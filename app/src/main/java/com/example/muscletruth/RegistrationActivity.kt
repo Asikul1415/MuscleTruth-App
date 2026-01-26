@@ -5,13 +5,26 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import org.w3c.dom.Text
+
+import com.example.muscletruth.data.api.models.User.UserCreate
+import com.example.muscletruth.data.repository.UserRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RegistrationActivity : AppCompatActivity() {
+    private val userRepository = UserRepository()
+
+    lateinit var usernameField: TextView;
+    lateinit var emailField: TextView;
+    lateinit var passwordField: TextView;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -24,32 +37,64 @@ class RegistrationActivity : AppCompatActivity() {
 
         val enterButton = findViewById<Button>(R.id.registrationEnterButton)
         enterButton.setOnClickListener {
-            val usernameField = findViewById<TextView>(R.id.registrationUsernameText)
+            usernameField = findViewById<TextView>(R.id.registrationUsernameText)
             if(usernameField.length() == 0){
                 usernameField.setError("Пустое поле!")
                 return@setOnClickListener
             }
 
-            val emailField = findViewById<TextView>(R.id.registrationEmailText)
+            emailField = findViewById<TextView>(R.id.registrationEmailText)
             if(emailField.length() == 0){
                 emailField.setError("Пустое поле!")
                 return@setOnClickListener
             }
 
-            val passwordField = findViewById<TextView>(R.id.registrationPasswordText)
+            passwordField = findViewById<TextView>(R.id.registrationPasswordText)
             if(passwordField.length() == 0){
                 passwordField.setError("Пустое поле!")
                 return@setOnClickListener
             }
 
-            Log.i("registrationLogging", "Регистрация")
-            Log.i("registrationLogging", "username: ${usernameField.text.toString()}; email: ${emailField.text.toString()}; password: ${passwordField.text.toString()}")
-
-            val intent = Intent(this, MainMenuActivity::class.java)
-            intent.putExtra("username", usernameField.text.toString())
-            intent.putExtra("email", emailField.text.toString())
-            intent.putExtra("password", passwordField.text.toString())
-            startActivity(intent)
+            registerUser()
         }
     }
+
+    private fun registerUser() {
+        val newUser = UserCreate(
+            name = usernameField.text.toString(),
+            email = emailField.text.toString(),
+            password = passwordField.text.toString(),
+            age = 25  //Need to add age field in future
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = userRepository.registerUser(newUser)
+
+            withContext(Dispatchers.Main) {
+                result.onSuccess {user ->
+                    saveUserId(user.id)
+
+                    val intent = Intent(this@RegistrationActivity, MainMenuActivity::class.java)
+                    intent.putExtra("user_id", user.id)
+                    startActivity(intent)
+                }.onFailure { error ->
+                    Toast.makeText(
+                        this@RegistrationActivity,
+                        "Ошибка: ${error.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                }
+            }
+        }
+    }
+
+    private fun saveUserId(userId: Int) {
+        val sharedPref = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putInt("user_id", userId)
+            apply()
+        }
+    }
+
 }

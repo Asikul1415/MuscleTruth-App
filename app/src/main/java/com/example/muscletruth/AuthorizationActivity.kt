@@ -5,15 +5,19 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.muscletruth.data.repository.UserRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AuthorizationActivity : AppCompatActivity() {
-    val username = "sam_sulek"
-    val correctEmail = "samsulek14@yandex.ru"
-    val correctPassword = "1020304050"
+    private val userRepository = UserRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,23 +31,40 @@ class AuthorizationActivity : AppCompatActivity() {
 
         val enterButton = findViewById<Button>(R.id.authorizationEnterButton)
         enterButton.setOnClickListener {
-            val emailField = findViewById<TextView>(R.id.authorizationEmailText)
-            val passwordField = findViewById< TextView>(R.id.authorizationPasswordText)
-            Log.i("authorizationLogging", "Авторизация:")
-            Log.i("authorizationLogging", "email: ${emailField.text.toString()}, password: ${passwordField.text.toString()}")
-            Log.i("authorizationLogging", "correctEmail: ${correctEmail}, password: ${correctPassword}")
+            val email = findViewById<TextView>(R.id.authorizationEmailText).text.toString()
+            val password = findViewById< TextView>(R.id.authorizationPasswordText).text.toString()
 
-            if(emailField.text.toString() == correctEmail && passwordField.text.toString() == correctPassword){
-                val intent = Intent(this, MainMenuActivity::class.java)
-                intent.putExtra("username", username)
-                intent.putExtra("email", emailField.text.toString())
-                intent.putExtra("password", passwordField.text.toString())
-                startActivity(intent)
+            authorizeUser(email, password)
+        }
+    }
+
+    private fun authorizeUser(email: String, password: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = userRepository.login(email, password)
+
+            withContext(Dispatchers.Main) {
+                result.onSuccess {response ->
+                    saveUserId(response.user.id)
+
+                    val intent = Intent(this@AuthorizationActivity, MainMenuActivity::class.java)
+                    intent.putExtra("user_id", response.user.id)
+                    startActivity(intent)
+                }.onFailure { error ->
+                    Toast.makeText(
+                        this@AuthorizationActivity,
+                        "Ошибка: ${error.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
-            else{
-                val errorText = findViewById< TextView>(R.id.authorizationErrorText)
-                errorText.text = "Неправильные данные!"
-            }
+        }
+    }
+
+    private fun saveUserId(userId: Int) {
+        val sharedPref = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putInt("user_id", userId)
+            apply()
         }
     }
 }
