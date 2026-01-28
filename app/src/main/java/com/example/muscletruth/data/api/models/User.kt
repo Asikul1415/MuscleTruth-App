@@ -26,6 +26,6 @@ class User {
     data class LoginResponse(
         @SerializedName("access_token") val accessToken: String,
         @SerializedName("token_type") val tokenType: String = "bearer",
-        @SerializedName("user") val user: UserResponse
+        @SerializedName("user_id") val userID: Int
     )
 }

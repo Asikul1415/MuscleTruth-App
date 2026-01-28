@@ -44,10 +44,10 @@ class AuthorizationActivity : AppCompatActivity() {
 
             withContext(Dispatchers.Main) {
                 result.onSuccess {response ->
-                    saveUserId(response.user.id)
+                    saveUserId(response.userID)
 
                     val intent = Intent(this@AuthorizationActivity, MainMenuActivity::class.java)
-                    intent.putExtra("user_id", response.user.id)
+                    intent.putExtra("user_id", response.userID)
                     startActivity(intent)
                 }.onFailure { error ->
                     Toast.makeText(
