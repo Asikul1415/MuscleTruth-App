@@ -2,7 +2,6 @@ package com.example.muscletruth
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -29,10 +28,10 @@ class AuthorizationActivity : AppCompatActivity() {
             insets
         }
 
-        val enterButton = findViewById<Button>(R.id.authorizationEnterButton)
+        val enterButton = findViewById<Button>(R.id.auth_btn_login)
         enterButton.setOnClickListener {
-            val email = findViewById<TextView>(R.id.authorizationEmailText).text.toString()
-            val password = findViewById< TextView>(R.id.authorizationPasswordText).text.toString()
+            val email = findViewById<TextView>(R.id.auth_et_email).text.toString()
+            val password = findViewById< TextView>(R.id.auth_et_password).text.toString()
 
             authorizeUser(email, password)
         }

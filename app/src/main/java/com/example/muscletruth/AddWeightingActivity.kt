@@ -14,8 +14,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
+import com.example.muscletruth.data.api.models.Weighting
+import com.example.muscletruth.data.repository.UserRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AddWeightingActivity : AppCompatActivity() {
+    private val userRepository = UserRepository()
     private lateinit var selectImageLauncher: ActivityResultLauncher<Intent>
 
 
@@ -33,30 +39,28 @@ class AddWeightingActivity : AppCompatActivity() {
             result ->
                 if(result.resultCode == Activity.RESULT_OK){
                     val selectedImageUri: Uri? = result.data?.data
-                    val imageView = findViewById<ImageView>(R.id.addWeightingWeightingImage)
+                    val imageView = findViewById<ImageView>(R.id.add_weighting_iv_weighting)
 
                     imageView.setImageURI(selectedImageUri)
                 }
         }
 
-        val addImageButton = findViewById<Button>(R.id.addWeightingAddImageButton)
+        val addImageButton = findViewById<Button>(R.id.add_weighting_btn_attach)
         addImageButton.setOnClickListener {
             openGallery()
         }
 
-        val weightingResultText = findViewById<EditText>(R.id.addWeightingWeightingResultText)
+        val weightingResultText = findViewById<EditText>(R.id.add_weighting_et_result)
         weightingResultText.addTextChangedListener {
             val text = it.toString()
             if(text.isNotEmpty()){
-
-                //Value validation
                 val value = text.toDoubleOrNull()
                 if(value != null && (value <= 0 || value > 400)){
                     weightingResultText.error = "Неподходящее значение!"
                 }
 
-                //Decimal part symbols count validation. If more than two, remove last
                 val splitText = text.split(".")
+                //If decimal part length is more than two
                 if(splitText.count() == 2 && splitText[1].length > 2){
                     weightingResultText.setText(text.dropLast(1));
                     weightingResultText.setSelection(weightingResultText.text.length)
@@ -65,9 +69,10 @@ class AddWeightingActivity : AppCompatActivity() {
             }
         }
 
-        val saveButton = findViewById<Button>(R.id.saveWeightingAddWeightingButton)
+        val saveButton = findViewById<Button>(R.id.add_weighting_btn_save)
         saveButton.setOnClickListener {
-            saveWeighting(weightingResultText.text.toString().toInt())
+            val text = weightingResultText.text.toString()
+            saveWeighting(text.toDouble())
         }
     }
 
@@ -77,9 +82,10 @@ class AddWeightingActivity : AppCompatActivity() {
         selectImageLauncher.launch(intent)
     }
 
-    private fun saveWeighting(weightingResult: Int){
-        val intent = Intent(this, MainMenuActivity::class.java)
-        intent.putExtra("lastWeighting", weightingResult)
-        startActivity(intent)
+    private fun saveWeighting(weightingResult: Double){
+        CoroutineScope(Dispatchers.IO).launch {
+            userRepository.addWeighting(Weighting.WeightingBase(result=weightingResult))
+        }
+        finish()
     }
 }

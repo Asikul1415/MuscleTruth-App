@@ -8,7 +8,7 @@
     tools:context=".MainMenuActivity">
 
     <Button
-        android:id="@+id/mainMenuMyProfileButton"
+        android:id="@+id/main_menu_btn_profile"
         android:layout_width="350dp"
         android:layout_height="80dp"
         android:text="Мой профиль"
@@ -20,7 +20,7 @@
         app:layout_constraintVertical_bias="0.801" />
 
     <Button
-        android:id="@+id/mainMenuAddProductButton"
+        android:id="@+id/main_menu_btn_products"
         android:layout_width="350dp"
         android:layout_height="80dp"
         android:text="Добавить продукт"
@@ -32,7 +32,7 @@
         app:layout_constraintVertical_bias="0.651" />
 
     <Button
-        android:id="@+id/mainMenuAddMealButton"
+        android:id="@+id/main_menu_btn_add_meal"
         android:layout_width="350dp"
         android:layout_height="80dp"
         android:text="Добавить приём пищи"
@@ -44,7 +44,7 @@
         app:layout_constraintVertical_bias="0.499" />
 
     <TextView
-        android:id="@+id/mainMenuHeaderText"
+        android:id="@+id/main_menu_tv_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="MuscleTruth"
@@ -57,10 +57,10 @@
         app:layout_constraintVertical_bias="0.098" />
 
     <Button
-        android:id="@+id/mainMenuAddWeightingButton"
+        android:id="@+id/main_menu_btn_weightings"
         android:layout_width="350dp"
         android:layout_height="80dp"
-        android:text="Добавить взвешивание"
+        android:text="Мои взвешивания"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"

@@ -14,7 +14,7 @@
         tools:layout_editor_absoluteY="0dp">
 
         <Button
-            android:id="@+id/enterRegistrationButton"
+            android:id="@+id/enter_btn_register"
             android:layout_width="250dp"
             android:layout_height="60dp"
             android:text="Регистрация"
@@ -26,7 +26,7 @@
             app:layout_constraintVertical_bias="0.499" />
 
         <Button
-            android:id="@+id/enterEnterButton"
+            android:id="@+id/enter_btn_login"
             android:layout_width="250dp"
             android:layout_height="60dp"
             android:text="Войти"
@@ -38,7 +38,7 @@
             app:layout_constraintVertical_bias="0.649" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/enter_tv_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="MuscleTruth"

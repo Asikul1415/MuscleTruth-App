@@ -2,16 +2,12 @@ package com.example.muscletruth
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 class MainMenuActivity : AppCompatActivity() {
-    private var username = ""
-    private var email = ""
-    private var password = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,36 +18,28 @@ class MainMenuActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        username = intent.getStringExtra("username").toString()
-        email = intent.getStringExtra("email").toString()
-        password = intent.getStringExtra("password").toString()
-        Log.i("mainMenuLogging", "username: ${username}; email: ${email}; password: ${password}")
 
-        val addWeightingButton = findViewById<Button>(R.id.mainMenuAddWeightingButton)
+        val addWeightingButton = findViewById<Button>(R.id.main_menu_btn_weightings)
         addWeightingButton.setOnClickListener {
-            val intent = Intent(this, AddWeightingActivity::class.java)
+            val intent = Intent(this, WeightingsActivity::class.java)
             startActivity(intent)
         }
 
-        val addMealButton = findViewById<Button>(R.id.mainMenuAddMealButton)
+        val addMealButton = findViewById<Button>(R.id.main_menu_btn_add_meal)
         addMealButton.setOnClickListener {
             val intent = Intent(this, AddMealActivity::class.java)
             startActivity(intent)
         }
 
-        val addProductButton = findViewById<Button>(R.id.mainMenuAddProductButton)
+        val addProductButton = findViewById<Button>(R.id.main_menu_btn_products)
         addProductButton.setOnClickListener {
             val intent = Intent(this, AddProductActivity::class.java)
             startActivity(intent)
         }
 
-        val myProfileButton = findViewById<Button>(R.id.mainMenuMyProfileButton)
+        val myProfileButton = findViewById<Button>(R.id.main_menu_btn_profile)
         myProfileButton.setOnClickListener {
             val intent = Intent(this, MyProfileActivity::class.java)
-            intent.putExtra("userName", username)
-            intent.putExtra("userEmail", email)
-            intent.putExtra("userPassword", password)
-            intent.putExtra("userProfilePictureURI", "something about cats")
             startActivity(intent)
         }
     }

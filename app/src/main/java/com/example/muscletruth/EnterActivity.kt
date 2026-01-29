@@ -19,13 +19,13 @@ class EnterActivity : AppCompatActivity() {
             insets
         }
 
-        val enterButton = findViewById<Button>(R.id.enterEnterButton)
+        val enterButton = findViewById<Button>(R.id.enter_btn_login)
         enterButton.setOnClickListener {
             val intent = Intent(this, AuthorizationActivity::class.java)
             startActivity(intent)
         }
 
-        val registrationButton = findViewById<Button>(R.id.enterRegistrationButton)
+        val registrationButton = findViewById<Button>(R.id.enter_btn_register)
         registrationButton.setOnClickListener {
             val intent = Intent(this, RegistrationActivity::class.java)
             startActivity(intent)

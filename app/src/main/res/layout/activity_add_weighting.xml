@@ -8,7 +8,7 @@
     tools:context=".AddWeightingActivity">
 
     <EditText
-        android:id="@+id/addWeightingWeightingResultText"
+        android:id="@+id/add_weighting_et_result"
         android:layout_width="150sp"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -24,7 +24,7 @@
         app:layout_constraintVertical_bias="0.626" />
 
     <Button
-        android:id="@+id/saveWeightingAddWeightingButton"
+        android:id="@+id/add_weighting_btn_save"
         android:layout_width="200dp"
         android:layout_height="75dp"
         android:text="Сохранить"
@@ -36,7 +36,7 @@
         app:layout_constraintVertical_bias="0.846" />
 
     <ImageView
-        android:id="@+id/addWeightingWeightingImage"
+        android:id="@+id/add_weighting_iv_weighting"
         android:layout_width="300sp"
         android:layout_height="200sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -48,7 +48,7 @@
         app:srcCompat="@drawable/ic_launcher_foreground" />
 
     <Button
-        android:id="@+id/addWeightingAddImageButton"
+        android:id="@+id/add_weighting_btn_attach"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Прикрепить фото"
@@ -59,7 +59,7 @@
         app:layout_constraintVertical_bias="0.373" />
 
     <TextView
-        android:id="@+id/addWeightingWeightingResultKgText"
+        android:id="@+id/add_weightings_tv_kg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="кг"

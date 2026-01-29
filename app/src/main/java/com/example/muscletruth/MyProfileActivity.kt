@@ -19,13 +19,5 @@ class MyProfileActivity : AppCompatActivity() {
             insets
         }
 
-        val userNameField = findViewById<TextView>(R.id.myProfileUserNameText)
-        userNameField.text = intent.getStringExtra("userName")
-
-        val userEmailField = findViewById<TextView>(R.id.myProfileEmailText)
-        userEmailField.text = intent.getStringExtra("userEmail")
-
-        val userPasswordField = findViewById<TextView>(R.id.myProfilePasswordText)
-        userPasswordField.text = intent.getStringExtra("userPassword")
     }
 }
