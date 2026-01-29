@@ -10,4 +10,10 @@ interface ApiService {
 
     @POST("api/auth/login")
     suspend fun authorizeUser(@Body user: User.UserLogin): Response<User.LoginResponse>
+
+    @GET("api/weightings")
+    suspend fun getUserWeightings(): List<Weighting.WeightingBase>
+
+    @POST("api/weightings")
+    suspend fun addWeighting(@Body weighting: Weighting.WeightingBase): Response<Weighting.WeightingResponse>
 }

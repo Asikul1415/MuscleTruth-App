@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -13,6 +14,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MuscleTruth"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".WeightingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WeightingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MuscleTruth" />
         <activity
             android:name=".MyProfileActivity"
             android:exported="false" />
