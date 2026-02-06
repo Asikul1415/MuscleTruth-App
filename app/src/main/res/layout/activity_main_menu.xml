@@ -35,7 +35,7 @@
         android:id="@+id/main_menu_btn_add_meal"
         android:layout_width="350dp"
         android:layout_height="80dp"
-        android:text="Добавить приём пищи"
+        android:text="Приёмы пищи"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"

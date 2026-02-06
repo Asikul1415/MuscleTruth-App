@@ -27,7 +27,7 @@ class MainMenuActivity : AppCompatActivity() {
 
         val addMealButton = findViewById<Button>(R.id.main_menu_btn_add_meal)
         addMealButton.setOnClickListener {
-            val intent = Intent(this, AddMealActivity::class.java)
+            val intent = Intent(this, MealsActivity::class.java)
             startActivity(intent)
         }
 

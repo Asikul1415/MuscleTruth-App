@@ -14,24 +14,30 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.data.api.models.Weighting
 import com.example.muscletruth.data.repository.UserRepository
+import com.example.muscletruth.utils.Period
 import com.example.muscletruth.utils.Utils.DateUtils
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
-
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.util.Locale
 
 class WeightingsActivity : AppCompatActivity() {
     private val userRepository = UserRepository()
     private var weightings = emptyList<Weighting.WeightingBase>()
+    private var rangePreference = Period.Week
     private lateinit var weightingsList: RecyclerView
     private lateinit var chart: LineChart
     private lateinit var adapter: WeightingAdapter
+    private var displayedToast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,17 +50,48 @@ class WeightingsActivity : AppCompatActivity() {
         }
 
         chart = findViewById(R.id.weightings_chart)
+        chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                e?.let {
+                    displayedToast?.cancel()
+                    displayedToast = Toast.makeText(
+                        this@WeightingsActivity,
+                        "Вес: ${"%.1f".format(it.y)} кг",
+                        Toast.LENGTH_SHORT
+                    )
+                    displayedToast?.show()
+                }
+            }
+
+            override fun onNothingSelected() {}})
+
         weightingsList = findViewById(R.id.weightings_rv)
 
-        setupChart()
-        setupList()
-
         loadData()
+        setupList()
 
         val addWeightingButton = findViewById<Button>(R.id.weightings_btn_add)
         addWeightingButton.setOnClickListener {
             val intent = Intent(this, AddWeightingActivity::class.java)
             startActivity(intent)
+        }
+
+        val weekButton = findViewById<Button>(R.id.weightings_btn_week)
+        weekButton.setOnClickListener {
+            rangePreference = Period.Week
+            loadData()
+        }
+
+        val monthButton = findViewById<Button>(R.id.weightings_btn_month)
+        monthButton.setOnClickListener {
+            rangePreference = Period.Month
+            loadData()
+        }
+
+        val yearButton = findViewById<Button>(R.id.weightings_btn_year)
+        yearButton.setOnClickListener {
+            rangePreference = Period.Year
+            loadData()
         }
     }
 
@@ -79,12 +116,13 @@ class WeightingsActivity : AppCompatActivity() {
         chart.setTouchEnabled(true)
         chart.setPinchZoom(true)
         chart.setDrawGridBackground(false)
+        chart.fitScreen()
 
         val xAxis = chart.xAxis
         xAxis.position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(true)
         xAxis.granularity = 1f
-        xAxis.setLabelCount(weightings.count(), true)
+        xAxis.setCenterAxisLabels(false)
         xAxis.setAvoidFirstLastClipping(true)
 
         val yAxis = chart.axisLeft
@@ -96,15 +134,27 @@ class WeightingsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 weightings = withContext(Dispatchers.IO) {
-                    userRepository.getWeightings()
+                    var date = LocalDate.now()
+                    date = if(rangePreference == Period.Week){
+                        date.minusWeeks(1)
+                    } else if(rangePreference == Period.Month){
+                        date.minusMonths(1)
+                    } else{
+                        date.minusYears(1)
+                    }
+
+                    val request = Weighting.WeightingRequest(startDate = date.toString())
+                    userRepository.getWeightings(request)
                 }
 
                 updateChartWithData(weightings)
-                adapter.items = weightings
+                setupChart()
+                adapter.items = weightings.sortedByDescending { ZonedDateTime.parse(it.creationDate)}
                 adapter.notifyDataSetChanged()
 
             } catch (e: Exception) {
-                Toast.makeText(this@WeightingsActivity, "Ошибка загрузки", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@WeightingsActivity, "${e.toString()}", Toast.LENGTH_LONG).show()
+                throw(e)
             }
         }
     }
@@ -116,7 +166,15 @@ class WeightingsActivity : AppCompatActivity() {
             return
         }
 
-        val sortedWeightings = weightings.sortedBy { it.creationDate }
+        val sortedWeightings = mutableListOf<Weighting.WeightingBase>()
+        weightings.groupBy {LocalDate.parse(it.creationDate?.substringBefore('T'))}.forEach { group ->
+            var middleValue = 0.00
+            group.value.forEach { weighting ->
+                middleValue = middleValue + weighting.result.toDouble()
+            }
+            sortedWeightings.add(Weighting.WeightingBase(result = middleValue / group.value.count(), creationDate = group.key.toString()))
+        }
+        sortedWeightings.sortBy { it.creationDate }
 
         val entries = ArrayList<Entry>()
         sortedWeightings.forEachIndexed { index, weighting ->
@@ -137,10 +195,14 @@ class WeightingsActivity : AppCompatActivity() {
             }
         }
 
+//        xAxis.axisMinimum = -0.1f  // Start slightly before first point
+//        xAxis.axisMaximum = (sortedWeightings.count() - 1).toFloat() + 0.1f  // End slightly after last
+        xAxis.labelRotationAngle = -90f
+
         val yAxis = chart.axisLeft
         yAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
-                return String.format(Locale.getDefault(), "%.2f кг", value)
+                return String.format(Locale.getDefault(), "%.1f кг", value)
             }
         }
 
@@ -148,7 +210,7 @@ class WeightingsActivity : AppCompatActivity() {
         dataSet.color = Color.MAGENTA
         dataSet.lineWidth = 2f
         dataSet.valueTextColor = Color.BLACK
-        dataSet.valueTextSize = 12f
+        dataSet.valueTextSize = 0f
         dataSet.setDrawCircles(true)
         dataSet.setCircleColor(Color.GRAY)
         dataSet.circleRadius = 4f

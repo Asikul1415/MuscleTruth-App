@@ -12,8 +12,30 @@ interface ApiService {
     suspend fun authorizeUser(@Body user: User.UserLogin): Response<User.LoginResponse>
 
     @GET("api/weightings")
-    suspend fun getUserWeightings(): List<Weighting.WeightingBase>
+    suspend fun getUserWeightings(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?): List<Weighting.WeightingBase>
 
     @POST("api/weightings")
     suspend fun addWeighting(@Body weighting: Weighting.WeightingBase): Response<Weighting.WeightingResponse>
+
+    @GET("api/products")
+    suspend fun getProducts(@Query("search_query") searchQuery: String?): List<Product.ProductBase>
+
+    @GET("api/products/{product_id}")
+    suspend fun getProduct(@Path("product_id") product_id: Int): Product.ProductBase
+
+    @POST("api/products")
+    suspend fun addProduct(@Body product: Product.ProductBase): Response<Product.ProductResponse>
+
+    @POST("api/meals")
+    suspend fun addMeal(@Body meal: Meal.MealBase): Response<Meal.MealResponse>
+
+    @POST("/api/meals/{meal_id}/servings")
+    suspend fun addServing(@Path("meal_id") mealID: Int, @Body serving: Serving.ServingBase): Response<Serving.ServingResponse>
+
+    @GET("/api/meals/{meal_id}/servings")
+    suspend fun getServings(@Path("meal_id") mealID: Int): List<Serving.ServingItem>
+
+    @GET("/api/meals")
+    suspend fun getMeals(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?, @Query("meal_type_id") mealTypeID: Int?): List<Meal.MealBase>
+
 }

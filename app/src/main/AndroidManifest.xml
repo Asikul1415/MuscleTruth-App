@@ -15,6 +15,12 @@
         android:theme="@style/Theme.MuscleTruth"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".MealsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProductsActivity"
+            android:exported="false" />
+        <activity
             android:name=".WeightingActivity"
             android:exported="false" />
         <activity
