@@ -20,6 +20,7 @@ class Meal {
         val id: Int,
         var isExpanded: Boolean = true,
         var servings: List<Serving.ServingItem> = emptyList<Serving.ServingItem>(),
+        var mealTypeID: Int,
         val picture: String? = null,
         val creationDate: String? = null,
     )

@@ -36,6 +36,9 @@ interface ApiService {
     suspend fun getServings(@Path("meal_id") mealID: Int): List<Serving.ServingItem>
 
     @GET("/api/meals")
-    suspend fun getMeals(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?, @Query("meal_type_id") mealTypeID: Int?): List<Meal.MealBase>
+    suspend fun getMeals(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?): List<Meal.MealBase>
+
+    @GET("/api/meals/{meal_type_id}/total")
+    suspend fun getMealTypeTotal(@Path("meal_type_id") mealTypeID: Int, @Query("start_date") startDate: String, @Query("end_date") endDate: String): MealType.MealTypeBase
 
 }
