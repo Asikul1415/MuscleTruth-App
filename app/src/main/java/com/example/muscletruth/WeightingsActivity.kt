@@ -74,6 +74,7 @@ class WeightingsActivity : AppCompatActivity() {
         addWeightingButton.setOnClickListener {
             val intent = Intent(this, AddWeightingActivity::class.java)
             startActivity(intent)
+            loadData()
         }
 
         val weekButton = findViewById<Button>(R.id.weightings_btn_week)
@@ -117,13 +118,17 @@ class WeightingsActivity : AppCompatActivity() {
         chart.setPinchZoom(true)
         chart.setDrawGridBackground(false)
         chart.fitScreen()
+        chart.setNoDataText("Нет взвешиваний")
+        chart.setNoDataTextColor(Color.MAGENTA)
 
         val xAxis = chart.xAxis
         xAxis.position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(true)
+        xAxis.setGranularityEnabled(true)
+        xAxis.enableGridDashedLine(10f, 1f, 0f)  // Makes grid less prominent
         xAxis.granularity = 1f
         xAxis.setCenterAxisLabels(false)
-        xAxis.setAvoidFirstLastClipping(true)
+        xAxis.setAvoidFirstLastClipping(false)
 
         val yAxis = chart.axisLeft
         yAxis.setDrawGridLines(true)
@@ -166,56 +171,95 @@ class WeightingsActivity : AppCompatActivity() {
             return
         }
 
-        val sortedWeightings = mutableListOf<Weighting.WeightingBase>()
-        weightings.groupBy {LocalDate.parse(it.creationDate?.substringBefore('T'))}.forEach { group ->
-            var middleValue = 0.00
-            group.value.forEach { weighting ->
-                middleValue = middleValue + weighting.result.toDouble()
-            }
-            sortedWeightings.add(Weighting.WeightingBase(result = middleValue / group.value.count(), creationDate = group.key.toString()))
-        }
-        sortedWeightings.sortBy { it.creationDate }
-
-        val entries = ArrayList<Entry>()
-        sortedWeightings.forEachIndexed { index, weighting ->
-            entries.add(Entry(index.toFloat(), weighting.result.toFloat()))
-        }
-
-        val xAxis = chart.xAxis
-        val dates = sortedWeightings.map{DateUtils.convertTimestamp(it.creationDate)}
-        xAxis.setLabelCount(dates.size, true)
-        xAxis.valueFormatter = object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String {
-                val index = value.toInt()
-                return if (index in dates.indices) {
-                    dates[index]
-                } else {
-                    ""
+        lifecycleScope.launch {
+            with(Dispatchers.IO){
+                val sortedWeightings = mutableListOf<Weighting.WeightingBase>()
+                if(rangePreference == Period.Year){
+                    with(Dispatchers.IO){
+                        val data = userRepository.getWeightingsYearChartData()
+                        data.forEach {weekWeighting ->
+                            sortedWeightings.add(Weighting.WeightingBase(result = weekWeighting.average_weight, creationDate = weekWeighting.week_start))
+                        }
+                    }
                 }
+                else if(rangePreference == Period.Month){
+                    with(Dispatchers.IO){
+                        val data = userRepository.getWeightingsMonthChartData()
+                        data.forEach {weighting ->
+                            sortedWeightings.add(Weighting.WeightingBase(result = weighting.average_weight, creationDate = weighting.day))
+                        }
+                    }
+                }
+                else{
+                    weightings.groupBy {LocalDate.parse(it.creationDate?.substringBefore('T'))}.forEach { group ->
+                        var middleValue = 0.00
+                        group.value.forEach { weighting ->
+                            middleValue = middleValue + weighting.result.toDouble()
+                        }
+                        sortedWeightings.add(Weighting.WeightingBase(result = middleValue / group.value.count(), creationDate = group.key.toString()))
+                    }
+                }
+                sortedWeightings.sortBy { it.creationDate }
+
+                val entries = ArrayList<Entry>()
+                sortedWeightings.forEachIndexed { index, weighting ->
+                    entries.add(Entry(index.toFloat(), weighting.result.toFloat()))
+                }
+
+                val xAxis = chart.xAxis
+                val dataSet = LineDataSet(entries, "Взвешивания")
+                with(Dispatchers.Main){
+                    dataSet.color = Color.MAGENTA
+                    dataSet.lineWidth = 2f
+                    dataSet.valueTextSize = 0f
+                    dataSet.setDrawCircles(true)
+                    dataSet.setCircleColor(Color.GRAY)
+                    dataSet.circleRadius = 4f
+
+
+                    if(rangePreference == Period.Week){
+                        xAxis.setLabelCount(7, true)
+                    }
+                    else if(rangePreference == Period.Month){
+                        //31 / 2 = 15.5
+                        xAxis.setLabelCount(16, true)
+                    }
+                    else if(rangePreference == Period.Year){
+                        //12 month x 2 (show only 2 days in a month) = 24
+                        xAxis.setLabelCount(16, true)
+                        dataSet.lineWidth = 1.5f
+                        dataSet.circleRadius = 2.25f;
+                        dataSet.setCircleColor(Color.BLACK)
+                    }
+                }
+
+                val dates = sortedWeightings.map{DateUtils.convertTimestamp(it.creationDate)}
+                xAxis.valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        val index = value.toInt()
+                        return if (index in dates.indices) {
+                            dates[index]
+                        } else {
+                            ""
+                        }
+                    }
+                }
+
+                with(Dispatchers.Main){
+                    xAxis.labelRotationAngle = -90f
+                    val yAxis = chart.axisLeft
+                    yAxis.valueFormatter = object : ValueFormatter() {
+                        override fun getFormattedValue(value: Float): String {
+                            return String.format(Locale.getDefault(), "%.2f кг", value)
+                        }
+                    }
+                }
+
+                chart.data = LineData(dataSet)
+                chart.invalidate()
             }
         }
 
-//        xAxis.axisMinimum = -0.1f  // Start slightly before first point
-//        xAxis.axisMaximum = (sortedWeightings.count() - 1).toFloat() + 0.1f  // End slightly after last
-        xAxis.labelRotationAngle = -90f
 
-        val yAxis = chart.axisLeft
-        yAxis.valueFormatter = object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String {
-                return String.format(Locale.getDefault(), "%.1f кг", value)
-            }
-        }
-
-        val dataSet = LineDataSet(entries, "Взвешивания")
-        dataSet.color = Color.MAGENTA
-        dataSet.lineWidth = 2f
-        dataSet.valueTextColor = Color.BLACK
-        dataSet.valueTextSize = 0f
-        dataSet.setDrawCircles(true)
-        dataSet.setCircleColor(Color.GRAY)
-        dataSet.circleRadius = 4f
-
-        chart.data = LineData(dataSet)
-        chart.invalidate()
     }
 }

@@ -10,15 +10,22 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:screenOrientation="portrait"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MuscleTruth"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".MealActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChangeProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".MealsActivity"
             android:exported="false" />
         <activity
-            android:name=".ProductsActivity"
+            android:name=".AddServingActivity"
             android:exported="false" />
         <activity
             android:name=".WeightingActivity"

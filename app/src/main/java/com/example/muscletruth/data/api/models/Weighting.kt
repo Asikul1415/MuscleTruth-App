@@ -2,11 +2,7 @@ package com.example.muscletruth.data.api.models
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import com.google.gson.annotations.SerializedName
-import java.sql.Date
-import java.sql.Time
-import java.sql.Timestamp
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 
 class  Weighting {
@@ -20,11 +16,19 @@ class  Weighting {
     ) : Parcelable
 
     data class WeightingRequest(
-        @SerializedName("start_date") val startDate: String?,
+        @SerializedName("start_date") val startDate: String? = null,
         @SerializedName("end_date") val endDate: String? = LocalDate.now().toString()
     )
 
     data class WeightingResponse(
         @SerializedName("id") val id: Int,
     )
+
+    data class YearChartData(
+        val week_start: String,  // or Date type
+        val average_weight: Double)
+
+    data class MonthChartData(
+        val day: String,  // or Date type
+        val average_weight: Double)
 }

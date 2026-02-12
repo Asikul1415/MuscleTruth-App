@@ -6,14 +6,14 @@ class User {
         @SerializedName("name") val name: String,
         @SerializedName("email") val email: String,
         @SerializedName("password") val password: String,
-        @SerializedName("age") val age: Int,
-        @SerializedName("profile_picture") val profilePicture: String? = null
-    )
+        @SerializedName("age") val age: Int
+        )
 
     data class UserResponse(
         @SerializedName("id") val id: Int,
         @SerializedName("name") val name: String,
         @SerializedName("email") val email: String,
+        @SerializedName("password") val password: String,
         @SerializedName("age") val age: Int,
         @SerializedName("profile_picture") val profilePicture: String? = null
     )
@@ -21,6 +21,22 @@ class User {
     data class UserLogin(
         @SerializedName("email") val email: String,
         @SerializedName("password") val password: String
+    )
+
+    data class UserUpdateResponse(
+        @SerializedName("status") val status: String
+    )
+
+    data class Password(
+        @SerializedName("password") val password: String
+    )
+
+    data class Email(
+        @SerializedName("email") val email: String
+    )
+
+    data class CheckPasswordResponse(
+        @SerializedName("response") val response: Boolean
     )
 
     data class LoginResponse(

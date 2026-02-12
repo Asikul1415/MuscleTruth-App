@@ -3,7 +3,6 @@ package com.example.muscletruth.data.api.models
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
-import androidx.lifecycle.lifecycleScope
 
 class Serving {
     data class ServingBase(
@@ -18,6 +17,7 @@ class Serving {
     data class ServingItem(
         @SerializedName("id") val id: Int? = null,
         @SerializedName("product_id") val productID: Int,
+        @SerializedName("meal_id") val mealID: Int? = null,
         @SerializedName("products") var product: Product.ProductBase? = null,
         @SerializedName("product_amount") val productAmount: Int
     ) : Parcelable

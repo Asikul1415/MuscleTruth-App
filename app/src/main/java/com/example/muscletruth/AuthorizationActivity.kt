@@ -30,40 +30,47 @@ class AuthorizationActivity : AppCompatActivity() {
 
         val enterButton = findViewById<Button>(R.id.auth_btn_login)
         enterButton.setOnClickListener {
-            val email = findViewById<TextView>(R.id.auth_et_email).text.toString()
-            val password = findViewById< TextView>(R.id.auth_et_password).text.toString()
+            val email = findViewById<TextView>(R.id.auth_et_email)
+            val password = findViewById< TextView>(R.id.auth_et_password)
 
             authorizeUser(email, password)
         }
     }
 
-    private fun authorizeUser(email: String, password: String) {
+    private fun authorizeUser(emailField: TextView, passwordField: TextView) {
+        val email = emailField.text.toString()
+        if(emailField.length() == 0){
+            emailField.error = "Введите email!"
+            return
+        }
+        val password = passwordField.text.toString()
+        if(passwordField.length() == 0){
+            passwordField.error = "Введите пароль!"
+            return
+        }
+
+        val manager = PreferencesManager(this)
         CoroutineScope(Dispatchers.IO).launch {
             val result = userRepository.login(email, password)
 
             withContext(Dispatchers.Main) {
                 result.onSuccess {response ->
-                    saveUserId(response.userID)
+                    manager.saveUserId(response.userID)
+                    manager.saveAuthToken(response.accessToken)
 
                     val intent = Intent(this@AuthorizationActivity, MainMenuActivity::class.java)
-                    intent.putExtra("user_id", response.userID)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
+                    finish()
                 }.onFailure { error ->
                     Toast.makeText(
                         this@AuthorizationActivity,
-                        "Ошибка: ${error.message}",
+                        "Ошибка авторизации!",
                         Toast.LENGTH_LONG
                     ).show()
                 }
             }
-        }
-    }
-
-    private fun saveUserId(userId: Int) {
-        val sharedPref = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putInt("user_id", userId)
-            apply()
         }
     }
 }

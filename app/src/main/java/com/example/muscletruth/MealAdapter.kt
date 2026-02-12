@@ -1,16 +1,20 @@
 package com.example.muscletruth
 
-import android.util.Log
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.muscletruth.data.api.models.Meal
 import com.example.muscletruth.data.api.models.MealType
 import com.example.muscletruth.data.api.models.Serving
 import com.example.muscletruth.data.repository.UserRepository
+import com.example.muscletruth.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,7 +22,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
+class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private val context: Context? = null, private val onServingClick: (Serving.ServingItem) -> Unit) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
     var items = mutableListOf<Any>()
 
     private val TYPE_MEAL = 0;
@@ -34,6 +38,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Recycle
         val servingTvCarbs: TextView? = view.findViewById(R.id.item_serving_tv_carbs_val)
         val servingTvCalories: TextView? = view.findViewById(R.id.item_serving_tv_calories)
         val servingTvAmount: TextView? = view.findViewById(R.id.item_serving_tv_amount)
+        val servingPicture: ImageView? = view.findViewById(R.id.item_serving_iv)
 
         val mealTypeTvTitle: TextView? = view.findViewById(R.id.item_meal_type_tv_title)
         val mealTypeTvProteins: TextView? = view.findViewById(R.id.item_meal_type_tv_proteins)
@@ -83,11 +88,17 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Recycle
         val item = items[position]
         when(item){
             is Meal.MealItem -> {
-                Log.d("APP_DEBUG", "{${item.creationDate.toString()}}")
                 val russianLocale = Locale("ru", "RU")
                 holder.mealTvDate?.text = ZonedDateTime.parse(item.creationDate).format(
                     DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm", russianLocale)
                 )
+                holder.itemView.setOnClickListener {
+                    if(context != null){
+                        val intent = Intent(context, MealActivity::class.java)
+                        intent.putExtra("mealID", item.id)
+                        context.startActivity(intent)
+                    }
+                }
             }
             is Serving.ServingItem -> {
                 lifecycleScope.launch {
@@ -102,11 +113,17 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope) : Recycle
                         holder.servingTvProteins?.text = "${product.proteins / 100.00 * item.productAmount}"
                         holder.servingTvFats?.text = "${product.fats / 100.00 * item.productAmount}"
                         holder.servingTvCarbs?.text = "${product.carbs / 100.00 * item.productAmount}"
-                        holder.servingTvCalories?.text = "${totalCalories} ккал"
+                        holder.servingTvCalories?.text = "${"%.2f".format(totalCalories)} ккал"
                         holder.servingTvAmount?.text = "${item.productAmount} г"
+                        if(product.picture != null && holder.servingPicture != null && context != null){
+                            Glide.with(context)
+                                .load(Utils.ImageUtils.getImagePath(product.picture))
+                                .placeholder(R.drawable.ic_launcher_foreground)
+                                .into(holder.servingPicture)
+                        }
 
                         holder.itemView.setOnClickListener {
-
+                            onServingClick(item)
                         }
                     }
                 }
