@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_margin="24dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    android:backgroundTint="@color/surface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,15 +37,17 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Название"
-                    android:layout_weight="4"
+                    android:layout_weight="3"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
 
                 <TextView
                     android:id="@+id/item_serving_tv_amount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="0 г"
+                    android:textColor="@color/accent"
                     android:layout_weight="1"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -64,7 +67,8 @@
                     android:layout_marginStart="5dp"
                     android:text="Б: "
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
 
                 <TextView
                     android:id="@+id/item_serving_tv_proteins_val"
@@ -73,7 +77,8 @@
                     android:layout_marginEnd="5dp"
                     android:text="0"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
 
                 <TextView
                     android:id="@+id/item_serving_tv_fats"
@@ -81,7 +86,8 @@
                     android:layout_height="wrap_content"
                     android:text="Ж: "
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
 
                 <TextView
                     android:id="@+id/item_serving_tv_fats_val"
@@ -90,7 +96,8 @@
                     android:layout_marginEnd="5dp"
                     android:text="0"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
 
                 <TextView
                     android:id="@+id/item_serving_tv_carbs"
@@ -98,7 +105,8 @@
                     android:layout_height="wrap_content"
                     android:text="У: "
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
 
                 <TextView
                     android:id="@+id/item_serving_tv_carbs_val"
@@ -107,7 +115,9 @@
                     android:layout_marginEnd="5dp"
                     android:text="0"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"
+                    />
             </LinearLayout>
 
             <LinearLayout
@@ -123,7 +133,8 @@
                     android:layout_marginStart="5dp"
                     android:text="0 ккал"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

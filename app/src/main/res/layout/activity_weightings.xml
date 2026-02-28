@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WeightingsActivity">
+    tools:context=".WeightingsActivity"
+    android:background="@color/background">
 
     <TextView
         android:id="@+id/weightings_tv_header"
@@ -13,6 +14,7 @@
         android:layout_height="wrap_content"
         android:text="Мои взвешивания"
         android:textSize="36dp"
+        android:textColor="@color/accent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,6 +49,8 @@
         android:layout_height="wrap_content"
         android:text="Добавить"
         android:textSize="24dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
@@ -60,6 +64,8 @@
         android:layout_height="wrap_content"
         android:text="Неделя"
         android:textSize="16dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.054"
@@ -73,6 +79,8 @@
         android:layout_height="wrap_content"
         android:text="Месяц"
         android:textSize="16dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,6 +93,8 @@
         android:layout_height="wrap_content"
         android:text="Год"
         android:textSize="16dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.949"

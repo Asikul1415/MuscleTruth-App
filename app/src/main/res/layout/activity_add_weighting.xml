@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddWeightingActivity">
+    tools:context=".AddWeightingActivity"
+    android:background="@color/background">
 
     <TextView
         android:layout_width="140dp"
@@ -13,6 +14,8 @@
         android:gravity="center_vertical"
         android:text="Вес"
         android:textSize="36dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/accent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.059"
@@ -29,6 +32,8 @@
         android:inputType="numberDecimal"
         android:textAlignment="center"
         android:textSize="48sp"
+        android:textColor="@color/accent"
+        android:textColorHint="@color/accent_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.757"
@@ -41,6 +46,8 @@
         android:layout_width="200dp"
         android:layout_height="75dp"
         android:text="Сохранить"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -66,6 +73,8 @@
         android:layout_width="200dp"
         android:layout_height="75dp"
         android:text="Прикрепить фото"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -78,6 +87,7 @@
         android:layout_height="wrap_content"
         android:text="кг"
         android:textSize="48sp"
+        android:textColor="@color/accent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.972"

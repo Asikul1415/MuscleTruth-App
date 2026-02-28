@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MealsActivity">
+    tools:context=".MealsActivity"
+    android:background="@color/background">
 
     <Button
         android:id="@+id/meals_btn_add"
@@ -15,6 +16,8 @@
         android:height="50dp"
         android:text="Добавить приём пищи"
         android:textSize="16dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -27,6 +30,7 @@
         android:layout_height="wrap_content"
         android:text="Приёмы пищи"
         android:textSize="28dp"
+        android:textColor="@color/accent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,6 +44,7 @@
         android:text="Добавьте свой первый приём пищи!"
         android:textAlignment="center"
         android:textSize="28dp"
+        android:textColor="@color/accent"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -51,10 +56,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/meals_rv"
         android:layout_width="375dp"
-        android:layout_height="550dp"
+        android:layout_height="620dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.348" />
+        app:layout_constraintVertical_bias="0.351" />
 </androidx.constraintlayout.widget.ConstraintLayout>

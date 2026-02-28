@@ -5,7 +5,8 @@
     android:id="@+id/activity_authorization"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AuthorizationActivity">
+    tools:context=".AuthorizationActivity"
+    android:background="@color/background">
 
     <EditText
         android:id="@+id/auth_et_email"
@@ -14,6 +15,8 @@
         android:ems="10"
         android:hint="Email"
         android:inputType="text"
+        android:textColor="@color/accent"
+        android:textColorHint="@color/accent_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
@@ -28,6 +31,8 @@
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
+        android:textColor="@color/accent"
+        android:textColorHint="@color/accent_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
@@ -40,13 +45,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Авторизация"
+        android:textColor="@color/accent"
         android:textSize="48sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.078" />
+        app:layout_constraintVertical_bias="0.146" />
 
     <TextView
         android:id="@+id/auth_tv_error"
@@ -66,6 +72,8 @@
         android:layout_width="250dp"
         android:layout_height="60dp"
         android:text="Войти"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"

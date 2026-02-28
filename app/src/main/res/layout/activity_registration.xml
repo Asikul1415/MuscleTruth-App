@@ -5,7 +5,8 @@
     android:id="@+id/activity_registration"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegistrationActivity">
+    tools:context=".RegistrationActivity"
+    android:background="@color/background">
 
 
     <Button
@@ -13,6 +14,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Добавить фото"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -40,6 +43,8 @@
         android:ems="10"
         android:hint="Пароль"
         android:inputType="textPassword"
+        android:textColor="@color/accent"
+        android:textColorHint="@color/accent_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.262"
@@ -54,6 +59,8 @@
         android:ems="10"
         android:hint="Email"
         android:inputType="textEmailAddress"
+        android:textColor="@color/accent"
+        android:textColorHint="@color/accent_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.262"
@@ -68,6 +75,8 @@
         android:ems="10"
         android:hint="Имя пользователя"
         android:inputType="text"
+        android:textColor="@color/accent"
+        android:textColorHint="@color/accent_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.262"
@@ -80,6 +89,8 @@
         android:layout_width="250dp"
         android:layout_height="60dp"
         android:text="Войти"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.49"
@@ -92,6 +103,7 @@
         android:layout_height="wrap_content"
         android:text="Регистрация"
         android:textSize="48sp"
+        android:textColor="@color/accent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"

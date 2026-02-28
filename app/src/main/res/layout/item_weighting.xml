@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    android:backgroundTint="@color/surface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +22,8 @@
             android:layout_weight="1"
             android:text="15 Янв 2026"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/accent"/>
 
         <TextView
             android:id="@+id/item_weighting_tv_weight"
@@ -29,7 +31,8 @@
             android:layout_height="wrap_content"
             android:text="75.5 кг"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/accent"/>
 
     </LinearLayout>
 

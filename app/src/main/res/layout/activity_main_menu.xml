@@ -5,26 +5,30 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainMenuActivity">
+    tools:context=".MainMenuActivity"
+    android:background="@color/background">
 
     <TextView
         android:id="@+id/main_menu_tv_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="MuscleTruth"
+        android:textColor="@color/accent"
         android:textSize="48sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.098" />
+        app:layout_constraintVertical_bias="0.14" />
 
     <Button
         android:id="@+id/main_menu_btn_weightings"
         android:layout_width="350dp"
         android:layout_height="80dp"
+        android:textSize="18dp"
         android:text="Мои взвешивания"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
@@ -36,6 +40,9 @@
         android:id="@+id/main_menu_btn_add_meal"
         android:layout_width="350dp"
         android:layout_height="80dp"
+        android:textSize="18dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/text"
         android:text="Приёмы пищи"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,6 +55,9 @@
         android:id="@+id/main_menu_btn_profile"
         android:layout_width="350dp"
         android:layout_height="80dp"
+        android:textSize="18dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"
         android:text="Мой профиль"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

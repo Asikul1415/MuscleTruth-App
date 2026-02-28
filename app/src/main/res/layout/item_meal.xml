@@ -3,7 +3,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="@color/surface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,6 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Дата и время"
+            android:textColor="@color/accent"
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>

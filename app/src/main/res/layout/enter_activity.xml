@@ -5,7 +5,8 @@
     android:id="@+id/enter_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EnterActivity">
+    tools:context=".EnterActivity"
+    android:background="@color/background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -18,18 +19,22 @@
             android:layout_width="250dp"
             android:layout_height="60dp"
             android:text="Регистрация"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.499" />
+            app:layout_constraintVertical_bias="0.499"/>
 
         <Button
             android:id="@+id/enter_btn_login"
             android:layout_width="250dp"
             android:layout_height="60dp"
             android:text="Войти"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.496"
@@ -42,6 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="MuscleTruth"
+            android:textColor="@color/accent"
             android:textSize="48sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
