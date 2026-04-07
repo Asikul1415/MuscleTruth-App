@@ -1,0 +1,166 @@
+package com.example.muscletruth.ui.Servings
+
+import android.content.Intent
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.muscletruth.R
+import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.serviceClasses.ServingItem
+import com.example.muscletruth.data.repository.ProductRepository
+import com.example.muscletruth.ui.Products.AddProductActivity
+import com.example.muscletruth.ui.Products.ProductAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class AddServingActivity : AppCompatActivity() {
+    private var products = mutableListOf<Product>()
+    private lateinit var productsList: RecyclerView
+    private lateinit var adapter: ProductAdapter
+    private lateinit var searchInput: EditText
+    private lateinit var addProductLauncher: ActivityResultLauncher<Intent>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_add_serving)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        productsList = findViewById<RecyclerView>(R.id.products_rv)
+        setupList()
+        loadData()
+
+        searchInput = findViewById<EditText>(R.id.search_input)
+        val clearButton = findViewById<ImageView>(R.id.clear_button)
+
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                adapter.filter?.filter(s.toString())
+
+                clearButton.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        clearButton.setOnClickListener {
+            searchInput.text.clear()
+            adapter.filter?.filter("")
+        }
+
+        addProductLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val addedProductTitle = result.data?.getStringExtra("productTitle")
+                if(addedProductTitle != null){
+                    loadData()
+                    lifecycleScope.launch {
+                        delay(500)
+                        searchInput.setText(addedProductTitle)
+                    }
+                }
+            }
+        }
+
+        val addButton = findViewById<Button>(R.id.add_serving_btn_add_product)
+        addButton.setOnClickListener{
+            val intent = Intent(this, AddProductActivity::class.java)
+            addProductLauncher.launch(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadData()
+    }
+
+    private fun loadData(){
+        lifecycleScope.launch {
+            try{
+                products = withContext(Dispatchers.IO){
+                    ProductRepository.getProducts()
+                }
+                adapter.submitList(products)
+                adapter.notifyDataSetChanged()
+            }
+            catch(e: Exception){
+
+            }
+        }
+    }
+
+    private fun setupList() {
+        productsList.layoutManager = LinearLayoutManager(this)
+        adapter = ProductAdapter({ product ->
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_product_amount, null)
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Введите количество продукта:")
+                .setView(dialogView)
+                .setPositiveButton("Сохранить", null)
+                .setNegativeButton("Отменить", null)
+                .create()
+
+            dialog.setOnShowListener {
+                val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                val amount = dialogView.findViewById<EditText>(R.id.dialog_product_amount_et_amount)
+                amount.addTextChangedListener {
+                    if (amount.length() > 4) {
+                        amount.setText(amount.text.dropLast(1))
+                        amount.setSelection(amount.text.length)
+                    } else if (amount.length() == 0) {
+                        amount.error = "Введите кол-во продукта!"
+                    }
+                }
+                button.setOnClickListener {
+                    //9999 max
+                    if (amount.length() > 0 && amount.length() <= 4) {
+                        val intAmount = amount.text.toString().toInt()
+                        if (intAmount <= 0) {
+                            amount.error = "Кол-во продукта должно быть больше 0!"
+                        } else if (intAmount > 9999) {
+                            amount.error = "Кол-во продукта должно быть меньше 9999!"
+                        } else {
+                            val resultIntent = Intent()
+                            val serving = ServingItem(
+                                productID = product.serverID,
+                                productAmount = intAmount
+                            )
+                            resultIntent.putExtra("serving", serving)
+                            setResult(RESULT_OK, resultIntent)
+                            finish()
+                        }
+                    } else {
+                        amount.error = "Введите корректное кол-во продукта!"
+                    }
+                }
+            }
+
+            dialog.show()
+        }, this)
+        adapter.items = mutableListOf()
+        productsList.adapter = adapter
+    }
+}

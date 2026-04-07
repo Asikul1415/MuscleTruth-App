@@ -5,7 +5,7 @@
     android:id="@+id/activity_authorization"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AuthorizationActivity"
+    tools:context=".ui.Auth.AuthorizationActivity"
     android:background="@color/background">
 
     <EditText
