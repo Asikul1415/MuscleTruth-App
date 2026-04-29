@@ -1,6 +1,7 @@
 package com.example.muscletruth.ui.Products
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Product
 import com.example.muscletruth.utils.Utils
+import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import java.util.Locale
 
 class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Context? = null) : RecyclerView.Adapter<ProductAdapter.ViewHolder>(), Filterable{
@@ -42,12 +44,24 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
         holder.tvFats.text = item.fats.toString()
         holder.tvCarbs.text = item.carbs.toString()
         holder.tvCalories.text = "${totalCalories} ккал"
-        if(item.serverPicture != null && context != null){
-            val path = item.serverPicture
-            Glide.with(context)
-                .load(Utils.ImageUtils.getImagePath(path!!))
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .into(holder.picture)
+        Log.d("APP_DEBUG", "PRODUCT: $item")
+        if(checkForInternetConnection() === true){
+            if(item.serverPicture != null && context != null){
+                val path = item.serverPicture
+                Glide.with(context)
+                    .load(Utils.ImageUtils.getImagePath(path!!))
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .into(holder.picture)
+            }
+        }
+        else{
+            if(item.localPicture !== null && context !== null){
+                val path = item.localPicture
+                Glide.with(context)
+                    .load(path)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .into(holder.picture)
+            }
         }
 
         holder.itemView.setOnClickListener {
