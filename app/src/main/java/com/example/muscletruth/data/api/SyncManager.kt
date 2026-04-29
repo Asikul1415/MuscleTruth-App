@@ -210,7 +210,7 @@ object SyncManager {
         coroutineScope {
             with(Dispatchers.IO){
                 productsForSync.forEach { product ->
-                    ProductRepository.addProduct(product, null, context)
+                    ProductRepository.addProduct(product, imagePart = null, localImage = null, context = context)
                 }
             }
         }

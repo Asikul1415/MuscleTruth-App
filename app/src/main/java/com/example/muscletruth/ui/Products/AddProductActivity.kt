@@ -95,7 +95,7 @@ class AddProductActivity : AppCompatActivity() {
                         fats = fatsField.text.toString().toIntOrNull() ?: 0,
                         carbs = carbsField.text.toString().toIntOrNull() ?: 0
                     )
-                    ProductRepository.addProduct(product, imagePart, this@AddProductActivity)
+                    ProductRepository.addProduct(product, imagePart, imageURI,this@AddProductActivity)
                     val intent = Intent()
                     intent.putExtra("productTitle", product.title)
                     setResult(RESULT_OK, intent)

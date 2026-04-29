@@ -1,6 +1,7 @@
 package com.example.muscletruth.data.repository
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.models.Product
@@ -44,7 +45,7 @@ object ProductRepository {
         }
     }
 
-    suspend fun addProduct(product: Product, imagePart: MultipartBody.Part?, context: Context): Result<Product>{
+    suspend fun addProduct(product: Product, imagePart: MultipartBody.Part?, localImage: Uri?, context: Context): Result<Product>{
         var serverProduct: Product? = null
         return try {
             if(checkForInternetConnection()){
@@ -64,10 +65,16 @@ object ProductRepository {
                 Result.success(serverProduct)
             }
             else{
-                Result.failure(Exception("Не удалось локально сохранить продукт"))
+                if(localImage !== null){
+                    product.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localImage)
+                }
+
+                localDb.productDao().insert(product)
+                Result.success(product)
             }
         }
         catch(e: Exception) {
+            Log.e("APP_DEBUG", "PRODUCT ADD ERROR!!!")
             Result.failure(Exception("${e.toString()}"))
         }
     }
