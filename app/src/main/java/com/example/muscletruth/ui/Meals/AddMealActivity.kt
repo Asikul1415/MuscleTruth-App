@@ -112,7 +112,7 @@ class AddMealActivity : AppCompatActivity() {
                     }
 
                     val mealTypeID = spinner.selectedItemPosition + 1;
-                    val mealResponse = MealRepository.addMeal(Meal(mealTypeID=mealTypeID), imagePart)
+                    val mealResponse = MealRepository.addMeal(Meal(mealTypeID=mealTypeID), imagePart, localImage = imageURI, context = this@AddMealActivity)
 
                     mealResponse.onSuccess {meal ->
                         servings.forEach { serving ->
@@ -122,7 +122,7 @@ class AddMealActivity : AppCompatActivity() {
                                 productAmount = serving.productAmount
                             )
                             Log.d("APP_DEBUG", "${mealResponse} ${meal} ${servingBase} ${meal.serverID}")
-                            ServingRepository.addServing(meal.serverID, servingBase)
+                            ServingRepository.addServing(meal, servingBase)
                             finish()
                         }
                     }

@@ -26,6 +26,7 @@ import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ServingRepository
+import com.example.muscletruth.data.serviceClasses.MealItem
 import com.example.muscletruth.ui.Servings.AddServingActivity
 import com.example.muscletruth.ui.Servings.ServingAdapter
 import com.example.muscletruth.utils.Utils
@@ -102,16 +103,23 @@ class MealActivity : AppCompatActivity() {
 
        lifecycleScope.launch {
             with(Dispatchers.IO){
-                val mealID = intent.getIntExtra("mealID", 0)
-                if(mealID != 0){
-                    servings = ServingRepository.getServings(mealID)
+                val meal = intent.getParcelableExtra<MealItem>("meal")
+                if(meal !== null){
+                    servings = ServingRepository.getServings(meal.id, meal.localID)
                     loadData()
 
-                    val meal = MealRepository.getMeal(mealID)
+                    val meal = MealRepository.getMeal(meal.id)
                     if(meal?.serverPicture != null){
                         val path = meal.serverPicture
                         Glide.with(this@MealActivity)
                             .load(Utils.ImageUtils.getImagePath(path!!))
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .into(picture)
+                    }
+                    else if(meal?.localPicture !== null){
+                        val path = meal.localPicture
+                        Glide.with(this@MealActivity)
+                            .load(path)
                             .placeholder(R.drawable.ic_launcher_foreground)
                             .into(picture)
                     }
@@ -137,11 +145,19 @@ class MealActivity : AppCompatActivity() {
                 val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
                 positiveButton.setOnClickListener {
+                    Log.d("APP_DEBUG", "SERVING DELETE")
                     lifecycleScope.launch {
                         withContext(Dispatchers.IO){
-                            val mealID = intent.getIntExtra("mealID", 0)
-                            if(mealID != 0){
-                                MealRepository.deleteMeal(mealID)
+                            val mealItem = intent.getParcelableExtra<MealItem>("meal")
+                            Log.d("APP_DEBUG", "SERVING DELETE: mealItem from intent $mealItem")
+                            if(mealItem !== null && mealItem.localID !== null){
+                                val meal = Meal(
+                                    localID = mealItem.localID,
+                                    serverID = mealItem.id,
+                                    mealTypeID = mealItem.mealTypeID
+                                )
+                                MealRepository.deleteMeal(meal)
+                                Log.d("APP_DEBUG", "SERVING DELETE: serving was deleted")
                                 finish()
                             }
                         }
@@ -179,7 +195,7 @@ class MealActivity : AppCompatActivity() {
                                 productID = serving.productID,
                                 productAmount = serving.productAmount
                             )
-                            ServingRepository.addServing(mealID, servingBase)
+                            ServingRepository.addServing(MealRepository.getMeal(mealID!!)!!, servingBase)
                         }
                         finish()
                     }

@@ -27,6 +27,9 @@ data class Serving(
     @ColumnInfo(name="meal_id")
     var mealID: Int? = null,
 
+    @ColumnInfo(name="local_meal_id")
+    var localMealID: String? = null,
+
     @SerializedName("product_id")
     @ColumnInfo(name="product_id")
     var productID: Int,

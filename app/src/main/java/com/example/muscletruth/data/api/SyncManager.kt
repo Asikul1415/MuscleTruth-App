@@ -3,8 +3,6 @@ package com.example.muscletruth.data.api
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.room.util.copy
-import com.example.muscletruth.data.api.models.*
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
@@ -30,9 +28,9 @@ object SyncManager {
     suspend fun syncDb(context: Context){
         if(checkForInternetConnection()){
             syncWeightings(context)
-            syncTodayMeals()
+            syncTodayMeals(context)
             syncServings()
-            syncProducts()
+            syncProducts(context)
             syncUser(context)
             Log.d("APP_DEBUG", "DB SYNCED")
         }
@@ -42,42 +40,67 @@ object SyncManager {
     }
 
      private suspend fun syncWeightings(context: Context){
-        var weightings: List<Weighting>
+        var weightingsToInsert: List<Weighting>
+
         coroutineScope {
             with(Dispatchers.IO){
-                weightings = WeightingRepository.getWeightings().map { weighting ->
+                val localWeightings = localDb.weightingDao().getWeightings()
+
+                weightingsToInsert = WeightingRepository.getWeightings().map { weighting ->
                     var localWeighting = UserRepository.localDb.weightingDao().getServerWeighting(weighting.serverID)
-                    val localID = localWeighting?.localID ?: UUID.randomUUID().toString()
-                    weighting.copy(localID = localID)
+
+                    weighting.copy(localID = localWeighting?.localID ?: UUID.randomUUID().toString())
+                }.filter { weighting ->
+                    localWeightings.find{ local -> local.serverID === weighting.serverID} === null
                 }
             }
         }
 
-        localDb.weightingDao().insertAll(weightings)
-        Log.d("APP_DEBUG", "SYNC: WEIGHTINGS INSERTED ${weightings}")
+        localDb.weightingDao().insertAll(weightingsToInsert)
+        Log.d("APP_DEBUG", "SYNC: WEIGHTINGS INSERTED ${weightingsToInsert}")
 
-        val localWeightings = localDb.weightingDao().getWeightingsForSync()
+        val weightingsForSync = localDb.weightingDao().getWeightingsForSync()
         coroutineScope {
              with(Dispatchers.IO){
-                 localWeightings.forEach { weighting ->
+                 weightingsForSync.forEach { weighting ->
                      var imagePart: MultipartBody.Part? = null;
                      if(weighting.localPicture !== "" && weighting.localPicture !== null){
                          imagePart = Utils.ImageUtils.createImagePart(context, Uri.fromFile(File(weighting.localPicture)));
                      }
 
-                     WeightingRepository.addWeighting(weighting, context = context, image = imagePart)
+                     WeightingRepository.addWeighting(weighting, context = context, image = imagePart).onSuccess {serverWeighting ->
+                         val updatedWeighting = weighting.copy(
+                             serverID = serverWeighting.serverID,
+                             userID = serverWeighting.userID,
+                             serverPicture = serverWeighting.serverPicture
+                         )
+                         localDb.weightingDao().update(updatedWeighting)
+                     }
                  }
              }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL WEIGHTINGS WERE SENT ${localWeightings}")
+        Log.d("APP_DEBUG", "SYNC: LOCAL WEIGHTINGS WERE SENT ${weightingsForSync}")
      }
 
-    private suspend fun syncTodayMeals(){
+    private suspend fun syncTodayMeals(context: Context){
         var meals: List<Meal>
+
         coroutineScope {
             with(Dispatchers.IO){
+                val localMeals = localDb.mealDao().getMeals()
+
                 meals = MealRepository.getTodayMeals().map {meal ->
-                    meal.copy(localID = UUID.randomUUID().toString())
+                    if(meal.serverPicture !== null){
+                        meal.copy(
+                            localID = UUID.randomUUID().toString(),
+                            localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(meal.serverPicture!!)))
+                    }
+                    else{
+                        meal.copy(localID = UUID.randomUUID().toString())
+                    }
+
+                }.filter { meal ->
+                    localMeals.find{ local -> local.serverID === meal.serverID} === null
                 }
             }
         }
@@ -85,23 +108,34 @@ object SyncManager {
         localDb.mealDao().insertAll(meals)
         Log.d("APP_DEBUG", "SYNC: MEALS INSERTED ${meals}")
 
-        val localMeals = localDb.mealDao().getMealsForSync()
+        val mealsForSync = localDb.mealDao().getMealsForSync()
         coroutineScope {
             with(Dispatchers.IO){
-                localMeals.forEach { meal ->
-                    MealRepository.addMeal(Meal(
-                        userID = meal.userID,
-                        mealTypeID = meal.mealTypeID!!,
-                        creationDate = meal.creationDate
-                    ))
+                mealsForSync.forEach { meal ->
+                    MealRepository.addMeal(meal, context = context).onSuccess { serverMeal ->
+                        val updatedMeal = meal.copy(
+                            serverID = serverMeal.serverID,
+                            serverPicture = serverMeal.serverPicture
+                        )
+                        localDb.mealDao().update(updatedMeal)
+                        updateMealServings(updatedMeal)
+                    }
                 }
             }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL MEALS WERE SENT ${localMeals}")
+        Log.d("APP_DEBUG", "SYNC: LOCAL MEALS WERE SENT ${mealsForSync}")
+    }
+
+    private suspend fun updateMealServings(meal: Meal){
+        localDb.servingDao().getLocalMealServings(meal.localID).map{serving ->
+            val updatedServing = serving.copy(mealID = meal.serverID)
+            localDb.servingDao().update(updatedServing)
+        }
     }
 
     private suspend fun syncServings(){
         val servings: MutableList<ServingItem> = mutableListOf()
+
         coroutineScope {
             with(Dispatchers.IO){
                 val meals = MealRepository.getTodayMeals()
@@ -111,51 +145,76 @@ object SyncManager {
             }
         }
 
-        val convertedServings = servings.map { serving ->
-            Serving(
-                serverID = serving.id!!,
-                mealID = serving.mealID,
-                productID = serving.productID,
-                productAmount = serving.productAmount
-            )
-        }
+        val localServings = localDb.servingDao().getServings()
+        val convertedServings = servings
+            .filter{serving ->
+                localServings.find {local -> local.serverID === serving.id} === null}
+            .map {serving ->
+                Serving(
+                    serverID = serving.id!!,
+                    mealID = serving.mealID,
+                    productID = serving.productID,
+                    productAmount = serving.productAmount
+                )
+            }
 
         localDb.servingDao().insertAll(convertedServings)
         Log.d("APP_DEBUG", "SYNC: SERVINGS INSERTED: ${convertedServings}")
+        val servingsForSync = localDb.servingDao().getServingsForSync()
 
-        val localServings = localDb.servingDao().getServingsForSync()
         coroutineScope {
             with(Dispatchers.IO){
-                localServings.forEach { serving ->
-                    ServingRepository.addServing(serving.mealID!! ,serving)
+                servingsForSync.forEach { serving ->
+                    val meal = MealRepository.getMeal(serving.mealID!!, serving.localID)
+                    if(meal !== null){
+                         ServingRepository.addServing(meal ,serving).onSuccess { serverServing ->
+                             val updatedServing = serving.copy(
+                                 serverID = serverServing.serverID,
+                                 userID = serverServing.userID
+                             )
+                             Log.d("APP_DEBUG", "upd. SERVING - $updatedServing")
+                             localDb.servingDao().update(updatedServing)
+                         }
+                    }
                 }
             }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL SERVINGS WERE SENT ${localServings}")
+        Log.d("APP_DEBUG", "SYNC: LOCAL SERVINGS WERE SENT ${servingsForSync}")
     }
 
-    private suspend fun syncProducts(){
-        var products: List<Product>
+    private suspend fun syncProducts(context: Context){
+        var productsToInsert: List<Product>
+
         coroutineScope {
             with(Dispatchers.IO){
-                products = ProductRepository.getProducts().map{product ->
-                    product.copy(localID = UUID.randomUUID().toString())
+                val localProducts = localDb.productDao().getProducts()
+                productsToInsert = ProductRepository.getProducts().map{ product ->
+                    if(product.serverPicture !== null){
+                        product.copy(
+                            localID = UUID.randomUUID().toString(),
+                            localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(product.serverPicture!!)))
+                    }
+                    else{
+                        product.copy(localID = UUID.randomUUID().toString())
+                    }
+                }.filter { product ->
+                    localProducts.find{local -> local.serverID === product.serverID} === null
                 }
             }
         }
 
-        localDb.productDao().insertAll(products)
-        Log.d("APP_DEBUG", "SYNC: PRODUCTS INSERTED ${products}")
+        localDb.productDao().insertAll(productsToInsert)
+        Log.d("APP_DEBUG", "SYNC: PRODUCTS INSERTED ${productsToInsert}")
 
-        val localProducts = localDb.productDao().getProductsForSync()
+        val productsForSync = localDb.productDao().getProductsForSync()
         coroutineScope {
             with(Dispatchers.IO){
-                localProducts.forEach { product ->
-                    ProductRepository.addProduct(product, null)
+                productsForSync.forEach { product ->
+                    ProductRepository.addProduct(product, null, context)
                 }
             }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL PRODUCTS WERE SENT ${localProducts}")
+        Log.d("APP_DEBUG", "SYNC: LOCAL PRODUCTS WERE SENT ${productsForSync}")
     }
 
     private suspend fun syncUser(context: Context){

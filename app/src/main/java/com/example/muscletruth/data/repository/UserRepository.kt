@@ -2,7 +2,6 @@ package com.example.muscletruth.data.repository
 import android.content.Context
 import android.net.ConnectivityManager
 import com.example.muscletruth.data.api.ApiClient
-import com.example.muscletruth.data.api.models.*
 import com.example.muscletruth.data.models.User
 import android.util.Log
 import androidx.room.Room

@@ -99,7 +99,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                 holder.itemView.setOnClickListener {
                     if(context != null){
                         val intent = Intent(context, MealActivity::class.java)
-                        intent.putExtra("mealID", item.id)
+                        intent.putExtra("meal", item)
                         context.startActivity(intent)
                     }
                 }
@@ -125,7 +125,13 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                                 .placeholder(R.drawable.ic_launcher_foreground)
                                 .into(holder.servingPicture)
                         }
-
+                        else if(product.localPicture !== null && holder.servingPicture !== null && context !== null){
+                            val path = product.localPicture
+                            Glide.with(context)
+                                .load(path)
+                                .placeholder(R.drawable.ic_launcher_foreground)
+                                .into(holder.servingPicture)
+                        }
                         holder.itemView.setOnClickListener {
                             onServingClick(item)
                         }

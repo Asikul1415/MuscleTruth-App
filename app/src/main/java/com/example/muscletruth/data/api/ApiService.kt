@@ -50,7 +50,7 @@ interface ApiService {
 
     @Multipart
     @POST("api/weightings")
-    suspend fun addWeighting(@Part("weighting") weighting: RequestBody, @Part image: MultipartBody.Part? = null): Response<Int>
+    suspend fun addWeighting(@Part("weighting") weighting: RequestBody, @Part image: MultipartBody.Part? = null): Result<Weighting>
 
     @Multipart
     @PUT("api/weightings/{weighting_id}")
@@ -92,7 +92,7 @@ interface ApiService {
     suspend fun addServing(@Path("meal_id") mealID: Int, @Body serving: Serving): Response<Serving>
 
     @GET("/api/meals/{meal_id}/servings")
-    suspend fun getServings(@Path("meal_id") mealID: Int): MutableList<ServingItem>
+    suspend fun getServings(@Path("meal_id") mealID: Int): MutableList<Serving>
 
     @DELETE("/api/meals/{meal_id}/servings/{serving_id}")
     suspend fun deleteServing(@Path("meal_id") mealID: Int, @Path("serving_id") servingID: Int)

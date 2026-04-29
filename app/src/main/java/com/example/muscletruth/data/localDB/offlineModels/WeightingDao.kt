@@ -20,8 +20,11 @@ interface WeightingDao {
     @Query("SELECT * from weightings ORDER BY server_id DESC LIMIT(1)")
     suspend fun getLastWeighting(): Weighting
 
+    @Query("SELECT * from weightings")
+    suspend fun getWeightings(): List<Weighting>
+
     @Query("SELECT * from weightings WHERE substr(creation_date, 1, 10) BETWEEN :startDate AND :endDate")
-    suspend fun getWeightings(startDate: String? = null, endDate: String? = null): List<Weighting>
+    suspend fun getWeightingsByDate(startDate: String? = null, endDate: String? = null): List<Weighting>
 
     @Query("SELECT * FROM weightings WHERE substr(creation_date, 1, 10) >= :startDate")
     suspend fun getWeightingsFrom(startDate: String): List<Weighting>

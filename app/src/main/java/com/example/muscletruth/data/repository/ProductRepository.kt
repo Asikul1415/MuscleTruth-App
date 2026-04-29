@@ -1,5 +1,6 @@
 package com.example.muscletruth.data.repository
 
+import android.content.Context
 import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.models.Product
@@ -9,6 +10,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.example.muscletruth.data.repository.UserRepository.localDb
+import com.example.muscletruth.utils.Utils
 import java.util.UUID
 
 object ProductRepository {
@@ -42,7 +44,7 @@ object ProductRepository {
         }
     }
 
-    suspend fun addProduct(product: Product, imagePart: MultipartBody.Part?): Result<Product>{
+    suspend fun addProduct(product: Product, imagePart: MultipartBody.Part?, context: Context): Result<Product>{
         var serverProduct: Product? = null
         return try {
             if(checkForInternetConnection()){
@@ -53,6 +55,11 @@ object ProductRepository {
             }
             if(serverProduct !== null){
                 serverProduct.localID = UUID.randomUUID().toString()
+                if(serverProduct.serverPicture !== null){
+                    val url = serverProduct.serverPicture!!
+                    serverProduct.localPicture = Utils.ImageUtils.saveImageFromServer(context,Utils.ImageUtils.getImagePath(url))
+                }
+
                 localDb.productDao().insert(serverProduct)
                 Result.success(serverProduct)
             }

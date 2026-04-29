@@ -18,7 +18,13 @@ interface ServingDao {
     suspend fun delete(servingEntity: Serving)
 
     @Query("SELECT * from servings WHERE meal_id = :mealID")
-    suspend fun getServings(mealID: Int): MutableList<Serving>
+    suspend fun getServerMealServings(mealID: Int): MutableList<Serving>
+
+    @Query("SELECT * from servings WHERE local_meal_id = :mealID")
+    suspend fun getLocalMealServings(mealID: String?): MutableList<Serving>
+
+    @Query("SELECT * from servings")
+    suspend fun getServings(): MutableList<Serving>
 
     @Query("SELECT * from servings WHERE server_id = :servingID")
     suspend fun getServing(servingID: Int): Serving

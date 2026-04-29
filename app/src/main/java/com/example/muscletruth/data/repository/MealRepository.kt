@@ -1,5 +1,7 @@
 package com.example.muscletruth.data.repository
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.serviceClasses.MealType
@@ -10,14 +12,16 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import com.example.muscletruth.data.repository.UserRepository.localDb
+import com.example.muscletruth.utils.Utils
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 object MealRepository {
     private val apiService = ApiClient.apiService
 
-    suspend fun addMeal(meal: Meal, image: MultipartBody.Part? = null): Result<Meal> {
+    suspend fun addMeal(meal: Meal, image: MultipartBody.Part? = null, localImage: Uri? = null, context: Context): Result<Meal> {
         var serverMeal: Meal? = null
         return try {
             if(checkForInternetConnection()){
@@ -34,7 +38,15 @@ object MealRepository {
                 Result.success(serverMeal)
             }
             else{
-                Result.failure(Exception("Не удалось сохранить локально прием пищи."))
+                if(localImage !== null){
+                    meal.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localImage)
+                }
+                meal.creationDate = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                localDb.mealDao().insert(meal)
+
+                Log.d("APP_DEBUG", "ADDED MEAL $meal")
+                Result.success(meal)
+//                Result.failure(Exception("Не удалось сохранить локально прием пищи."))
             }
         }
         catch(e: Exception){
@@ -64,9 +76,20 @@ object MealRepository {
     suspend fun getTodayMeals(): List<Meal>{
         try{
             if(checkForInternetConnection()){
-                return apiService.getTodayMeals()
+                val meals = apiService.getTodayMeals()
+                Log.d("APP_DEBUG", "TODAY_MEAL: ${meals}")
+                return meals.map{meal ->
+                    val localMeal = localDb.mealDao().getServerMeal(meal.serverID)
+                    if(localMeal !== null){
+                        meal.copy(localID = localMeal.localID)
+                    }
+                    else meal
+                }
             }
-            return localDb.mealDao().getTodayMeals(LocalDate.now().toString())
+
+            val meals = localDb.mealDao().getTodayMeals(LocalDate.now().toString())
+            Log.d("APP_DEBUG", "TODAY_MEAL: ${meals}")
+            return meals
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "ERROR: ${e.toString()}")
@@ -74,13 +97,18 @@ object MealRepository {
         }
     }
 
-    suspend fun getMeal(mealID: Int): Meal?{
+    suspend fun getMeal(mealID: Int, localMealID: String? = null): Meal?{
         try{
             if(checkForInternetConnection()){
                 return apiService.getMeal(mealID)
             }
             else{
-                return localDb.mealDao().getMeal(mealID)
+                if(localMealID !== null && mealID === -1){
+                    return localDb.mealDao().getLocalMeal(localMealID)
+                }
+                else{
+                    return localDb.mealDao().getServerMeal(mealID)
+                }
             }
         }
         catch(e: Exception){
@@ -89,14 +117,33 @@ object MealRepository {
         }
     }
 
-    suspend fun deleteMeal(mealID: Int){
+    suspend fun deleteMeal(meal: Meal? = null, mealID: Int? = null){
         try{
             if(checkForInternetConnection()){
-                apiService.deleteMeal(mealID)
+                if(meal !== null && meal.serverID !== -1){
+                    apiService.deleteMeal(meal.serverID)
+                }
+                else if(mealID !== null && mealID !== -1){
+                    apiService.deleteMeal(mealID)
+                }
+                else{
+                    Log.e("APP_DEBUG", "DELETE MEAL: MEAL WASN'T DELETED")
+                }
             }
-            val meal = localDb.mealDao().getMeal(mealID)
-            localDb.mealDao().delete(meal!!)
-            Log.d("APP_DEBUG", "DELETE: MEAL ${meal} WAS DELETED")
+
+            if(meal !== null){
+                val localMeal = localDb.mealDao().getLocalMeal(meal.localID)
+                localDb.mealDao().delete(localMeal!!)
+                Log.d("APP_DEBUG", "DELETE: MEAL ${meal} WAS DELETED")
+            }
+            else if(mealID !== null && mealID !== -1){
+                val localMeal = localDb.mealDao().getServerMeal(mealID)
+                localDb.mealDao().delete(localMeal!!)
+                Log.d("APP_DEBUG", "DELETE: MEAL ${meal} WAS DELETED")
+            }
+            else{
+                Log.e("APP_DEBUG", "DELETE MEAL: MEAL WASN'T DELETED")
+            }
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "ERROR: ${e.toString()}")
@@ -116,7 +163,7 @@ object MealRepository {
             var totalCarbs = 0.00f;
 
             meals.forEach { meal ->
-                localDb.servingDao().getServings(meal.serverID!!).forEach { serving ->
+                localDb.servingDao().getServerMealServings(meal.serverID!!).forEach { serving ->
                     val product = localDb.productDao().getProduct(serving.productID)!!
                     totalProteins += (product.proteins / 100.00f * serving.productAmount)
                     totalFats += (product.fats / 100.00f * serving.productAmount)

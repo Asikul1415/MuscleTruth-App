@@ -33,7 +33,7 @@ object WeightingRepository {
 
 
             //LOCAL
-            val weightings = localDb.weightingDao().getWeightings(startDate = startDate, endDate = endDate)
+            val weightings = localDb.weightingDao().getWeightingsByDate(startDate = startDate, endDate = endDate)
             Log.d("APP_DEBUG", "LOCAL_GET: WEIGHTINGS ${weightings}")
             return weightings
         }
@@ -122,28 +122,38 @@ object WeightingRepository {
         }
     }
 
-    suspend fun addWeighting(weighting: Weighting, image: MultipartBody.Part? = null, localPicture: Uri? = null, context: Context): Result<Int> {
+    suspend fun addWeighting(weighting: Weighting, image: MultipartBody.Part? = null, localPicture: Uri? = null, context: Context): Result<Weighting> {
         return try{
+            var serverWeighting: Weighting? = null
             //SERVER
             if(checkForInternetConnection()){
                 val weightingJson = Gson().toJson(weighting)
                 val weightingBody = weightingJson.toRequestBody("application/json".toMediaTypeOrNull())
 
-                apiService.addWeighting(weightingBody, image).body();
+                apiService.addWeighting(weightingBody, image).onSuccess {addedWeighting ->
+                    serverWeighting = addedWeighting
+                }
             }
 
 
             //LOCAL
-            var weightingToInsert = getLastWeighting() ?: Weighting(result = weighting.result)
+            var weightingToInsert = serverWeighting ?: Weighting(result = weighting.result)
             if(localPicture !== null){
                 weightingToInsert.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localPicture) ?: ""
+            }
+            if(weightingToInsert.serverPicture !== null) {
+                val url = weightingToInsert.serverPicture!!
+                Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(url))
+            }
+            if(weightingToInsert.localID === null){
+                weightingToInsert.localID = UUID.randomUUID().toString()
             }
 
             localDb.weightingDao().insert(weightingToInsert)
             Log.d("APP_DEBUG","LOCAL_ADD: WEIGHTING ${weightingToInsert}")
-            Result.success(weightingToInsert.serverID);
+            Result.success(weightingToInsert);
         } catch(e: Exception){
-            Log.e("APP_DEBUG","LOCAL_ADD: WEIGHTING ERROR${e.toString()}")
+            Log.e("APP_DEBUG","LOCAL_ADD: WEIGHTING ERROR ${e.toString()}")
             Result.failure(e)
         }
     }

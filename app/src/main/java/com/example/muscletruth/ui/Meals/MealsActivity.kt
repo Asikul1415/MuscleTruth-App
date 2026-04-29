@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
+import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.serviceClasses.MealItem
 import com.example.muscletruth.data.serviceClasses.ServingItem
@@ -67,12 +68,17 @@ class MealsActivity : AppCompatActivity() {
             try{
                 meals = withContext(Dispatchers.IO){
                     MealRepository.getTodayMeals().map{ meal ->
+                        Log.d("APP_DEBUG", "MEAL: ${meal}")
                         MealItem(
                             id=meal.serverID!!,
-                            servings = ServingRepository.getServings(meal.serverID),
+                            localID = meal.localID,
+                            servings = ServingRepository.getServings(meal.serverID, meal.localID),
                             mealTypeID = meal.mealTypeID,
                             creationDate = meal.creationDate)
                     }
+                }
+                meals.forEach {meal ->
+                    Log.d("APP_DEBUG", "MEAL_ITEM: ${meal.servings}")
                 }
 
                 val noMealsText = findViewById<TextView>(R.id.meals_tv_no_meals)
@@ -134,6 +140,7 @@ class MealsActivity : AppCompatActivity() {
                                 adapter.items.add(index=insertionIndex, element = meal)
                                 insertionIndex += 1
                                 meal.servings.forEach {serving ->
+                                    Log.d("APP_DEBUG", "SERVING - $serving")
                                     adapter.items.add(index = insertionIndex, element = serving)
                                     insertionIndex += 1
                                 }
@@ -148,6 +155,7 @@ class MealsActivity : AppCompatActivity() {
                                 adapter.items.add(index=insertionIndex, element = meal)
                                 insertionIndex += 1
                                 meal.servings.forEach {serving ->
+                                    Log.d("APP_DEBUG", "SERVING - $serving")
                                     adapter.items.add(index = insertionIndex, element = serving)
                                     insertionIndex += 1
                                 }
@@ -162,6 +170,7 @@ class MealsActivity : AppCompatActivity() {
                                 adapter.items.add(index=insertionIndex, element = meal)
                                 insertionIndex += 1
                                 meal.servings.forEach {serving ->
+                                    Log.d("APP_DEBUG", "SERVING - $serving")
                                     adapter.items.add(index = insertionIndex, element = serving)
                                     insertionIndex += 1
                                 }
@@ -176,6 +185,7 @@ class MealsActivity : AppCompatActivity() {
                                 adapter.items.add(index=insertionIndex, element = meal)
                                 insertionIndex += 1
                                 meal.servings.forEach {serving ->
+                                    Log.d("APP_DEBUG", "SERVING - $serving")
                                     adapter.items.add(index = insertionIndex, element = serving)
                                     insertionIndex += 1
                                 }
@@ -218,7 +228,7 @@ class MealsActivity : AppCompatActivity() {
                    with(Dispatchers.IO){
                        if(serving.mealID != null){
                            if(ServingRepository.getServings(serving.mealID).size == 1){
-                               MealRepository.deleteMeal(serving.mealID)
+                               MealRepository.deleteMeal(mealID = serving.mealID)
                            }
                            else{
                                ServingRepository.deleteServing(serving)

@@ -21,10 +21,16 @@ interface MealDao {
     suspend fun getTodayMeals(today: String): List<Meal>
 
     @Query("SELECT * from meals WHERE server_id = :mealID")
-    suspend fun getMeal(mealID: Int): Meal?
+    suspend fun getServerMeal(mealID: Int): Meal?
+
+    @Query("SELECT * from meals WHERE local_id = :mealID")
+    suspend fun getLocalMeal(mealID: String): Meal?
 
     @Query("SELECT * from meals WHERE meal_type_id = :mealTypeID AND substr(creation_date, 1, 10) = :today")
     suspend fun getMealTypeMeals(mealTypeID: Int, today: String): MutableList<Meal>
+
+    @Query("SELECT * FROM meals")
+    suspend fun getMeals(): List<Meal>
 
     @Query("SELECT * FROM meals WHERE server_id = -1")
     suspend fun getMealsForSync(): List<Meal>
