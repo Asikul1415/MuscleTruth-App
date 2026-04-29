@@ -123,6 +123,7 @@ class MealActivity : AppCompatActivity() {
                             .placeholder(R.drawable.ic_launcher_foreground)
                             .into(picture)
                     }
+
                     if(meal != null){
                         spinner.setSelection(meal.mealTypeID - 1)
                     }

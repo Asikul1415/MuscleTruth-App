@@ -52,10 +52,17 @@ class ServingAdapter(
                 holder.tvCarbs.text = "${"%.2f".format(product.carbs / 100.00 * item.productAmount)}"
                 holder.tvCalories.text = "${"%.2f".format(totalCalories)} ккал"
                 holder.tvAmount.text = "${item.productAmount}"
-                if(product.serverPicture != null && context != null){
+                if(product.serverPicture !== null && context !== null){
                     val path = product.serverPicture
                     Glide.with(context)
                         .load(Utils.ImageUtils.getImagePath(path!!))
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .into(holder.picture)
+                }
+                else if(product.localPicture !== null && context !== null){
+                    val path = product.localPicture
+                    Glide.with(context)
+                        .load(path)
                         .placeholder(R.drawable.ic_launcher_foreground)
                         .into(holder.picture)
                 }
