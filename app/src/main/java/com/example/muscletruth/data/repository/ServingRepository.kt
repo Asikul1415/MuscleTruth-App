@@ -34,7 +34,12 @@ object ServingRepository {
 
             //LOCAL
             if(serverServing !== null){
-                serverServing.localID = UUID.randomUUID().toString()
+                if(serving.localID !== null){
+                    serverServing.localID = serving.localID
+                }
+                else{
+                    serverServing.localID = UUID.randomUUID().toString()
+                }
                 serverServing.localMealID = meal.localID
                 serverServing.localProductID = serving.localProductID
                 localDb.servingDao().insert(serverServing)

@@ -32,7 +32,13 @@ object MealRepository {
             }
 
             if(serverMeal !== null){
-                serverMeal.localID = UUID.randomUUID().toString()
+                if(meal.localID !== null){
+                    serverMeal.localID = meal.localID
+                }
+                else{
+                    serverMeal.localID = UUID.randomUUID().toString()
+                }
+
                 localDb.mealDao().insert(serverMeal)
                 Log.d("APP_DEBUG", "ADDED MEAL $serverMeal")
                 Result.success(serverMeal)
