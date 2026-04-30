@@ -30,6 +30,7 @@ import com.example.muscletruth.data.serviceClasses.MealItem
 import com.example.muscletruth.ui.Servings.AddServingActivity
 import com.example.muscletruth.ui.Servings.ServingAdapter
 import com.example.muscletruth.utils.Utils
+import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -109,7 +110,7 @@ class MealActivity : AppCompatActivity() {
                     loadData()
 
                     val meal = MealRepository.getMeal(meal.id)
-                    if(meal?.serverPicture != null){
+                    if(checkForInternetConnection() && meal?.serverPicture !== null){
                         val path = meal.serverPicture
                         Glide.with(this@MealActivity)
                             .load(Utils.ImageUtils.getImagePath(path!!))

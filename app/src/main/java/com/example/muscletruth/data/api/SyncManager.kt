@@ -112,13 +112,11 @@ object SyncManager {
         coroutineScope {
             with(Dispatchers.IO){
                 mealsForSync.forEach { meal ->
-                    MealRepository.addMeal(meal, context = context).onSuccess { serverMeal ->
-                        val updatedMeal = meal.copy(
-                            serverID = serverMeal.serverID,
-                            serverPicture = serverMeal.serverPicture
-                        )
-                        localDb.mealDao().update(updatedMeal)
-                        updateMealServings(updatedMeal)
+                    val uri = Uri.fromFile(File(meal.localPicture))
+                    val imagePart = Utils.ImageUtils.createImagePart(context, uri)
+
+                    MealRepository.addMeal(meal, image = imagePart, context = context).onSuccess { serverMeal ->
+                        updateMealServings(serverMeal)
                     }
                 }
             }

@@ -39,6 +39,13 @@ object MealRepository {
                     serverMeal.localID = UUID.randomUUID().toString()
                 }
 
+                if(meal.localPicture !== null){
+                    serverMeal.localPicture = meal.localPicture
+                }
+                else{
+                    serverMeal.localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(serverMeal.serverPicture!!))
+                }
+
                 localDb.mealDao().insert(serverMeal)
                 Log.d("APP_DEBUG", "ADDED MEAL $serverMeal")
                 Result.success(serverMeal)
