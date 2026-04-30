@@ -14,6 +14,8 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
 import com.example.muscletruth.data.repository.UserRepository.localDb
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 object WeightingRepository {
@@ -138,6 +140,7 @@ object WeightingRepository {
 
             //LOCAL
             var weightingToInsert = serverWeighting ?: Weighting(result = weighting.result)
+
             if(localPicture !== null){
                 weightingToInsert.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localPicture) ?: ""
             }
@@ -147,6 +150,10 @@ object WeightingRepository {
             }
             if(weightingToInsert.localID === null){
                 weightingToInsert.localID = UUID.randomUUID().toString()
+            }
+            if(weightingToInsert.creationDate === null){
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
+                weightingToInsert.creationDate = OffsetDateTime.now().format(formatter)
             }
 
             localDb.weightingDao().insert(weightingToInsert)
