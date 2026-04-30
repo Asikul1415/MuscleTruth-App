@@ -9,6 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class ServingItem(
     @SerializedName("id") val id: Int? = null,
     @SerializedName("product_id") val productID: Int,
+    @SerializedName("local_product_id") val localProductID: String? = null,
     @SerializedName("meal_id") val mealID: Int? = null,
     @SerializedName("products") var product: Product? = null,
     @SerializedName("product_amount") val productAmount: Int

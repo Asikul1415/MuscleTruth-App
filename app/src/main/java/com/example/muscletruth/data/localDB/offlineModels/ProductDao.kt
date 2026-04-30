@@ -21,7 +21,10 @@ interface ProductDao {
     suspend fun getProducts(searchQuery: String? = null): MutableList<Product>
 
     @Query("SELECT * FROM products WHERE server_id = :productID")
-    suspend fun getProduct(productID: Int): Product?
+    suspend fun getServerProduct(productID: Int): Product?
+
+    @Query("SELECT * FROM products WHERE local_id = :productID")
+    suspend fun getLocalProduct(productID: String): Product?
 
     @Query("SELECT * FROM products WHERE server_id = -1")
     suspend fun getProductsForSync(): List<Product>

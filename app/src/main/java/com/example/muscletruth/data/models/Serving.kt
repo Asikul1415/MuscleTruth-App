@@ -34,6 +34,9 @@ data class Serving(
     @ColumnInfo(name="product_id")
     var productID: Int,
 
+    @ColumnInfo(name="local_product_id")
+    var localProductID: String? = null,
+
     @SerializedName("product_amount")
     @ColumnInfo(name="product_amount")
     var productAmount: Int,

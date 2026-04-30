@@ -13,6 +13,7 @@ import com.example.muscletruth.R
 import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.utils.Utils
+import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -52,7 +53,7 @@ class ServingAdapter(
                 holder.tvCarbs.text = "${"%.2f".format(product.carbs / 100.00 * item.productAmount)}"
                 holder.tvCalories.text = "${"%.2f".format(totalCalories)} ккал"
                 holder.tvAmount.text = "${item.productAmount}"
-                if(product.serverPicture !== null && context !== null){
+                if(checkForInternetConnection() && product.serverPicture !== null && context !== null){
                     val path = product.serverPicture
                     Glide.with(context)
                         .load(Utils.ImageUtils.getImagePath(path!!))

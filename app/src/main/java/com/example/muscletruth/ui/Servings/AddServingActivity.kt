@@ -146,6 +146,7 @@ class AddServingActivity : AppCompatActivity() {
                             val resultIntent = Intent()
                             val serving = ServingItem(
                                 productID = product.serverID,
+                                localProductID = product.localID,
                                 productAmount = intAmount
                             )
                             resultIntent.putExtra("serving", serving)

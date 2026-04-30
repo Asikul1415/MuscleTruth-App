@@ -119,6 +119,7 @@ class AddMealActivity : AppCompatActivity() {
                             val servingBase = Serving(
                                 mealID = meal.serverID,
                                 productID = serving.productID,
+                                localProductID = serving.localProductID,
                                 productAmount = serving.productAmount
                             )
                             Log.d("APP_DEBUG", "${mealResponse} ${meal} ${servingBase} ${meal.serverID}")

@@ -37,7 +37,7 @@ object ProductRepository {
             if(checkForInternetConnection()){
                 return apiService.getProduct(productID)
             }
-            return localDb.productDao().getProduct(productID)
+            return localDb.productDao().getServerProduct(productID)
         }
         catch(e: Exception){
             Log.d("APP_DEBUG", "${e.toString()}")
@@ -47,6 +47,7 @@ object ProductRepository {
 
     suspend fun addProduct(product: Product, imagePart: MultipartBody.Part?, localImage: Uri?, context: Context): Result<Product>{
         var serverProduct: Product? = null
+
         return try {
             if(checkForInternetConnection()){
                 val productJson = Gson().toJson(product)
@@ -55,10 +56,21 @@ object ProductRepository {
                 serverProduct = apiService.addProduct(productBody, imagePart).body()
             }
             if(serverProduct !== null){
-                serverProduct.localID = UUID.randomUUID().toString()
+                if(product.localID !== null){
+                    serverProduct.localID = product.localID
+                }
+                else{
+                    serverProduct.localID = UUID.randomUUID().toString()
+                }
+
                 if(serverProduct.serverPicture !== null){
-                    val url = serverProduct.serverPicture!!
-                    serverProduct.localPicture = Utils.ImageUtils.saveImageFromServer(context,Utils.ImageUtils.getImagePath(url))
+                    if(product.localPicture !== null){
+                        serverProduct.localPicture = product.localPicture
+                    }
+                    else{
+                        val url = serverProduct.serverPicture!!
+                        serverProduct.localPicture = Utils.ImageUtils.saveImageFromServer(context,Utils.ImageUtils.getImagePath(url))
+                    }
                 }
 
                 localDb.productDao().insert(serverProduct)

@@ -15,30 +15,40 @@ object ServingRepository {
     suspend fun addServing(meal: Meal, serving: Serving): Result<Serving> {
         var serverServing: Serving? = null
         return try {
+            //SERVER
             //ONLY IF SERVING DOESN'T EXIST ON THE SERVER ALREADY
             if(checkForInternetConnection() && serving.serverID === -1){
+                //In case serving product was added offline
+                if(serving.productID === -1 && serving.localProductID !== null){
+                    val productLocalID = serving.localProductID!!
+                    val product = localDb.productDao().getLocalProduct(productLocalID)
+                    if(product !== null){
+                        serving.productID = product.serverID
+                    }
+                }
+
                 serverServing = apiService.addServing(meal.serverID, serving).body()
             }
             Log.d("APP_DEBUG", "ADD SERVING $meal $serving")
-//            if(meal.localID === null){
-                if(serverServing !== null){
-                    serverServing.localID = UUID.randomUUID().toString()
-                    Log.d("APP_DEBUG", "ADDED SERVING $serverServing")
-                    serverServing.localMealID = meal.localID
-                    localDb.servingDao().insert(serverServing)
-                    Result.success(serverServing)
-                }
-                else{
-                    serving.localMealID = meal.localID
-                    localDb.servingDao().insert(serving)
-                    Log.d("APP_DEBUG", "ADDED SERVING $serving")
-                    Result.success(serving)
-//                Result.failure(Exception("Не удалось локально добавить порцию!"))
-                }
-//            } else {
-//                Log.e("APP_DEBUG", "ADD SERVING ERROR!")
-//                Result.failure(Exception("Не удалось локально добавить порцию!"))
-//            }
+
+
+            //LOCAL
+            if(serverServing !== null){
+                serverServing.localID = UUID.randomUUID().toString()
+                serverServing.localMealID = meal.localID
+                serverServing.localProductID = serving.localProductID
+                localDb.servingDao().insert(serverServing)
+
+                Log.d("APP_DEBUG", "ADDED SERVING $serverServing")
+                Result.success(serverServing)
+            }
+            else{
+                serving.localMealID = meal.localID
+                localDb.servingDao().insert(serving)
+
+                Log.d("APP_DEBUG", "ADDED SERVING $serving")
+                Result.success(serving)
+            }
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "ADD SERVING ERROR ${e.toString()}")

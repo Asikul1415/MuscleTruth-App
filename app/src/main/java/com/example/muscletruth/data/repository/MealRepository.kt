@@ -164,7 +164,7 @@ object MealRepository {
 
             meals.forEach { meal ->
                 localDb.servingDao().getServerMealServings(meal.serverID!!).forEach { serving ->
-                    val product = localDb.productDao().getProduct(serving.productID)!!
+                    val product = localDb.productDao().getServerProduct(serving.productID)!!
                     totalProteins += (product.proteins / 100.00f * serving.productAmount)
                     totalFats += (product.fats / 100.00f * serving.productAmount)
                     totalCarbs += (product.carbs / 100.00f * serving.productAmount)

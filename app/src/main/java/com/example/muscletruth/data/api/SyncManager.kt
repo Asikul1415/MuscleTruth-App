@@ -29,8 +29,8 @@ object SyncManager {
         if(checkForInternetConnection()){
             syncWeightings(context)
             syncTodayMeals(context)
-            syncServings()
             syncProducts(context)
+            syncServings()
             syncUser(context)
             Log.d("APP_DEBUG", "DB SYNCED")
         }
@@ -170,6 +170,7 @@ object SyncManager {
                          ServingRepository.addServing(meal ,serving).onSuccess { serverServing ->
                              val updatedServing = serving.copy(
                                  serverID = serverServing.serverID,
+                                 productID = serverServing.productID,
                                  userID = serverServing.userID
                              )
                              Log.d("APP_DEBUG", "upd. SERVING - $updatedServing")
@@ -210,7 +211,12 @@ object SyncManager {
         coroutineScope {
             with(Dispatchers.IO){
                 productsForSync.forEach { product ->
-                    ProductRepository.addProduct(product, imagePart = null, localImage = null, context = context)
+                    val uri = Uri.fromFile(File(product.localPicture))
+                    ProductRepository.addProduct(
+                        product,
+                        imagePart = Utils.ImageUtils.createImagePart(context, uri),
+                        localImage = null,
+                        context = context)
                 }
             }
         }
