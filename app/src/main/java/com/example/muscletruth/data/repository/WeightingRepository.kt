@@ -126,39 +126,50 @@ object WeightingRepository {
 
     suspend fun addWeighting(weighting: Weighting, image: MultipartBody.Part? = null, localPicture: Uri? = null, context: Context): Result<Weighting> {
         return try{
-            var serverWeighting: Weighting? = null
-            //SERVER
             if(checkForInternetConnection()){
+                //SERVER
                 val weightingJson = Gson().toJson(weighting)
                 val weightingBody = weightingJson.toRequestBody("application/json".toMediaTypeOrNull())
 
-                apiService.addWeighting(weightingBody, image).onSuccess {addedWeighting ->
-                    serverWeighting = addedWeighting
+                var serverWeighting = apiService.addWeighting(weightingBody, image).body()
+                if(serverWeighting !== null){
+                    Log.d("APP_DEBUG","ADD WEIGHTING: WEIGHTING ${serverWeighting} HAS BEEN ADDED TO THE SERVER")
+
+                    if(weighting.localID !== null){
+                        serverWeighting.localID = weighting.localID
+                    }
+                    else{
+                        serverWeighting.localID = UUID.randomUUID().toString()
+                    }
+
+                    if(serverWeighting.serverPicture !== null){
+                        val url = serverWeighting.serverPicture!!
+                        serverWeighting.localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(url))
+                    }
+
+                    localDb.weightingDao().insert(serverWeighting)
+                    Log.d("APP_DEBUG","ADD WEIGHTING: WEIGHTING ${serverWeighting} HAS BEEN ADDED TO THE LOCAL DB")
+                    Result.success(serverWeighting)
+                }
+                else{
+                    Log.e("APP_DEBUG","ADD WEIGHTING FAILURE")
+                    Result.failure(Exception("ADD WEIGHTING FAILURE"))
                 }
             }
+            else{
+                //LOCAL
+                if(localPicture !== null){
+                    weighting.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localPicture)
+                }
+                if(weighting.creationDate === null){
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
+                    weighting.creationDate = OffsetDateTime.now().format(formatter)
+                }
 
-
-            //LOCAL
-            var weightingToInsert = serverWeighting ?: Weighting(result = weighting.result)
-
-            if(localPicture !== null){
-                weightingToInsert.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localPicture) ?: ""
+                localDb.weightingDao().insert(weighting)
+                Log.d("APP_DEBUG","ADD WEIGHTING: WEIGHTING ${weighting}")
+                Result.success(weighting)
             }
-            if(weightingToInsert.serverPicture !== null) {
-                val url = weightingToInsert.serverPicture!!
-                Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(url))
-            }
-            if(weightingToInsert.localID === null){
-                weightingToInsert.localID = UUID.randomUUID().toString()
-            }
-            if(weightingToInsert.creationDate === null){
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX")
-                weightingToInsert.creationDate = OffsetDateTime.now().format(formatter)
-            }
-
-            localDb.weightingDao().insert(weightingToInsert)
-            Log.d("APP_DEBUG","LOCAL_ADD: WEIGHTING ${weightingToInsert}")
-            Result.success(weightingToInsert);
         } catch(e: Exception){
             Log.e("APP_DEBUG","LOCAL_ADD: WEIGHTING ERROR ${e.toString()}")
             Result.failure(e)

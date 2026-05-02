@@ -50,7 +50,7 @@ interface ApiService {
 
     @Multipart
     @POST("api/weightings")
-    suspend fun addWeighting(@Part("weighting") weighting: RequestBody, @Part image: MultipartBody.Part? = null): Result<Weighting>
+    suspend fun addWeighting(@Part("weighting") weighting: RequestBody, @Part image: MultipartBody.Part? = null): Response<Weighting>
 
     @Multipart
     @PUT("api/weightings/{weighting_id}")

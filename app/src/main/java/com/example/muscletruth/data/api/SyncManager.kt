@@ -40,25 +40,35 @@ object SyncManager {
     }
 
      private suspend fun syncWeightings(context: Context){
+         //Insert in localDB new weightings from the server
         var weightingsToInsert: List<Weighting>
-
         coroutineScope {
             with(Dispatchers.IO){
                 val localWeightings = localDb.weightingDao().getWeightings()
 
+                //Find all weightings from server that missing in localDB
                 weightingsToInsert = WeightingRepository.getWeightings().map { weighting ->
                     var localWeighting = UserRepository.localDb.weightingDao().getServerWeighting(weighting.serverID)
 
-                    weighting.copy(localID = localWeighting?.localID ?: UUID.randomUUID().toString())
+                    var localPicture: String? = null
+                    if(checkForInternetConnection() && weighting.serverPicture?.isNullOrEmpty() === false){
+                        localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(weighting.serverPicture!!))
+                    }
+
+                    weighting.copy(
+                        localID = localWeighting?.localID ?: UUID.randomUUID().toString(),
+                        localPicture = localPicture
+                    )
                 }.filter { weighting ->
                     localWeightings.find{ local -> local.serverID === weighting.serverID} === null
                 }
             }
         }
-
         localDb.weightingDao().insertAll(weightingsToInsert)
         Log.d("APP_DEBUG", "SYNC: WEIGHTINGS INSERTED ${weightingsToInsert}")
 
+
+        //Send to the server new weightings that were added in offline mode
         val weightingsForSync = localDb.weightingDao().getWeightingsForSync()
         coroutineScope {
              with(Dispatchers.IO){
@@ -68,14 +78,7 @@ object SyncManager {
                          imagePart = Utils.ImageUtils.createImagePart(context, Uri.fromFile(File(weighting.localPicture)));
                      }
 
-                     WeightingRepository.addWeighting(weighting, context = context, image = imagePart).onSuccess {serverWeighting ->
-                         val updatedWeighting = weighting.copy(
-                             serverID = serverWeighting.serverID,
-                             userID = serverWeighting.userID,
-                             serverPicture = serverWeighting.serverPicture
-                         )
-                         localDb.weightingDao().update(updatedWeighting)
-                     }
+                     WeightingRepository.addWeighting(weighting, context = context, image = imagePart)
                  }
              }
         }
