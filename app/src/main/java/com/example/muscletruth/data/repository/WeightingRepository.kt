@@ -36,11 +36,11 @@ object WeightingRepository {
 
             //LOCAL
             val weightings = localDb.weightingDao().getWeightingsByDate(startDate = startDate, endDate = endDate)
-            Log.d("APP_DEBUG", "LOCAL_GET: WEIGHTINGS ${weightings}")
+            Log.d("APP_DEBUG", "GET WEIGHTINGS: LOCAL WEIGHTINGS $weightings")
             return weightings
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "LOCAL_GET: WEIGHTINGS ERROR ${e.toString()}")
+            Log.e("APP_DEBUG", "GET WEIGHTINGS ERROR ${e.toString()}")
             return emptyList()
         }
     }
@@ -133,7 +133,7 @@ object WeightingRepository {
 
                 var serverWeighting = apiService.addWeighting(weightingBody, image).body()
                 if(serverWeighting !== null){
-                    Log.d("APP_DEBUG","ADD WEIGHTING: WEIGHTING ${serverWeighting} HAS BEEN ADDED TO THE SERVER")
+                    Log.d("APP_DEBUG","ADD WEIGHTING: ADDED WEIGHTING $serverWeighting TO THE SERVER")
 
                     if(weighting.localID !== null){
                         serverWeighting.localID = weighting.localID
@@ -148,12 +148,12 @@ object WeightingRepository {
                     }
 
                     localDb.weightingDao().insert(serverWeighting)
-                    Log.d("APP_DEBUG","ADD WEIGHTING: WEIGHTING ${serverWeighting} HAS BEEN ADDED TO THE LOCAL DB")
+                    Log.d("APP_DEBUG","ADD WEIGHTING: ADDED WEIGHTING $serverWeighting TO THE LOCAL DB")
                     Result.success(serverWeighting)
                 }
                 else{
-                    Log.e("APP_DEBUG","ADD WEIGHTING FAILURE")
-                    Result.failure(Exception("ADD WEIGHTING FAILURE"))
+                    Log.e("APP_DEBUG","ADD WEIGHTING ERROR")
+                    Result.failure(Exception("ADD WEIGHTING ERROR"))
                 }
             }
             else{
@@ -167,11 +167,11 @@ object WeightingRepository {
                 }
 
                 localDb.weightingDao().insert(weighting)
-                Log.d("APP_DEBUG","ADD WEIGHTING: WEIGHTING ${weighting}")
+                Log.d("APP_DEBUG","ADD WEIGHTING: ADDED WEIGHTING $weighting TO THE LOCAL DB")
                 Result.success(weighting)
             }
         } catch(e: Exception){
-            Log.e("APP_DEBUG","LOCAL_ADD: WEIGHTING ERROR ${e.toString()}")
+            Log.e("APP_DEBUG","ADD WEIGHTING: ERROR ${e.toString()}")
             Result.failure(e)
         }
     }

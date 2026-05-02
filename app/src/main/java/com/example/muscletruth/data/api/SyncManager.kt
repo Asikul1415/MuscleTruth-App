@@ -109,7 +109,7 @@ object SyncManager {
         }
 
         localDb.mealDao().insertAll(meals)
-        Log.d("APP_DEBUG", "SYNC: MEALS INSERTED ${meals}")
+        Log.d("APP_DEBUG", "SYNC MEALS: INSERTED $meals")
 
         val mealsForSync = localDb.mealDao().getMealsForSync()
         coroutineScope {
@@ -124,7 +124,7 @@ object SyncManager {
                 }
             }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL MEALS WERE SENT ${mealsForSync}")
+        Log.d("APP_DEBUG", "SYNC MEALS: LOCALS WERE SENT $mealsForSync")
     }
 
     private suspend fun updateMealServings(meal: Meal){
@@ -160,9 +160,10 @@ object SyncManager {
             }
 
         localDb.servingDao().insertAll(convertedServings)
-        Log.d("APP_DEBUG", "SYNC: SERVINGS INSERTED: ${convertedServings}")
-        val servingsForSync = localDb.servingDao().getServingsForSync()
+        Log.d("APP_DEBUG", "SYNC SERVINGS: INSERTED: $convertedServings")
 
+
+        val servingsForSync = localDb.servingDao().getServingsForSync()
         coroutineScope {
             with(Dispatchers.IO){
                 servingsForSync.forEach { serving ->
@@ -181,7 +182,7 @@ object SyncManager {
                 }
             }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL SERVINGS WERE SENT ${servingsForSync}")
+        Log.d("APP_DEBUG", "SYNC SERVINGS: LOCALS WERE SENT $servingsForSync")
     }
 
     private suspend fun syncProducts(context: Context){
@@ -206,7 +207,7 @@ object SyncManager {
         }
 
         localDb.productDao().insertAll(productsToInsert)
-        Log.d("APP_DEBUG", "SYNC: PRODUCTS INSERTED ${productsToInsert}")
+        Log.d("APP_DEBUG", "SYNC PRODUCTS: INSERTED $productsToInsert")
 
         val productsForSync = localDb.productDao().getProductsForSync()
         coroutineScope {
@@ -221,7 +222,7 @@ object SyncManager {
                 }
             }
         }
-        Log.d("APP_DEBUG", "SYNC: LOCAL PRODUCTS WERE SENT ${productsForSync}")
+        Log.d("APP_DEBUG", "SYNC PRODUCTS: LOCALS WERE SENT $productsForSync")
     }
 
     private suspend fun syncUser(context: Context){
@@ -234,10 +235,10 @@ object SyncManager {
                 }}
             }
         }
-        Log.d("APP_DEBUG", "GET: USER ${user}")
+        Log.d("APP_DEBUG", "GET USER: GOT USER $user")
         if(user === null) return
 
         localDb.userDao().insert(user)
-        Log.d("APP_DEBUG", "SYNC: USER INSERTED")
+        Log.d("APP_DEBUG", "SYNC USER: INSERTED")
     }
 }

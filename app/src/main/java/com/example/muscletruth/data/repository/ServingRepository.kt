@@ -28,8 +28,9 @@ object ServingRepository {
                 }
 
                 serverServing = apiService.addServing(meal.serverID, serving).body()
+                Log.d("APP_DEBUG", "ADD SERVING: ADDED SERVING $serverServing TO THE SERVER")
             }
-            Log.d("APP_DEBUG", "ADD SERVING $meal $serving")
+
 
 
             //LOCAL
@@ -44,19 +45,19 @@ object ServingRepository {
                 serverServing.localProductID = serving.localProductID
                 localDb.servingDao().insert(serverServing)
 
-                Log.d("APP_DEBUG", "ADDED SERVING $serverServing")
+                Log.d("APP_DEBUG", "ADD SERVING: ADDED SERVING $serverServing")
                 Result.success(serverServing)
             }
             else{
                 serving.localMealID = meal.localID
                 localDb.servingDao().insert(serving)
 
-                Log.d("APP_DEBUG", "ADDED SERVING $serving")
+                Log.d("APP_DEBUG", "ADD SERVING: ADDED SERVING $serving")
                 Result.success(serving)
             }
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "ADD SERVING ERROR ${e.toString()}")
+            Log.e("APP_DEBUG", "ADD SERVING ERROR: ${e.toString()}")
             Result.failure(Exception("${e.toString()}"))
         }
     }
@@ -93,7 +94,7 @@ object ServingRepository {
             }.toMutableList()
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "ERROR: ${e.toString()}")
+            Log.e("APP_DEBUG", "getServings() ERROR: ${e.toString()}")
             return mutableListOf()
         }
     }
@@ -107,14 +108,14 @@ object ServingRepository {
 
                 val localServing = localDb.servingDao().getServing(serving.id)
                 localDb.servingDao().delete(localServing)
-                Log.d("APP_DEBUG", "DELETE: SERVING ${localServing} WAS DELETED")
+                Log.d("APP_DEBUG", "DELETE SERVING: SERVING $localServing WAS DELETED")
             }
             else{
-                Log.e("APP_DEBUG", "ERROR: serving wasn't deleted. MealID: ${serving.mealID} ServingID: ${serving.id}")
+                Log.e("APP_DEBUG", "DELETE SERVING ERROR: serving $serving wasn't deleted")
             }
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "ERROR: ${e.toString()}")
+            Log.e("APP_DEBUG", "DELETE SERVING ERROR: ${e.toString()}")
         }
     }
 }

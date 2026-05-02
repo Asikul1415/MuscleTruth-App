@@ -46,35 +46,38 @@ object ProductRepository {
     }
 
     suspend fun addProduct(product: Product, imagePart: MultipartBody.Part?, localImage: Uri?, context: Context): Result<Product>{
-        var serverProduct: Product? = null
-
         return try {
             if(checkForInternetConnection()){
                 val productJson = Gson().toJson(product)
                 val productBody = productJson.toRequestBody("application/json".toMediaTypeOrNull())
 
-                serverProduct = apiService.addProduct(productBody, imagePart).body()
-            }
-            if(serverProduct !== null){
-                if(product.localID !== null){
-                    serverProduct.localID = product.localID
-                }
-                else{
-                    serverProduct.localID = UUID.randomUUID().toString()
-                }
+                var serverProduct = apiService.addProduct(productBody, imagePart).body()
 
-                if(serverProduct.serverPicture !== null){
-                    if(product.localPicture !== null){
-                        serverProduct.localPicture = product.localPicture
+                if(serverProduct !== null){
+                    if(product.localID !== null){
+                        serverProduct.localID = product.localID
                     }
                     else{
-                        val url = serverProduct.serverPicture!!
-                        serverProduct.localPicture = Utils.ImageUtils.saveImageFromServer(context,Utils.ImageUtils.getImagePath(url))
+                        serverProduct.localID = UUID.randomUUID().toString()
                     }
-                }
 
-                localDb.productDao().insert(serverProduct)
-                Result.success(serverProduct)
+                    if(serverProduct.serverPicture !== null){
+                        if(product.localPicture !== null){
+                            serverProduct.localPicture = product.localPicture
+                        }
+                        else{
+                            val url = serverProduct.serverPicture!!
+                            serverProduct.localPicture = Utils.ImageUtils.saveImageFromServer(context,Utils.ImageUtils.getImagePath(url))
+                        }
+                    }
+
+                    localDb.productDao().insert(serverProduct)
+                    Result.success(serverProduct)
+                }
+                else{
+                    Log.e("APP_DEBUG", "ADD PRODUCT: FAILURE")
+                    Result.failure(Exception("ADD PRODUCT FAILURE"))
+                }
             }
             else{
                 if(localImage !== null){
