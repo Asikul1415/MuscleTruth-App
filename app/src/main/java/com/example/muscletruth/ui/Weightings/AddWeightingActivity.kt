@@ -107,8 +107,9 @@ class AddWeightingActivity : AppCompatActivity() {
                 }
             }
             WeightingRepository.addWeighting(Weighting(result=weightingResult), imagePart, context = this@AddWeightingActivity, localPicture = imageURI)
+
+            setResult(RESULT_OK)
+            finish()
         }
-        setResult(RESULT_OK)
-        finish()
     }
 }
