@@ -37,10 +37,12 @@ object UserRepository {
             if (response.isSuccessful) {
                 Result.success(response.body()!!)
             } else {
+                Log.e("APP_DEBUG", "REGISTRATION: FAILED WITH ${response.code()} CODE")
                 Result.failure(Exception("Registration failed: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Log.e("APP_DEBUG", "REGISTRATION ERROR: ${e.toString()}")
+            Result.failure(Exception("REGISTRATION ERROR: ${e.toString()}"))
         }
     }
 
@@ -53,10 +55,11 @@ object UserRepository {
                     Result.success(authResponse)
                 } ?: Result.failure(Exception("Empty response"))
             } else {
+                Log.e("APP_DEBUG", "LOGIN: FAILED WITH ${response.code()} CODE")
                 Result.failure(Exception("Login failed: ${response.code()}"))
             }
         } catch (e: Exception) {
-            Log.e("APP_DEBUG", "${e.toString()}")
+            Log.e("APP_DEBUG", "LOGIN ERROR: ${e.toString()}")
             Result.failure(e)
         }
     }
@@ -67,31 +70,29 @@ object UserRepository {
         return response
     }
 
-    suspend fun getUser(context: Context): Result<User> {
-        return try {
+    suspend fun getUser(context: Context): User? {
+        try {
             if(checkForInternetConnection()){
-                val response = apiService.getUser()
-                if (response.isSuccessful) {
-                    Result.success(response.body()!!)
-                } else {
-                    Result.failure(Exception("Ошибка получения профиля!"))
+                val user = apiService.getUser()
+                if (user === null) {
+                    Log.e("APP_DEBUG", "GET USER ERROR: USER IS NULL")
                 }
+
+                Log.d("APP_DEBUG", "GET USER: GOT USER $user")
+                return user
             }
             else{
                 val user = localDb.userDao().getUser(PreferencesManager(context).getUserId())
-                Result.success(User(
-                    serverID = user.serverID!!,
-                    name = user.name,
-                    email = user.email,
-                    password = user.password,
-                    age = user.age,
-                    serverPicture = user.serverPicture
-                ))
+                if (user === null) {
+                    Log.e("APP_DEBUG", "GET USER ERROR: USER IS NULL")
+                }
 
+                Log.d("APP_DEBUG", "GET USER: GOT USER $user")
+                return user
             }
         } catch (e: Exception) {
-            Log.e("APP_DEBUG", "${e.toString()}")
-            Result.failure(e)
+            Log.e("APP_DEBUG", "GET USER ERROR: ${e.toString()}")
+            return null
         }
     }
 

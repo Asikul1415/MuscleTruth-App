@@ -176,7 +176,7 @@ class WeightingsActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Toast.makeText(this@WeightingsActivity, "Ошибка!", Toast.LENGTH_LONG).show()
-                Log.d("APP_DEBUG", "${e.toString()}")
+                Log.e("APP_DEBUG", "${e.toString()}")
                 throw(e)
             }
         }

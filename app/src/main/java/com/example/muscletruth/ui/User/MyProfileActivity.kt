@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
+import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.repository.UserRepository
 import com.example.muscletruth.data.repository.WeightingRepository
 import com.example.muscletruth.ui.EnterActivity
@@ -75,19 +76,21 @@ class MyProfileActivity : AppCompatActivity() {
 
     fun updateUserData(){
         lifecycleScope.launch {
-            val userResponse = withContext(Dispatchers.IO){
-                UserRepository.getUser(this@MyProfileActivity)
+            var user: User? = null
+            var lastWeightingResult: Double? = null
+
+            withContext(Dispatchers.IO){
+                user = UserRepository.getUser(this@MyProfileActivity)
+                lastWeightingResult = WeightingRepository.getLastWeighting()?.result
             }
-            val weighting = withContext(Dispatchers.IO){
-                WeightingRepository.getLastWeighting()?.result
-            }
-            userResponse.onSuccess{ user ->
+
+            if(user !== null){
                 withContext(Dispatchers.Main){
                     userName.text = user.name
                     email.text = user.email
                     age.text = user.age.toString()
-                    weight.text = if(weighting != null) {
-                        "$weighting кг"
+                    weight.text = if(lastWeightingResult != null) {
+                        "$lastWeightingResult кг"
                     } else{
                         "0.00 кг"
                     }
@@ -99,9 +102,10 @@ class MyProfileActivity : AppCompatActivity() {
                             .into(picture)
                     }
                 }
-            }.onFailure { error ->
+            }
+            else{
                 Toast.makeText(this@MyProfileActivity, "Ошибка!", Toast.LENGTH_LONG).show()
-                Log.e("APP_DEBUG", "${error.toString()}")
+                Log.e("APP_DEBUG", "UPDATE USER INFO ERROR: USER IS NULL")
             }
         }
     }

@@ -27,7 +27,7 @@ interface ApiService {
 
     //========================================USERS========================================\\
     @GET("api/users/me")
-    suspend fun getUser(): Response<User>
+    suspend fun getUser(): User
 
     @POST("api/users/check-email")
     suspend fun checkEmail(@Field("email") email: String): Boolean

@@ -157,8 +157,8 @@ class ChangeProfileActivity : AppCompatActivity() {
     private fun loadUserData(){
         lifecycleScope.launch {
             with(Dispatchers.IO){
-                val response = UserRepository.getUser(this@ChangeProfileActivity)
-                response.onSuccess { user ->
+                val user = UserRepository.getUser(this@ChangeProfileActivity)
+                if(user !== null){
                     userName.setText(user.name)
                     email.setText(user.email)
                     passwordText.setText(user.password)
@@ -185,8 +185,10 @@ class ChangeProfileActivity : AppCompatActivity() {
     private suspend fun checkUserEmail(email: String): Boolean{
         return with(Dispatchers.IO){
             var checkEmail = UserRepository.checkEmail(email)
-            if(checkEmail == true){
-                UserRepository.getUser(this@ChangeProfileActivity).onSuccess { user ->
+
+            if(checkEmail === true){
+                val user = UserRepository.getUser(this@ChangeProfileActivity)
+                if(user !== null) {
                     //If email is not users, email is registered for someone else
                     checkEmail = user.email != email
                 }

@@ -229,10 +229,10 @@ object SyncManager {
         var user: User? = null
         coroutineScope {
             with(Dispatchers.IO){
-                UserRepository.getUser(context).onSuccess {it -> {
-                    user = it
-                    user.localID = UUID.randomUUID().toString()
-                }}
+                user = UserRepository.getUser(context)
+                if(user?.localID === null){
+                    user?.localID = UUID.randomUUID().toString()
+                }
             }
         }
         Log.d("APP_DEBUG", "GET USER: GOT USER $user")

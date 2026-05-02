@@ -37,14 +37,16 @@ class MainMenuActivity : AppCompatActivity() {
         lifecycleScope.launch {
             if(checkForInternetConnection() === false) return@launch
 
-            val userResponse = withContext(Dispatchers.IO){
+            val user = withContext(Dispatchers.IO){
                 UserRepository.getUser(this@MainMenuActivity)
             }
-            userResponse.onSuccess{
+
+            if(user !== null){
                 SyncManager.syncDb(this@MainMenuActivity)
-            }.onFailure { error ->
+            }
+            else{
                 Toast.makeText(this@MainMenuActivity, "Вы не авторизованы! Авторизуйтесь ещё раз!", Toast.LENGTH_LONG).show()
-                Log.e("APP_DEBUG", "${error.toString()}")
+                Log.e("APP_DEBUG", "MAIN MENU ERROR: USER IS UNAUTHORIZED")
 
                 val manager = PreferencesManager(this@MainMenuActivity)
                 manager.clearAuthToken()
