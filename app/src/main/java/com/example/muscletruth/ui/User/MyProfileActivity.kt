@@ -20,6 +20,7 @@ import com.example.muscletruth.data.repository.WeightingRepository
 import com.example.muscletruth.ui.EnterActivity
 import com.example.muscletruth.utils.PreferencesManager
 import com.example.muscletruth.utils.Utils
+import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,10 +50,20 @@ class MyProfileActivity : AppCompatActivity() {
 
         updateUserData()
 
-        val saveButton = findViewById<Button>(R.id.profile_btn_change)
-        saveButton.setOnClickListener {
-            val intent = Intent(this@MyProfileActivity, ChangeProfileActivity::class.java)
-            startActivity(intent)
+        val changeProfileButton = findViewById<Button>(R.id.profile_btn_change)
+        changeProfileButton.setOnClickListener {
+            if(checkForInternetConnection()){
+                val intent = Intent(this@MyProfileActivity, ChangeProfileActivity::class.java)
+                startActivity(intent)
+            }
+            else{
+                Toast.makeText(
+                    this@MyProfileActivity,
+                    "В оффлайн режиме изменение профиля недоступно!",
+                    Toast.LENGTH_LONG
+                )
+                .show()
+            }
         }
 
         val logoutButton = findViewById<Button>(R.id.profile_btn_logout)
