@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.room.Room
 import com.example.muscletruth.utils.PreferencesManager
 import com.example.muscletruth.data.localDB.AppDatabase
+import com.example.muscletruth.data.models.UserUpdate
 import com.example.muscletruth.data.serviceClasses.Token
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.example.muscletruth.utils.Utils.NetworkUtils.connectivityManager
@@ -64,8 +65,8 @@ object UserRepository {
         }
     }
 
-    suspend fun checkEmail(email: String): Boolean{
-        val response = apiService.checkEmail(email = email)
+    suspend fun checkIfEmailRegistered(email: String): Boolean{
+        val response = apiService.checkIfEmailRegistered(email = email)
 
         return response
     }
@@ -101,7 +102,7 @@ object UserRepository {
         return response
     }
 
-    suspend fun updateUser(user: User, image: MultipartBody.Part? = null): Boolean {
+    suspend fun updateUser(user: UserUpdate, image: MultipartBody.Part? = null): Boolean {
         try {
             val userJson = Gson().toJson(user)
             val userBody = userJson.toRequestBody("application/json".toMediaTypeOrNull())

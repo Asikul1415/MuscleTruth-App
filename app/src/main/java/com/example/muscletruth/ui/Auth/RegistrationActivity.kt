@@ -103,7 +103,7 @@ class RegistrationActivity : AppCompatActivity() {
 
     private suspend fun checkUserEmail(email: String): Boolean{
         return withContext(Dispatchers.IO){
-            UserRepository.checkEmail(email)
+            UserRepository.checkIfEmailRegistered(email)
         }
     }
 

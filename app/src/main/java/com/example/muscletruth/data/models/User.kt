@@ -40,3 +40,21 @@ data class User(
     @ColumnInfo("local_picture")
     var localPicture: String? = null,
 ): Parcelable
+
+@Parcelize
+data class UserUpdate(
+    @SerializedName("name")
+    var name: String? = null,
+
+    @SerializedName("email")
+    var email: String? = null,
+
+    @SerializedName("password")
+    var password: String? = null,
+
+    @SerializedName("age")
+    var age: Int? = null,
+
+    @SerializedName("profile_picture")
+    var serverPicture: String? = null,
+): Parcelable

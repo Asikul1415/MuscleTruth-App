@@ -2,7 +2,6 @@ package com.example.muscletruth.data.api
 
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.Token
 import com.example.muscletruth.data.models.Weighting
@@ -29,13 +28,15 @@ interface ApiService {
     @GET("api/users/me")
     suspend fun getUser(): User
 
+    @FormUrlEncoded
     @POST("api/users/check-email")
-    suspend fun checkEmail(@Field("email") email: String): Boolean
+    suspend fun checkIfEmailRegistered(@Field("email") email: String): Boolean
 
     @Multipart
     @PUT("api/users/me")
     suspend fun updateUser(@Part("user") user: RequestBody, @Part image: MultipartBody.Part? = null): Boolean
 
+    @FormUrlEncoded
     @POST("api/users/me/check-password")
     suspend fun checkUserPassword(@Field("password") password: String): Boolean
 
