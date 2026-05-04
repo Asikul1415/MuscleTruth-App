@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +27,7 @@ import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ServingRepository
+import com.example.muscletruth.data.repository.UserRepository
 import com.example.muscletruth.data.serviceClasses.MealItem
 import com.example.muscletruth.ui.Servings.AddServingActivity
 import com.example.muscletruth.ui.Servings.ServingAdapter
@@ -35,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
+import java.util.UUID
 
 class MealActivity : AppCompatActivity() {
     private var servings = mutableListOf<ServingItem>()
@@ -102,14 +105,15 @@ class MealActivity : AppCompatActivity() {
             }
         }
 
+
+        val mealItem = intent.getParcelableExtra<MealItem>("meal")
        lifecycleScope.launch {
             with(Dispatchers.IO){
-                val meal = intent.getParcelableExtra<MealItem>("meal")
-                if(meal !== null){
-                    servings = ServingRepository.getServings(meal.id, meal.localID)
+                if(mealItem !== null){
+                    servings = ServingRepository.getServings(mealItem.id, mealItem.localID)
                     loadData()
 
-                    val meal = MealRepository.getMeal(meal.id)
+                    val meal = MealRepository.getMeal(mealItem.id)
                     if(checkForInternetConnection() && meal?.serverPicture !== null){
                         val path = meal.serverPicture
                         Glide.with(this@MealActivity)
@@ -150,7 +154,6 @@ class MealActivity : AppCompatActivity() {
                     Log.d("APP_DEBUG", "SERVING DELETE")
                     lifecycleScope.launch {
                         withContext(Dispatchers.IO){
-                            val mealItem = intent.getParcelableExtra<MealItem>("meal")
                             Log.d("APP_DEBUG", "SERVING DELETE: mealItem from intent $mealItem")
                             if(mealItem !== null && mealItem.localID !== null){
                                 val meal = Meal(
@@ -187,20 +190,48 @@ class MealActivity : AppCompatActivity() {
                     }
 
                     val mealTypeID = spinner.selectedItemPosition + 1;
-                    val mealID = intent.getIntExtra("mealID", 0)
-                    val isMealUpdateSuccessful = MealRepository.updateMeal(mealID = mealID, meal = Meal(mealTypeID=mealTypeID), imagePart)
 
-                    if(isMealUpdateSuccessful){
-                        addedServings.forEach { serving ->
-                            val servingBase = Serving(
-                                mealID = mealID,
-                                productID = serving.productID,
-                                productAmount = serving.productAmount
-                            )
-                            ServingRepository.addServing(MealRepository.getMeal(mealID!!)!!, servingBase)
+                    if(mealItem !== null){
+                        val isMealUpdateSuccessful = MealRepository.updateMeal(
+                            meal = Meal(
+                                localID = mealItem.localID ?: UUID.randomUUID().toString(),
+                                serverID = mealItem.id ?: -1,
+                                mealTypeID=mealTypeID,
+                                creationDate = mealItem.creationDate),
+                            localImage = imageURI,
+                            image = imagePart)
+
+                        if(isMealUpdateSuccessful){
+                            //Setting wasUpdated flag to sync changes later
+                            if(checkForInternetConnection() === false && mealItem.localID !== null){
+                                val updatedMeal = UserRepository.localDb.mealDao().getLocalMeal(mealItem.localID)
+                                if(updatedMeal !== null){
+                                    updatedMeal.wasUpdated = 1;
+                                    UserRepository.localDb.mealDao().update(updatedMeal)
+                                }
+                            }
+
+
+                            addedServings.forEach { serving ->
+                                val servingBase = Serving(
+                                    mealID = mealItem.id,
+                                    localMealID = mealItem.localID,
+                                    productID = serving.productID,
+                                    localProductID = serving.localProductID,
+                                    productAmount = serving.productAmount
+                                )
+                                ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, servingBase)
+                            }
+                            finish()
                         }
+                    }
+                    else{
+                        Toast.makeText(this@MealActivity, "Ошибка!",
+                            Toast.LENGTH_LONG).show()
+                        Log.e("APP_DEBUG", "MEAL ACTIVITY ERROR: MEAL ITEM IS NULL")
                         finish()
                     }
+
                 }
             }
         }

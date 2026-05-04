@@ -34,4 +34,7 @@ interface MealDao {
 
     @Query("SELECT * FROM meals WHERE server_id = -1")
     suspend fun getMealsForSync(): List<Meal>
+
+    @Query("SELECT * FROM meals WHERE was_updated = 1")
+    suspend fun getMealsForUpdate(): List<Meal>
 }

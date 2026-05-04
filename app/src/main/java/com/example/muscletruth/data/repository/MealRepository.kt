@@ -47,7 +47,9 @@ object MealRepository {
                     serverMeal.localPicture = meal.localPicture
                 }
                 else{
-                    serverMeal.localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(serverMeal.serverPicture!!))
+                    if(serverMeal.serverPicture !== null){
+                        serverMeal.localPicture = Utils.ImageUtils.saveImageFromServer(context, Utils.ImageUtils.getImagePath(serverMeal.serverPicture!!))
+                    }
                 }
 
                 localDb.mealDao().insert(serverMeal)
@@ -71,13 +73,13 @@ object MealRepository {
         }
     }
 
-    suspend fun updateMeal(mealID: Int, meal: Meal, image: MultipartBody.Part?): Boolean{
+    suspend fun updateMeal(meal: Meal, localImage: Uri? = null, image: MultipartBody.Part? = null): Boolean{
         try {
             if(checkForInternetConnection()){
                 val mealJson = Gson().toJson(meal)
                 val mealBody = mealJson.toRequestBody("application/json".toMediaTypeOrNull())
 
-                return apiService.updateMeal(mealID,mealBody, image)
+                return apiService.updateMeal(meal.serverID,mealBody, image)
             }
             else{
                 localDb.mealDao().update(meal)

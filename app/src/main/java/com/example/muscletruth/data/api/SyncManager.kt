@@ -115,8 +115,12 @@ object SyncManager {
         coroutineScope {
             with(Dispatchers.IO){
                 mealsForSync.forEach { meal ->
-                    val uri = Uri.fromFile(File(meal.localPicture))
-                    val imagePart = Utils.ImageUtils.createImagePart(context, uri)
+                    var imagePart: MultipartBody.Part? = null
+                    if(meal.localPicture !== null){
+                        val uri = Uri.fromFile(File(meal.localPicture))
+                        imagePart = Utils.ImageUtils.createImagePart(context, uri)
+                    }
+
 
                     MealRepository.addMeal(meal, image = imagePart, context = context).onSuccess { serverMeal ->
                         updateMealServings(serverMeal)
@@ -125,6 +129,30 @@ object SyncManager {
             }
         }
         Log.d("APP_DEBUG", "SYNC MEALS: LOCALS WERE SENT $mealsForSync")
+
+        val mealsForUpdate = localDb.mealDao().getMealsForUpdate()
+        coroutineScope {
+            with(Dispatchers.IO){
+                mealsForUpdate.forEach { meal ->
+                    var imagePart: MultipartBody.Part? = null
+                    if(meal.localPicture !== null){
+                        val uri = Uri.fromFile(File(meal.localPicture))
+                         imagePart = Utils.ImageUtils.createImagePart(context, uri)
+                    }
+
+
+                    MealRepository.updateMeal(meal,  image = imagePart)
+                    val updatedMeal = MealRepository.getMeal(meal.serverID)
+                    if(updatedMeal !== null){
+                        updateMealServings(updatedMeal.copy(localID = meal.localID))
+                    }
+
+                    //setting flag to zero
+                    localDb.mealDao().update(meal.copy(wasUpdated = 0))
+                }
+            }
+        }
+        Log.d("APP_DEBUG", "SYNC MEALS: LOCALS WERE UPDATED $mealsForUpdate")
     }
 
     private suspend fun updateMealServings(meal: Meal){

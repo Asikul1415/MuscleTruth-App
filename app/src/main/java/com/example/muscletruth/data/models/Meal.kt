@@ -34,5 +34,8 @@ data class Meal(
 
     @SerializedName("creation_date")
     @ColumnInfo("creation_date")
-    var creationDate: String? = null
+    var creationDate: String? = null,
+
+    @ColumnInfo("was_updated")
+    var wasUpdated: Int = 0,
 ): Parcelable
