@@ -199,7 +199,7 @@ class StatisticActivity : AppCompatActivity() {
                     weightings.groupBy {LocalDate.parse(it.creationDate?.substringBefore('T'))}.forEach { group ->
                         var middleValue = 0.00
                         group.value.forEach { weighting ->
-                            middleValue = middleValue + weighting.result.toDouble()
+                            middleValue = middleValue + weighting.result
                         }
                         sortedWeightings.add(Weighting(result = middleValue / group.value.count(), creationDate = group.key.toString()))
                     }
@@ -208,24 +208,53 @@ class StatisticActivity : AppCompatActivity() {
                 }
                 sortedWeightings.sortBy { it.creationDate }
 
+                var dates = weightings.map{it-> it.creationDate.toString().split('T').first()}.toMutableList()
+                when(calories){
+                    is CaloriesData.ByWeek -> {
+                        dates.addAll(calories.items.map{it-> it.week_start})
+                    }
+                    is CaloriesData.ByDay -> {
+                        dates.addAll(calories.items.map{it-> it.day})
+                    }
+                }
+                dates = dates.distinct()
+                    .sortedBy{date ->
+                        LocalDate.of(
+                            date.split('-')[0].toInt(),
+                            date.split('-')[1].toInt(),
+                            date.split('-')[2].toInt()
+                        )
+                    }.map{date -> DateUtils.convertTimestamp(date)}.toMutableList()
+                val dateIndexMap = dates.withIndex().associate { it.value to it.index }
+
                 val weightingsEntries = ArrayList<Entry>()
-                sortedWeightings.forEachIndexed { index, weighting ->
-                    weightingsEntries.add(Entry(index.toFloat(), weighting.result.toFloat()))
+                sortedWeightings.mapNotNull {weighting ->
+                    dateIndexMap[DateUtils.convertTimestamp(weighting.creationDate)]?.let{ index ->
+                        weightingsEntries.add( Entry(index.toFloat(), weighting.result.toFloat()))
+                    }
                 }
 
                 val caloriesEntries = ArrayList<Entry>()
                 when(calories) {
                     is CaloriesData.ByWeek -> {
-                        calories.items.forEachIndexed {index, item ->
-                            caloriesEntries.add(Entry(index.toFloat(), item.average_calories.toFloat()))
+                        calories.items.mapNotNull {data ->
+                            dateIndexMap[DateUtils.convertTimestamp(data.week_start)]?.let{index ->
+                                caloriesEntries.add(Entry(index.toFloat(), data.average_calories.toFloat()))
+                            }
                         }
+
                     }
                     is CaloriesData.ByDay -> {
-                        calories.items.forEachIndexed {index, item ->
-                            caloriesEntries.add(Entry(index.toFloat(), item.total_calories.toFloat()))
+                        calories.items.mapNotNull {data ->
+                            dateIndexMap[DateUtils.convertTimestamp(data.day)]?.let{index ->
+                                caloriesEntries.add(Entry(index.toFloat(), data.total_calories.toFloat()))
+                            }
                         }
                     }
                 }
+
+                weightingsEntries.sortBy{entry -> entry.x}
+                caloriesEntries.sortBy {entry -> entry.x}
 
                 val xAxis = chart.xAxis
                 val weightingsDataSet = LineDataSet(weightingsEntries, "Взвешивания")
@@ -267,24 +296,6 @@ class StatisticActivity : AppCompatActivity() {
                         caloriesDataSet.setCircleColor(Color.WHITE)
                     }
                 }
-
-                val dates =
-                    if(weightingsEntries.count() >= caloriesEntries.count()) {
-                        sortedWeightings.map { DateUtils.convertTimestamp(it.creationDate) }
-                    }
-                    else{
-                        if(calories is CaloriesData.ByDay) {
-                            calories.items.map { it -> DateUtils.convertTimestamp(it.day) }
-                        }
-                        else{
-                            if(calories is CaloriesData.ByWeek){
-                                calories.items.map { it -> DateUtils.convertTimestamp(it.week_start)}
-                            }
-                            else{
-                                emptyList()
-                            }
-                        }
-                    }
 
                 xAxis.valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {

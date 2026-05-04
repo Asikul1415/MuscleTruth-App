@@ -30,6 +30,7 @@ object WeightingRepository {
                     val localID = localWeighting?.localID ?: UUID.randomUUID().toString()
                     weighting.copy(localID = localID)
                 }
+                Log.d("APP_DEBUG", "GET WEIGHTINGS: WEIGHTINGS $response")
                 return response
             }
 
