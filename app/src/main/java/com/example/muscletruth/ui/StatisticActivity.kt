@@ -24,6 +24,8 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,20 +54,25 @@ class StatisticActivity : AppCompatActivity() {
         }
 
         chart = findViewById(R.id.statistics_chart)
-//        chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-//            override fun onValueSelected(e: Entry?, h: Highlight?) {
-//                e?.let {
-//                    displayedToast?.cancel()
-//                    displayedToast = Toast.makeText(
-//                        this@StatisticActivity,
-//                        "Вес: ${"%.1f".format(it.y)} кг",
-//                        Toast.LENGTH_SHORT
-//                    )
-//                    displayedToast?.show()
-//                }
-//            }
-//
-//            override fun onNothingSelected() {}})
+        chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                e?.let {
+                    val message = when(h?.dataSetIndex){
+                        0 -> "Вес: ${"%.1f".format(it.y)} кг"
+                        1 -> "Калорий: ${"%.2f".format(it.y)} ккал"
+                        else -> "${it.y}"
+                    }
+                    displayedToast?.cancel()
+                    displayedToast = Toast.makeText(
+                        this@StatisticActivity,
+                        message,
+                        Toast.LENGTH_SHORT
+                    )
+                    displayedToast?.show()
+                }
+            }
+
+            override fun onNothingSelected() {}})
 
 
         loadData()
