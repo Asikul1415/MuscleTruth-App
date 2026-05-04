@@ -92,7 +92,7 @@ object SyncManager {
             with(Dispatchers.IO){
                 val localMeals = localDb.mealDao().getMeals()
 
-                meals = MealRepository.getTodayMeals().map {meal ->
+                meals = MealRepository.getMeals().map {meal ->
                     if(meal.serverPicture !== null){
                         meal.copy(
                             localID = UUID.randomUUID().toString(),
@@ -139,7 +139,7 @@ object SyncManager {
 
         coroutineScope {
             with(Dispatchers.IO){
-                val meals = MealRepository.getTodayMeals()
+                val meals = MealRepository.getMeals()
                 meals.forEach { meal ->
                     servings.addAll(ServingRepository.getServings(meal.serverID!!))
                 }
@@ -154,7 +154,9 @@ object SyncManager {
                 Serving(
                     serverID = serving.id!!,
                     mealID = serving.mealID,
+                    localMealID = localDb.mealDao().getServerMeal(serving.mealID!!)?.localID,
                     productID = serving.productID,
+                    localProductID = localDb.productDao().getServerProduct(serving.productID)?.localID,
                     productAmount = serving.productAmount
                 )
             }

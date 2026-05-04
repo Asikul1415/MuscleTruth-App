@@ -99,6 +99,9 @@ interface ApiService {
     @DELETE("/api/meals/{meal_id}/servings/{serving_id}")
     suspend fun deleteServing(@Path("meal_id") mealID: Int, @Path("serving_id") servingID: Int)
 
+    @GET("/api/meals")
+    suspend fun getMeals(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?): List<Meal>
+
     @GET("/api/meals/{meal_id}")
     suspend fun getMeal(@Path("meal_id") mealID: Int): Meal
 

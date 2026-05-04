@@ -14,7 +14,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
 import com.example.muscletruth.data.repository.UserRepository.localDb
 import com.example.muscletruth.data.serviceClasses.CaloriesChartData
+import com.example.muscletruth.data.serviceClasses.WeightingsChartData
 import com.example.muscletruth.utils.Utils
+import java.time.DayOfWeek
+import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -106,6 +109,29 @@ object MealRepository {
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "getTodayMeals() ERROR: ${e.toString()}")
+            return emptyList()
+        }
+    }
+
+    suspend fun getMeals(): List<Meal>{
+        try{
+            if(checkForInternetConnection()){
+                val meals = apiService.getMeals(null, null)
+
+                return meals.map{meal ->
+                    val localMeal = localDb.mealDao().getServerMeal(meal.serverID)
+                    if(localMeal !== null){
+                        meal.copy(localID = localMeal.localID)
+                    }
+                    else meal
+                }
+            }
+
+            val meals = localDb.mealDao().getMeals()
+            return meals
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "getMeals() ERROR: ${e.toString()}")
             return emptyList()
         }
     }
@@ -204,10 +230,73 @@ object MealRepository {
 
     suspend fun getAverageCaloriesYearChartData(): List<CaloriesChartData.ChartDataByWeek>{
         try{
-            val data = apiService.getAverageCaloriesYearChartData()
+            if(checkForInternetConnection()){
+                val data = apiService.getAverageCaloriesYearChartData()
 
-            Log.d("APP_DEBUG", "GET CALORIES DATA FOR A YEAR: $data")
-            return data
+                Log.d("APP_DEBUG", "CALORIES CHART YEAR DATA: DATA - $data")
+                return data
+            }
+            else{
+                val end = LocalDate.now()
+                val start = end.minusMonths(1)
+
+                val meals = localDb.mealDao().getMeals().filter{meal ->
+                    val creationDate = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
+
+                    (creationDate.isAfter(start) || creationDate.isEqual(start) && (creationDate.isBefore(end) || creationDate.isEqual(end)))
+                }
+
+                //day, list of calories per meal
+                val mealsTotalPerDay = mutableMapOf<LocalDate, MutableList<Double>>();
+                meals.forEach {meal ->
+                    var caloriesInMeal = 0.00
+
+                    val mealServings = localDb.servingDao().getLocalMealServings(meal.localID)
+                    mealServings.forEach {serving ->
+                        if(serving.localProductID !== null){
+                            val product = localDb.productDao().getLocalProduct(serving.localProductID!!)
+                            if(product !== null){
+                                caloriesInMeal += (4 * product.proteins + 4 * product.carbs + 9 * product.fats) * (serving.productAmount / 100)
+                            }
+                        }
+                    }
+
+                    val date = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
+                    if(mealsTotalPerDay.keys.contains(date) === false){
+                        mealsTotalPerDay[date] = mutableListOf<Double>()
+                    }
+                    mealsTotalPerDay[date]?.add(caloriesInMeal)
+                }
+
+                val caloriesPerDay = mutableListOf<CaloriesChartData.ChartDataByDay>()
+                mealsTotalPerDay.entries.forEach {group ->
+                    caloriesPerDay.add(CaloriesChartData.ChartDataByDay(
+                        day = group.key.toString(),
+                        total_calories = group.value.sum()
+                    ))
+                }
+
+                // week start date, list of calories per day
+                val caloriesPerWeek = mutableMapOf<LocalDate, MutableList<Double>>()
+                caloriesPerDay.forEach {data ->
+                    val weekStartDate = LocalDate.parse(data.day).with(DayOfWeek.MONDAY)
+                    if(caloriesPerWeek.keys.contains(weekStartDate) === false){
+                        caloriesPerWeek[weekStartDate] = mutableListOf<Double>()
+                    }
+                    caloriesPerWeek[weekStartDate]?.add(data.total_calories)
+                }
+
+                val yearChartData = mutableListOf<CaloriesChartData.ChartDataByWeek>()
+                caloriesPerWeek.entries.forEach {data ->
+                    yearChartData.add(CaloriesChartData.ChartDataByWeek(
+                        week_start = data.key.toString(),
+                        average_calories = data.value.sum() / data.value.count()
+                    ))
+                }
+
+                Log.d("APP_DEBUG", "CALORIES CHART YEAR DATA: DATA - $yearChartData")
+                return yearChartData
+            }
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "GET CALORIES DATA FOR A YEAR ERROR: ${e.toString()}")
@@ -217,26 +306,114 @@ object MealRepository {
 
     suspend fun getAverageCaloriesMonthChartData(): List<CaloriesChartData.ChartDataByDay>{
         try{
-            val data = apiService.getAverageCaloriesMonthChartData()
+            if(checkForInternetConnection()){
+                val data = apiService.getAverageCaloriesMonthChartData()
 
-            Log.d("APP_DEBUG", "GET CALORIES DATA FOR A MONTH: $data")
-            return data
+                Log.d("APP_DEBUG", "GET CALORIES DATA FOR A MONTH: $data")
+                return data
+            }
+            else{
+                val end = LocalDate.now()
+                val start = end.minusMonths(1)
+
+                val meals = localDb.mealDao().getMeals().filter{meal ->
+                    val creationDate = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
+
+                    (creationDate.isAfter(start) || creationDate.isEqual(start) && (creationDate.isBefore(end) || creationDate.isEqual(end)))
+                }
+
+                val mealsTotalPerDay = mutableMapOf<LocalDate, MutableList<Double>>();
+                meals.forEach {meal ->
+                    var caloriesInMeal = 0.00
+
+                    val mealServings = localDb.servingDao().getLocalMealServings(meal.localID)
+                    mealServings.forEach {serving ->
+                        if(serving.localProductID !== null){
+                            val product = localDb.productDao().getLocalProduct(serving.localProductID!!)
+                            if(product !== null){
+                                caloriesInMeal += (4 * product.proteins + 4 * product.carbs + 9 * product.fats) * (serving.productAmount / 100)
+                            }
+                        }
+                    }
+
+                    val date = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
+                    if(mealsTotalPerDay.keys.contains(date) === false){
+                        mealsTotalPerDay[date] = mutableListOf<Double>()
+                    }
+                    mealsTotalPerDay[date]?.add(caloriesInMeal)
+                }
+
+                val caloriesPerDay = mutableListOf<CaloriesChartData.ChartDataByDay>()
+                mealsTotalPerDay.entries.forEach {group ->
+                    caloriesPerDay.add(CaloriesChartData.ChartDataByDay(
+                        day = group.key.toString(),
+                        total_calories = group.value.sum()
+                    ))
+                }
+
+                Log.d("APP_DEBUG", "CALORIES CHART MONTH DATA: DATA - $caloriesPerDay")
+                return caloriesPerDay
+            }
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "GET CALORIES DATA FOR A MONTH ERROR: ${e.toString()}")
+            Log.e("APP_DEBUG", "CALORIES CHART MONTH DATA ERROR: ${e.toString()}")
             return emptyList()
         }
     }
 
     suspend fun getAverageCaloriesWeekChartData(): List<CaloriesChartData.ChartDataByDay>{
         try{
-            val data = apiService.getAverageCaloriesWeekChartData()
+            if(checkForInternetConnection()){
+                val data = apiService.getAverageCaloriesWeekChartData()
 
-            Log.d("APP_DEBUG", "GET CALORIES DATA FOR A WEEK: $data")
-            return data
+                Log.d("APP_DEBUG", "CALORIES CHART WEEK DATA: DATA: $data")
+                return data
+            }
+            else{
+                val end = LocalDate.now()
+                val start = end.minusWeeks(1)
+
+                val meals = localDb.mealDao().getMeals().filter{meal ->
+                    val creationDate = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
+
+                    (creationDate.isAfter(start) || creationDate.isEqual(start) && (creationDate.isBefore(end) || creationDate.isEqual(end)))
+                }
+
+                val mealsTotalPerDay = mutableMapOf<LocalDate, MutableList<Double>>();
+                meals.forEach {meal ->
+                    var caloriesInMeal = 0.00
+
+                    val mealServings = localDb.servingDao().getLocalMealServings(meal.localID)
+                    mealServings.forEach {serving ->
+                        if(serving.localProductID !== null){
+                            val product = localDb.productDao().getLocalProduct(serving.localProductID!!)
+                            if(product !== null){
+                                caloriesInMeal += (4 * product.proteins + 4 * product.carbs + 9 * product.fats) * (serving.productAmount / 100)
+                            }
+                        }
+                    }
+
+                    val date = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
+                    if(mealsTotalPerDay.keys.contains(date) === false){
+                        mealsTotalPerDay[date] = mutableListOf<Double>()
+                    }
+                    mealsTotalPerDay[date]?.add(caloriesInMeal)
+                }
+
+                val caloriesPerDay = mutableListOf<CaloriesChartData.ChartDataByDay>()
+                mealsTotalPerDay.entries.forEach {group ->
+                    caloriesPerDay.add(CaloriesChartData.ChartDataByDay(
+                        day = group.key.toString(),
+                        total_calories = group.value.sum()
+                    ))
+                }
+
+                Log.d("APP_DEBUG", "CALORIES CHART WEEK DATA: DATA: $caloriesPerDay")
+                return caloriesPerDay
+            }
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "GET CALORIES DATA FOR A WEEK ERROR: ${e.toString()}")
+            Log.e("APP_DEBUG", "CALORIES CHART WEEK DATA ERROR: ${e.toString()}")
             return emptyList()
         }
     }
