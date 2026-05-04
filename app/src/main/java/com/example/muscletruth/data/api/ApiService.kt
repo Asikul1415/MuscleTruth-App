@@ -7,6 +7,7 @@ import com.example.muscletruth.data.serviceClasses.Token
 import com.example.muscletruth.data.models.Weighting
 import com.example.muscletruth.data.serviceClasses.WeightingsChartData
 import com.example.muscletruth.data.models.User
+import com.example.muscletruth.data.serviceClasses.CaloriesChartData
 import com.example.muscletruth.data.serviceClasses.MealType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -100,9 +101,6 @@ interface ApiService {
 
     @GET("/api/meals/{meal_id}")
     suspend fun getMeal(@Path("meal_id") mealID: Int): Meal
-//
-//    @GET("/api/meals")
-//    suspend fun getMeals(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?): List<Meal.MealBase>
 
     @GET("/api/meals/today")
     suspend fun getTodayMeals(): List<Meal>
@@ -112,4 +110,13 @@ interface ApiService {
 
     @GET("/api/meals/{meal_type_id}/total")
     suspend fun getMealTypeTotal(@Path("meal_type_id") mealTypeID: Int, @Query("start_date") startDate: String, @Query("end_date") endDate: String): MealType
+
+    @GET("api/meals/chart/year")
+    suspend fun getAverageCaloriesYearChartData(): List<CaloriesChartData.ChartDataByWeek>
+
+    @GET("api/meals/chart/month")
+    suspend fun getAverageCaloriesMonthChartData(): List<CaloriesChartData.ChartDataByDay>
+
+    @GET("api/meals/chart/week")
+    suspend fun getAverageCaloriesWeekChartData(): List<CaloriesChartData.ChartDataByDay>
 }

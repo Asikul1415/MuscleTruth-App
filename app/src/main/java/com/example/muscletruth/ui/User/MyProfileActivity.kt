@@ -18,6 +18,7 @@ import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.repository.UserRepository
 import com.example.muscletruth.data.repository.WeightingRepository
 import com.example.muscletruth.ui.EnterActivity
+import com.example.muscletruth.ui.StatisticActivity
 import com.example.muscletruth.utils.PreferencesManager
 import com.example.muscletruth.utils.Utils
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
@@ -49,6 +50,12 @@ class MyProfileActivity : AppCompatActivity() {
         picture = findViewById<ImageView>(R.id.profile_iv_picture)
 
         updateUserData()
+
+        val statisticButton = findViewById<Button>(R.id.profile_btn_statistics)
+        statisticButton.setOnClickListener {
+            val intent = Intent(this@MyProfileActivity, StatisticActivity::class.java)
+            startActivity(intent)
+        }
 
         val changeProfileButton = findViewById<Button>(R.id.profile_btn_change)
         changeProfileButton.setOnClickListener {

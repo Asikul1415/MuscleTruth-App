@@ -1,11 +1,11 @@
-package com.example.muscletruth.ui.Weightings
+package com.example.muscletruth.ui
 
 import android.content.Intent
-import android.os.Bundle
-import android.widget.Toast
 import android.graphics.Color
+import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -15,13 +15,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
-import com.example.muscletruth.data.localDB.offlineModels.WeightingDao
 import com.example.muscletruth.data.models.Weighting
+import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.WeightingRepository
+import com.example.muscletruth.data.serviceClasses.CaloriesChartData
+import com.example.muscletruth.ui.Weightings.AddWeightingActivity
+import com.example.muscletruth.ui.Weightings.WeightingActivity
+import com.example.muscletruth.ui.Weightings.WeightingAdapter
 import com.example.muscletruth.utils.Period
 import com.example.muscletruth.utils.Utils.DateUtils
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -35,69 +40,59 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.Locale
 
-class WeightingsActivity : AppCompatActivity() {
+class StatisticActivity : AppCompatActivity() {
     private var weightings = emptyList<Weighting>()
     private var rangePreference = Period.Week
-    private lateinit var weightingsList: RecyclerView
     private lateinit var chart: LineChart
-    private lateinit var adapter: WeightingAdapter
     private var displayedToast: Toast? = null
-    private val addActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {result ->
-        if(result.resultCode === RESULT_OK){
-            loadData()
-        }
+
+    private sealed class CaloriesData{
+        data class ByWeek(val items: List<CaloriesChartData.ChartDataByWeek>): CaloriesData()
+        data class ByDay(val items: List<CaloriesChartData.ChartDataByDay>): CaloriesData()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_weightings)
+        setContentView(R.layout.activity_statistic)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        chart = findViewById(R.id.weightings_chart)
-        chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                e?.let {
-                    displayedToast?.cancel()
-                    displayedToast = Toast.makeText(
-                        this@WeightingsActivity,
-                        "Вес: ${"%.1f".format(it.y)} кг",
-                        Toast.LENGTH_SHORT
-                    )
-                    displayedToast?.show()
-                }
-            }
+        chart = findViewById(R.id.statistics_chart)
+//        chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+//            override fun onValueSelected(e: Entry?, h: Highlight?) {
+//                e?.let {
+//                    displayedToast?.cancel()
+//                    displayedToast = Toast.makeText(
+//                        this@StatisticActivity,
+//                        "Вес: ${"%.1f".format(it.y)} кг",
+//                        Toast.LENGTH_SHORT
+//                    )
+//                    displayedToast?.show()
+//                }
+//            }
+//
+//            override fun onNothingSelected() {}})
 
-            override fun onNothingSelected() {}})
-
-        weightingsList = findViewById(R.id.weightings_rv)
 
         loadData()
-        setupList()
 
-        val addWeightingButton = findViewById<Button>(R.id.weightings_btn_add)
-        addWeightingButton.setOnClickListener {
-            val intent = Intent(this@WeightingsActivity, AddWeightingActivity::class.java)
-            addActivityLauncher.launch(intent);
-        }
-
-        val weekButton = findViewById<Button>(R.id.weightings_btn_week)
+        val weekButton = findViewById<Button>(R.id.statistics_btn_week)
         weekButton.setOnClickListener {
             rangePreference = Period.Week
             loadData()
         }
 
-        val monthButton = findViewById<Button>(R.id.weightings_btn_month)
+        val monthButton = findViewById<Button>(R.id.statistics_btn_month)
         monthButton.setOnClickListener {
             rangePreference = Period.Month
             loadData()
         }
 
-        val yearButton = findViewById<Button>(R.id.weightings_btn_year)
+        val yearButton = findViewById<Button>(R.id.statistics_btn_year)
         yearButton.setOnClickListener {
             rangePreference = Period.Year
             loadData()
@@ -107,17 +102,6 @@ class WeightingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadData()
-    }
-
-    private fun setupList() {
-        weightingsList.layoutManager = LinearLayoutManager(this)
-        adapter = WeightingAdapter {weighting ->
-            val intent = Intent(this, WeightingActivity::class.java)
-            intent.putExtra("weighting", weighting)
-            startActivity(intent)
-        }
-        adapter.items = emptyList()
-        weightingsList.adapter = adapter
     }
 
     private fun setupChart() {
@@ -147,6 +131,9 @@ class WeightingsActivity : AppCompatActivity() {
         yAxis.textSize = 14f
         yAxis.setDrawGridLines(true)
         chart.axisRight.isEnabled = false
+
+        chart.axisRight.isEnabled = true
+        chart.axisRight.textColor = Color.GREEN
     }
 
     private fun loadData() {
@@ -171,11 +158,8 @@ class WeightingsActivity : AppCompatActivity() {
 
                 setupChart()
                 updateChartWithData(weightings)
-                adapter.items = weightings.sortedByDescending { ZonedDateTime.parse(it.creationDate)}
-                adapter.notifyDataSetChanged()
-
             } catch (e: Exception) {
-                Toast.makeText(this@WeightingsActivity, "Ошибка!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@StatisticActivity, "Ошибка!", Toast.LENGTH_LONG).show()
                 Log.e("APP_DEBUG", "${e.toString()}")
                 throw(e)
             }
@@ -192,12 +176,16 @@ class WeightingsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             with(Dispatchers.IO){
                 val sortedWeightings = mutableListOf<Weighting>()
+                val calories = mutableListOf<CaloriesData>();
+
                 if(rangePreference == Period.Year){
                     with(Dispatchers.IO){
                         val data = WeightingRepository.getWeightingsYearChartData()
                         data.forEach {weekWeighting ->
                             sortedWeightings.add(Weighting(result = weekWeighting.average_weight, creationDate = weekWeighting.week_start))
                         }
+
+                        calories.add(CaloriesData.ByWeek(MealRepository.getAverageCaloriesYearChartData().sortedBy {it -> it.week_start}))
                     }
                 }
                 else if(rangePreference == Period.Month){
@@ -206,6 +194,8 @@ class WeightingsActivity : AppCompatActivity() {
                         data.forEach {weighting ->
                             sortedWeightings.add(Weighting(result = weighting.average_weight, creationDate = weighting.day))
                         }
+
+                        calories.add(CaloriesData.ByDay(MealRepository.getAverageCaloriesMonthChartData().sortedBy {it -> it.day}))
                     }
                 }
                 else{
@@ -216,36 +206,70 @@ class WeightingsActivity : AppCompatActivity() {
                         }
                         sortedWeightings.add(Weighting(result = middleValue / group.value.count(), creationDate = group.key.toString()))
                     }
+
+                    calories.add(CaloriesData.ByDay(MealRepository.getAverageCaloriesWeekChartData().sortedBy {it -> it.day}))
                 }
                 sortedWeightings.sortBy { it.creationDate }
 
-                val entries = ArrayList<Entry>()
+                val weightingsEntries = ArrayList<Entry>()
                 sortedWeightings.forEachIndexed { index, weighting ->
-                    entries.add(Entry(index.toFloat(), weighting.result.toFloat()))
+                    weightingsEntries.add(Entry(index.toFloat(), weighting.result.toFloat()))
+                }
+
+                val caloriesEntries = ArrayList<Entry>()
+                calories.forEach { it ->
+                    when(it) {
+                        is CaloriesData.ByWeek -> {
+                            it.items.forEachIndexed {index, item ->
+                                caloriesEntries.add(Entry(index.toFloat(), item.average_calories.toFloat()))
+                            }
+                        }
+                        is CaloriesData.ByDay -> {
+                            it.items.forEachIndexed {index, item ->
+                                caloriesEntries.add(Entry(index.toFloat(), item.total_calories.toFloat()))
+                            }
+                        }
+                    }
                 }
 
                 val xAxis = chart.xAxis
-                val dataSet = LineDataSet(entries, "Взвешивания")
+                val weightingsDataSet = LineDataSet(weightingsEntries, "Взвешивания")
+                val caloriesDataSet = LineDataSet(caloriesEntries, "Ккал")
                 with(Dispatchers.Main){
-                    dataSet.color = Color.MAGENTA
-                    dataSet.lineWidth = 2f
-                    dataSet.valueTextSize = 0f
-                    dataSet.setDrawCircles(true)
-                    dataSet.setCircleColor(Color.GRAY)
-                    dataSet.circleRadius = 4f
+                    weightingsDataSet.color = Color.WHITE
+                    weightingsDataSet.lineWidth = 2f
+                    weightingsDataSet.valueTextSize = 0f
+                    weightingsDataSet.setDrawCircles(true)
+                    weightingsDataSet.setCircleColor(Color.CYAN)
+                    weightingsDataSet.circleRadius = 4f
+
+                    caloriesDataSet.color = Color.GREEN
+                    caloriesDataSet.lineWidth = 2f
+                    caloriesDataSet.valueTextSize = 0f
+                    caloriesDataSet.setDrawCircles(true)
+                    caloriesDataSet.setCircleColor(Color.LTGRAY)
+                    caloriesDataSet.circleRadius = 4f
+                    caloriesDataSet.axisDependency = YAxis.AxisDependency.RIGHT
 
                     if(rangePreference == Period.Week){
                         xAxis.setLabelCount(7, false)
+                        chart.axisRight.setLabelCount(7, false)
                     }
                     else if(rangePreference == Period.Month){
                         //31 / 2 = 15.5
                         xAxis.setLabelCount(16, false)
+                        chart.axisRight.setLabelCount(16, false)
                     }
                     else if(rangePreference == Period.Year){
                         xAxis.setLabelCount(16, false)
-                        dataSet.lineWidth = 1.5f
-                        dataSet.circleRadius = 2.25f;
-                        dataSet.setCircleColor(Color.BLACK)
+                        weightingsDataSet.lineWidth = 1.5f
+                        weightingsDataSet.circleRadius = 2.25f;
+                        weightingsDataSet.setCircleColor(Color.BLACK)
+
+                        chart.axisRight.setLabelCount(16, false)
+                        caloriesDataSet.lineWidth = 1.5f
+                        caloriesDataSet.circleRadius = 2.25f;
+                        caloriesDataSet.setCircleColor(Color.WHITE)
                     }
                 }
 
@@ -271,7 +295,7 @@ class WeightingsActivity : AppCompatActivity() {
                     }
                 }
 
-                chart.data = LineData(dataSet)
+                chart.data = LineData(weightingsDataSet, caloriesDataSet)
                 chart.invalidate()
             }
         }

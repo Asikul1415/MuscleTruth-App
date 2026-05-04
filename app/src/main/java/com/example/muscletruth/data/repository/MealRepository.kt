@@ -13,6 +13,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
 import com.example.muscletruth.data.repository.UserRepository.localDb
+import com.example.muscletruth.data.serviceClasses.CaloriesChartData
 import com.example.muscletruth.utils.Utils
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -198,6 +199,45 @@ object MealRepository {
         catch(e: Exception){
             Log.e("APP_DEBUG", "getMealTypeTotal() ERROR: ${e.toString()}")
             return null
+        }
+    }
+
+    suspend fun getAverageCaloriesYearChartData(): List<CaloriesChartData.ChartDataByWeek>{
+        try{
+            val data = apiService.getAverageCaloriesYearChartData()
+
+            Log.d("APP_DEBUG", "GET CALORIES DATA FOR A YEAR: $data")
+            return data
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "GET CALORIES DATA FOR A YEAR ERROR: ${e.toString()}")
+            return emptyList()
+        }
+    }
+
+    suspend fun getAverageCaloriesMonthChartData(): List<CaloriesChartData.ChartDataByDay>{
+        try{
+            val data = apiService.getAverageCaloriesMonthChartData()
+
+            Log.d("APP_DEBUG", "GET CALORIES DATA FOR A MONTH: $data")
+            return data
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "GET CALORIES DATA FOR A MONTH ERROR: ${e.toString()}")
+            return emptyList()
+        }
+    }
+
+    suspend fun getAverageCaloriesWeekChartData(): List<CaloriesChartData.ChartDataByDay>{
+        try{
+            val data = apiService.getAverageCaloriesWeekChartData()
+
+            Log.d("APP_DEBUG", "GET CALORIES DATA FOR A WEEK: $data")
+            return data
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "GET CALORIES DATA FOR A WEEK ERROR: ${e.toString()}")
+            return emptyList()
         }
     }
 }
