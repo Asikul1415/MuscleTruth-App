@@ -1,27 +1,20 @@
 package com.example.muscletruth.ui
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Weighting
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.WeightingRepository
 import com.example.muscletruth.data.serviceClasses.CaloriesChartData
-import com.example.muscletruth.ui.Weightings.AddWeightingActivity
-import com.example.muscletruth.ui.Weightings.WeightingActivity
-import com.example.muscletruth.ui.Weightings.WeightingAdapter
 import com.example.muscletruth.utils.Period
 import com.example.muscletruth.utils.Utils.DateUtils
 import com.github.mikephil.charting.charts.LineChart
@@ -31,13 +24,10 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.util.Locale
 
 class StatisticActivity : AppCompatActivity() {
@@ -176,7 +166,7 @@ class StatisticActivity : AppCompatActivity() {
         lifecycleScope.launch {
             with(Dispatchers.IO){
                 val sortedWeightings = mutableListOf<Weighting>()
-                val calories = mutableListOf<CaloriesData>();
+                val calories: CaloriesData
 
                 if(rangePreference == Period.Year){
                     with(Dispatchers.IO){
@@ -185,7 +175,7 @@ class StatisticActivity : AppCompatActivity() {
                             sortedWeightings.add(Weighting(result = weekWeighting.average_weight, creationDate = weekWeighting.week_start))
                         }
 
-                        calories.add(CaloriesData.ByWeek(MealRepository.getAverageCaloriesYearChartData().sortedBy {it -> it.week_start}))
+                        calories = CaloriesData.ByWeek(MealRepository.getAverageCaloriesYearChartData().sortedBy {it -> it.week_start})
                     }
                 }
                 else if(rangePreference == Period.Month){
@@ -195,7 +185,7 @@ class StatisticActivity : AppCompatActivity() {
                             sortedWeightings.add(Weighting(result = weighting.average_weight, creationDate = weighting.day))
                         }
 
-                        calories.add(CaloriesData.ByDay(MealRepository.getAverageCaloriesMonthChartData().sortedBy {it -> it.day}))
+                        calories = CaloriesData.ByDay(MealRepository.getAverageCaloriesMonthChartData().sortedBy {it -> it.day})
                     }
                 }
                 else{
@@ -207,7 +197,7 @@ class StatisticActivity : AppCompatActivity() {
                         sortedWeightings.add(Weighting(result = middleValue / group.value.count(), creationDate = group.key.toString()))
                     }
 
-                    calories.add(CaloriesData.ByDay(MealRepository.getAverageCaloriesWeekChartData().sortedBy {it -> it.day}))
+                    calories = CaloriesData.ByDay(MealRepository.getAverageCaloriesWeekChartData().sortedBy {it -> it.day})
                 }
                 sortedWeightings.sortBy { it.creationDate }
 
@@ -217,17 +207,15 @@ class StatisticActivity : AppCompatActivity() {
                 }
 
                 val caloriesEntries = ArrayList<Entry>()
-                calories.forEach { it ->
-                    when(it) {
-                        is CaloriesData.ByWeek -> {
-                            it.items.forEachIndexed {index, item ->
-                                caloriesEntries.add(Entry(index.toFloat(), item.average_calories.toFloat()))
-                            }
+                when(calories) {
+                    is CaloriesData.ByWeek -> {
+                        calories.items.forEachIndexed {index, item ->
+                            caloriesEntries.add(Entry(index.toFloat(), item.average_calories.toFloat()))
                         }
-                        is CaloriesData.ByDay -> {
-                            it.items.forEachIndexed {index, item ->
-                                caloriesEntries.add(Entry(index.toFloat(), item.total_calories.toFloat()))
-                            }
+                    }
+                    is CaloriesData.ByDay -> {
+                        calories.items.forEachIndexed {index, item ->
+                            caloriesEntries.add(Entry(index.toFloat(), item.total_calories.toFloat()))
                         }
                     }
                 }
@@ -273,7 +261,24 @@ class StatisticActivity : AppCompatActivity() {
                     }
                 }
 
-                val dates = sortedWeightings.map{DateUtils.convertTimestamp(it.creationDate)}
+                val dates =
+                    if(weightingsEntries.count() >= caloriesEntries.count()) {
+                        sortedWeightings.map { DateUtils.convertTimestamp(it.creationDate) }
+                    }
+                    else{
+                        if(calories is CaloriesData.ByDay) {
+                            calories.items.map { it -> DateUtils.convertTimestamp(it.day) }
+                        }
+                        else{
+                            if(calories is CaloriesData.ByWeek){
+                                calories.items.map { it -> DateUtils.convertTimestamp(it.week_start)}
+                            }
+                            else{
+                                emptyList()
+                            }
+                        }
+                    }
+
                 xAxis.valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
                         val index = value.toInt()
