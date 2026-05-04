@@ -238,7 +238,7 @@ object MealRepository {
             }
             else{
                 val end = LocalDate.now()
-                val start = end.minusMonths(1)
+                val start = end.minusYears(1)
 
                 val meals = localDb.mealDao().getMeals().filter{meal ->
                     val creationDate = OffsetDateTime.parse(meal.creationDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate()
