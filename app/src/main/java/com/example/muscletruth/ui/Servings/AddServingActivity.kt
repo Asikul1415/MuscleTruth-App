@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -116,6 +117,10 @@ class AddServingActivity : AppCompatActivity() {
         productsList.layoutManager = LinearLayoutManager(this)
         adapter = ProductAdapter({ product ->
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_product_amount, null)
+            val displayMetrics = resources.displayMetrics
+            val width = (displayMetrics.widthPixels * 1).toInt()
+            val height = (displayMetrics.heightPixels * 0.55).toInt()
+
             val dialog = AlertDialog.Builder(this)
                 .setTitle("Введите количество продукта:")
                 .setView(dialogView)
@@ -123,15 +128,37 @@ class AddServingActivity : AppCompatActivity() {
                 .setNegativeButton("Отменить", null)
                 .create()
 
+
             dialog.setOnShowListener {
                 val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+
+                val productTitleField = dialog.findViewById<TextView>(R.id.dg_product_amount_tv_product_title)
+                productTitleField?.text = product.title
+
                 val amount = dialogView.findViewById<EditText>(R.id.dialog_product_amount_et_amount)
+                val proteinsField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_proteins_val)
+                val carbsField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_carbs_val)
+                val fatsField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_fats_val)
+                val caloriesField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_calories_val)
+
                 amount.addTextChangedListener {
                     if (amount.length() > 4) {
                         amount.setText(amount.text.dropLast(1))
                         amount.setSelection(amount.text.length)
                     } else if (amount.length() == 0) {
                         amount.error = "Введите кол-во продукта!"
+                    }
+                    else{
+                        val productAmount = amount.text.toString().toDouble()
+                        val proteinsAmount = product.proteins * (productAmount / 100)
+                        val carbsAmount = product.carbs * (productAmount / 100)
+                        val fatsAmount = product.fats * (productAmount / 100)
+                        val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
+
+                        proteinsField.text = "%.2f".format(proteinsAmount)
+                        carbsField.text = "%.2f".format(carbsAmount)
+                        fatsField.text = "%.2f".format(fatsAmount)
+                        caloriesField.text = "%.2f".format(caloriesAmount)
                     }
                 }
                 button.setOnClickListener {
@@ -160,6 +187,7 @@ class AddServingActivity : AppCompatActivity() {
             }
 
             dialog.show()
+            dialog.window?.setLayout(width, height)
         }, this)
         adapter.items = mutableListOf()
         productsList.adapter = adapter
