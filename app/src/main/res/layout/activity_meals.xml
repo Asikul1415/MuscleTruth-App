@@ -14,16 +14,16 @@
         android:layout_height="60dp"
         android:width="150dp"
         android:height="50dp"
-        android:text="Добавить приём пищи"
-        android:textSize="16dp"
         android:backgroundTint="@color/primary"
+        android:text="Добавить приём пищи"
         android:textColor="@color/white"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.94" />
+        app:layout_constraintVertical_bias="0.956" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -56,10 +56,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/meals_rv"
         android:layout_width="375dp"
-        android:layout_height="620dp"
+        android:layout_height="600dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.351" />
+        app:layout_constraintVertical_bias="0.4" />
 </androidx.constraintlayout.widget.ConstraintLayout>
