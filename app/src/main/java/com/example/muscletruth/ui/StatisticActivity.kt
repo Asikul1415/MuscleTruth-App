@@ -107,7 +107,7 @@ class StatisticActivity : AppCompatActivity() {
         chart.setPinchZoom(true)
         chart.setDrawGridBackground(false)
         chart.fitScreen()
-        chart.setNoDataText("Нет взвешиваний")
+        chart.setNoDataText("Данных нет")
         chart.setNoDataTextColor(Color.MAGENTA)
         chart.legend.textColor = Color.WHITE
         chart.legend.textSize = 14f
