@@ -141,7 +141,7 @@ object SyncManager {
                     }
 
 
-                    MealRepository.updateMeal(meal,  image = imagePart)
+                    MealRepository.updateMeal(meal,  image = imagePart, context = context)
                     val updatedMeal = MealRepository.getMeal(meal.serverID)
                     if(updatedMeal !== null){
                         updateMealServings(updatedMeal.copy(localID = meal.localID))
@@ -216,12 +216,15 @@ object SyncManager {
     }
 
     private suspend fun syncProducts(context: Context){
+
+        //Insert new products from the server
         var productsToInsert: List<Product>
 
         coroutineScope {
             with(Dispatchers.IO){
                 val localProducts = localDb.productDao().getProducts()
                 productsToInsert = ProductRepository.getProducts().map{ product ->
+                    Log.d("APP_DEBUG", "ABC $product")
                     if(product.serverPicture !== null){
                         product.copy(
                             localID = UUID.randomUUID().toString(),
@@ -239,6 +242,8 @@ object SyncManager {
         localDb.productDao().insertAll(productsToInsert)
         Log.d("APP_DEBUG", "SYNC PRODUCTS: INSERTED $productsToInsert")
 
+
+        //Send local added products to the server
         val productsForSync = localDb.productDao().getProductsForSync()
         coroutineScope {
             with(Dispatchers.IO){

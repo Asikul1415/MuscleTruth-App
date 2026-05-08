@@ -199,7 +199,8 @@ class MealActivity : AppCompatActivity() {
                                 mealTypeID=mealTypeID,
                                 creationDate = mealItem.creationDate),
                             localImage = imageURI,
-                            image = imagePart)
+                            image = imagePart,
+                            context = this@MealActivity)
 
                         if(isMealUpdateSuccessful){
                             //Setting wasUpdated flag to sync changes later
