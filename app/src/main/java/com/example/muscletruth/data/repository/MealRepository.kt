@@ -53,7 +53,7 @@ object MealRepository {
                 }
 
                 localDb.mealDao().insert(serverMeal)
-                Log.d("APP_DEBUG", "ADDED MEAL $serverMeal")
+                Log.d("APP_DEBUG", "MEAL ADD: ADDED MEAL $serverMeal")
                 Result.success(serverMeal)
             }
             else{
@@ -63,7 +63,7 @@ object MealRepository {
                 meal.creationDate = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                 localDb.mealDao().insert(meal)
 
-                Log.d("APP_DEBUG", "ADDED MEAL $meal")
+                Log.d("APP_DEBUG", "MEAL ADD: ADDED MEAL $meal")
                 Result.success(meal)
             }
         }
@@ -73,16 +73,21 @@ object MealRepository {
         }
     }
 
-    suspend fun updateMeal(meal: Meal, localImage: Uri? = null, image: MultipartBody.Part? = null): Boolean{
+    suspend fun updateMeal(meal: Meal, localImage: Uri? = null, image: MultipartBody.Part? = null, context: Context): Boolean{
         try {
             if(checkForInternetConnection()){
                 val mealJson = Gson().toJson(meal)
                 val mealBody = mealJson.toRequestBody("application/json".toMediaTypeOrNull())
 
+                Log.d("APP_DEBUG", "MEAL UPDATE: SUCCESS")
                 return apiService.updateMeal(meal.serverID,mealBody, image)
             }
             else{
+                if(localImage !== null){
+                    meal.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localImage)
+                }
                 localDb.mealDao().update(meal)
+                Log.d("APP_DEBUG", "MEAL UPDATE: SUCCESS")
                 return true
             }
         } catch (e: Exception) {
