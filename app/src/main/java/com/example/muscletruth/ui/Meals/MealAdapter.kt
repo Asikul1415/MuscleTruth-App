@@ -117,8 +117,9 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         holder.servingTvProteins?.text = "${"%.2f".format(product.proteins / 100.00 * item.productAmount)}"
                         holder.servingTvFats?.text = "${"%.2f".format(product.fats / 100.00 * item.productAmount)}"
                         holder.servingTvCarbs?.text = "${"%.2f".format(product.carbs / 100.00 * item.productAmount)}"
-                        holder.servingTvCalories?.text = "${"%.2f".format(totalCalories)} ккал"
-                        holder.servingTvAmount?.text = "${item.productAmount} г"
+                        holder.servingTvCalories?.text = "${"%.2f".format(totalCalories)}"
+                        holder.servingTvAmount?.text = "${item.productAmount}"
+
                         if(checkForInternetConnection() && product.serverPicture != null && holder.servingPicture != null && context != null){
                             val path = product.serverPicture
                             Glide.with(context)

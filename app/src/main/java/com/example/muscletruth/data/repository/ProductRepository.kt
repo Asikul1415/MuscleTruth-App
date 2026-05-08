@@ -32,12 +32,18 @@ object ProductRepository {
         }
     }
 
-    suspend fun getProduct(productID: Int): Product? {
+    suspend fun getProduct(productID: Int, localProductID: String? = null): Product? {
         try{
             if(checkForInternetConnection()){
                 return apiService.getProduct(productID)
             }
-            return localDb.productDao().getServerProduct(productID)
+
+            if(localProductID !== null){
+                return localDb.productDao().getLocalProduct(localProductID)
+            }
+            else{
+                return localDb.productDao().getServerProduct(productID)
+            }
         }
         catch(e: Exception){
             Log.d("APP_DEBUG", "${e.toString()}")

@@ -51,7 +51,7 @@ class ServingAdapter(
                 holder.tvProteins.text = "${"%.2f".format(product.proteins / 100.00 * item.productAmount)}"
                 holder.tvFats.text = "${"%.2f".format(product.fats / 100.00 * item.productAmount)}"
                 holder.tvCarbs.text = "${"%.2f".format(product.carbs / 100.00 * item.productAmount)}"
-                holder.tvCalories.text = "${"%.2f".format(totalCalories)} ккал"
+                holder.tvCalories.text = "${"%.2f".format(totalCalories)}"
                 holder.tvAmount.text = "${item.productAmount}"
                 if(checkForInternetConnection() && product.serverPicture !== null && context !== null){
                     val path = product.serverPicture
