@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -23,6 +24,7 @@ import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
+import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.data.repository.ServingRepository
 import com.example.muscletruth.ui.Servings.AddServingActivity
 import com.example.muscletruth.ui.Servings.ServingAdapter
@@ -37,6 +39,10 @@ class AddMealActivity : AppCompatActivity() {
     private lateinit var productsList: RecyclerView
     private lateinit var adapter: ServingAdapter
     private lateinit var spinner: Spinner
+    private lateinit var proteinsField: TextView
+    private lateinit var fatsField: TextView
+    private lateinit var carbsField: TextView
+    private lateinit var caloriesField: TextView
     private lateinit var selectImageLauncher: ActivityResultLauncher<Intent>
     var imageURI: Uri? = null
 
@@ -95,6 +101,11 @@ class AddMealActivity : AppCompatActivity() {
             }
         }
 
+        proteinsField = findViewById<TextView>(R.id.add_meal_tv_proteins_val)
+        fatsField = findViewById<TextView>(R.id.add_meal_tv_fats_val)
+        carbsField = findViewById<TextView>(R.id.add_meal_tv_carbs_val)
+        caloriesField = findViewById<TextView>(R.id.add_meal_tv_calories_val)
+
         val saveButton = findViewById<Button>(R.id.add_meal_btn_save)
         saveButton.setOnClickListener {
             if(servings.size <= 0){
@@ -137,10 +148,37 @@ class AddMealActivity : AppCompatActivity() {
         loadData()
     }
 
+    private suspend fun updateMacros(){
+        var totalProteins: Double = 0.00
+        var totalFats: Double = 0.00
+        var totalCarbs: Double = 0.00
+        var totalCalories: Double = 0.00
+
+        servings.forEach { serving ->
+            val product = ProductRepository.getProduct(serving.productID, serving.localProductID)
+
+            if (product !== null) {
+                totalProteins += product.proteins * (serving.productAmount / 100.00)
+                totalFats += product.fats * (serving.productAmount / 100.00)
+                totalCarbs += product.carbs * (serving.productAmount / 100.00)
+            }
+        }
+        totalCalories += totalProteins * 4 + totalFats * 9 + totalCarbs * 4
+
+        proteinsField.text = "%.2f".format(totalProteins)
+        fatsField.text = "%.2f".format(totalFats)
+        carbsField.text = "%.2f".format(totalCarbs)
+        caloriesField.text = "%.2f".format(totalCalories)
+
+        Log.d("APP_DEBUG", "TEST 123")
+    }
+
     private fun loadData(){
         lifecycleScope.launch {
             try{
                 adapter.items = servings
+                updateMacros()
+
                 adapter.notifyDataSetChanged()
             }
             catch(e: Exception){
