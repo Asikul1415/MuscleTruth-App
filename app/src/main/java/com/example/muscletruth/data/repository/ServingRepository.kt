@@ -84,6 +84,24 @@ object ServingRepository {
         }
     }
 
+    suspend fun updateServing(serving: Serving) {
+        try{
+            if(checkForInternetConnection()){
+                val mealID = serving.mealID
+                if(mealID !== null && serving.serverID != -1){
+                    apiService.updateServing(mealID, serving.serverID, serving)
+                    Log.d("APP_DEBUG", "SERVING UPDATE: $serving WAS UPDATED ON THE SERVER")
+                }
+            }
+
+            localDb.servingDao().update(serving)
+            Log.d("APP_DEBUG", "SERVING UPDATE: $serving WAS UPDATED LOCALLY")
+        } catch(e: Exception) {
+            Log.d("APP_DEBUG", "SERVING UPDATE ERROR: ${e.toString()}")
+
+        }
+    }
+
     suspend fun deleteServing(serving: Serving){
         try{
             if(serving.serverID !== null){

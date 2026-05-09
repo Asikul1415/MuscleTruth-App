@@ -32,7 +32,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 
-class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private val context: Context? = null, private val onServingDelete: () -> Unit) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
+class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private val context: Context? = null, private val onItemsUpdate: () -> Unit) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
     var items = mutableListOf<Any>()
 
     private val TYPE_MEAL = 0;
@@ -260,6 +260,13 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         } else {
                             servingActionsDialog.dismiss()
                             changeServingDialog.dismiss()
+
+                            lifecycleScope.launch {
+                                serving.productAmount = intAmount
+                                ServingRepository.updateServing(serving)
+                                onItemsUpdate()
+                            }
+
                             Toast.makeText(context, "Порция была изменена успешно!", Toast.LENGTH_LONG).show()
                         }
                     } else {
@@ -308,7 +315,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         servingActionsDialog.dismiss()
 
                         items.clear()
-                        onServingDelete()
+                        onItemsUpdate()
                     }
                 }
             }

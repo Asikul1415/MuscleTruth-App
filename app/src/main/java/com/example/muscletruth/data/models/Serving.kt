@@ -7,7 +7,6 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 
-//Вроде все перенес с порциями, но не тестил совсем.
 @Parcelize
 @Entity("servings")
 data class Serving(
