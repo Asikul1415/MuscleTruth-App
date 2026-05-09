@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Serving
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.data.repository.ServingRepository
@@ -35,7 +34,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
 
 class AddMealActivity : AppCompatActivity() {
-    private var servings = mutableListOf<ServingItem>()
+    private var servings = mutableListOf<Serving>()
     private lateinit var productsList: RecyclerView
     private lateinit var adapter: ServingAdapter
     private lateinit var spinner: Spinner
@@ -50,7 +49,7 @@ class AddMealActivity : AppCompatActivity() {
         { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
-                val serving = data?.getParcelableExtra<ServingItem>("serving")
+                val serving = data?.getParcelableExtra<Serving>("serving")
                 if(serving != null){
                     servings.add(serving)
                     loadData()
@@ -127,14 +126,8 @@ class AddMealActivity : AppCompatActivity() {
 
                     mealResponse.onSuccess {meal ->
                         servings.forEach { serving ->
-                            val servingBase = Serving(
-                                mealID = meal.serverID,
-                                productID = serving.productID,
-                                localProductID = serving.localProductID,
-                                productAmount = serving.productAmount
-                            )
-                            Log.d("APP_DEBUG", "${mealResponse} ${meal} ${servingBase} ${meal.serverID}")
-                            ServingRepository.addServing(meal, servingBase)
+                            serving.mealID = meal.serverID
+                            ServingRepository.addServing(meal, serving)
                             finish()
                         }
                     }
@@ -169,8 +162,6 @@ class AddMealActivity : AppCompatActivity() {
         fatsField.text = "%.2f".format(totalFats)
         carbsField.text = "%.2f".format(totalCarbs)
         caloriesField.text = "%.2f".format(totalCalories)
-
-        Log.d("APP_DEBUG", "TEST 123")
     }
 
     private fun loadData(){

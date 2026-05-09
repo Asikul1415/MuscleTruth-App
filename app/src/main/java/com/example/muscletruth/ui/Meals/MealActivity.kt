@@ -24,9 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Meal
-import com.example.muscletruth.data.models.Product
 import com.example.muscletruth.data.models.Serving
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.data.repository.ServingRepository
@@ -43,8 +41,8 @@ import okhttp3.MultipartBody
 import java.util.UUID
 
 class MealActivity : AppCompatActivity() {
-    private var servings = mutableListOf<ServingItem>()
-    private var addedServings = mutableListOf<ServingItem>()
+    private var servings = mutableListOf<Serving>()
+    private var addedServings = mutableListOf<Serving>()
     private lateinit var productsList: RecyclerView
     private lateinit var adapter: ServingAdapter
     private lateinit var spinner: Spinner
@@ -60,7 +58,7 @@ class MealActivity : AppCompatActivity() {
     { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
-            val serving = data?.getParcelableExtra<ServingItem>("serving")
+            val serving = data?.getParcelableExtra<Serving>("serving")
             if(serving != null){
                 servings.add(serving)
                 addedServings.add(serving)
@@ -168,12 +166,7 @@ class MealActivity : AppCompatActivity() {
                         withContext(Dispatchers.IO){
                             Log.d("APP_DEBUG", "SERVING DELETE: mealItem from intent $mealItem")
                             if(mealItem !== null && mealItem.localID !== null){
-                                val meal = Meal(
-                                    localID = mealItem.localID,
-                                    serverID = mealItem.id,
-                                    mealTypeID = mealItem.mealTypeID
-                                )
-                                MealRepository.deleteMeal(meal)
+                                MealRepository.deleteMeal(mealItem.id, mealItem.localID)
                                 Log.d("APP_DEBUG", "SERVING DELETE: serving was deleted")
                                 finish()
                             }

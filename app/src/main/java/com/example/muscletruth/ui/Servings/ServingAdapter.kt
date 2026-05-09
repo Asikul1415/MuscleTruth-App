@@ -10,7 +10,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
-import com.example.muscletruth.data.serviceClasses.ServingItem
+import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.utils.Utils
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
@@ -18,10 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ServingAdapter(
-    private val onItemClick: (ServingItem) -> Unit,
+    private val onItemClick: (Serving) -> Unit,
     val lifecycleScope: LifecycleCoroutineScope,
     val context: Context? = null) : RecyclerView.Adapter<ServingAdapter.ViewHolder>(){
-    var items = emptyList<ServingItem>()
+    var items = emptyList<Serving>()
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvTitle: TextView = view.findViewById(R.id.item_serving_tv_title)

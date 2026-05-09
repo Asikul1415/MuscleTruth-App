@@ -6,7 +6,6 @@ import android.util.Log
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.Weighting
 import com.example.muscletruth.data.repository.MealRepository
@@ -163,29 +162,26 @@ object SyncManager {
     }
 
     private suspend fun syncServings(){
-        val servings: MutableList<ServingItem> = mutableListOf()
+        val serverServings: MutableList<Serving> = mutableListOf()
 
         coroutineScope {
             with(Dispatchers.IO){
                 val meals = MealRepository.getMeals()
                 meals.forEach { meal ->
-                    servings.addAll(ServingRepository.getServings(meal.serverID!!))
+                    serverServings.addAll(ServingRepository.getServings(meal.serverID!!))
                 }
             }
         }
 
         val localServings = localDb.servingDao().getServings()
-        val convertedServings = servings
+        val convertedServings = serverServings
+            //Get servings that are missing in the localDB
             .filter{serving ->
-                localServings.find {local -> local.serverID === serving.id} === null}
+                localServings.find {local -> local.serverID === serving.serverID} === null}
             .map {serving ->
-                Serving(
-                    serverID = serving.id!!,
-                    mealID = serving.mealID,
+                serving.copy(
                     localMealID = localDb.mealDao().getServerMeal(serving.mealID!!)?.localID,
-                    productID = serving.productID,
-                    localProductID = localDb.productDao().getServerProduct(serving.productID)?.localID,
-                    productAmount = serving.productAmount
+                    localProductID = localDb.productDao().getServerProduct(serving.productID)?.localID
                 )
             }
 

@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.serviceClasses.ServingItem
+import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.ui.Products.AddProductActivity
 import com.example.muscletruth.ui.Products.ProductAdapter
@@ -171,7 +171,7 @@ class AddServingActivity : AppCompatActivity() {
                             amount.error = "Кол-во продукта должно быть меньше 9999!"
                         } else {
                             val resultIntent = Intent()
-                            val serving = ServingItem(
+                            val serving = Serving(
                                 productID = product.serverID,
                                 localProductID = product.localID,
                                 productAmount = intAmount

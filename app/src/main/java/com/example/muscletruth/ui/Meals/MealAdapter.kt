@@ -13,14 +13,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
-import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.serviceClasses.MealItem
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.data.repository.ServingRepository
@@ -68,7 +66,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {
             is MealItem -> TYPE_MEAL
-            is ServingItem -> TYPE_SERVING
+            is Serving -> TYPE_SERVING
             is MealType -> TYPE_MEAL_TYPE
             else -> throw IllegalArgumentException()
         }
@@ -112,7 +110,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                     }
                 }
             }
-            is ServingItem -> {
+            is Serving -> {
                 lifecycleScope.launch {
                     val product = with(Dispatchers.IO){
                         ProductRepository.getProduct(item.productID)!!
@@ -168,7 +166,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
 
     override fun getItemCount() = items.size
 
-    private fun showServingActionsDialog(serving: ServingItem): Unit{
+    private fun showServingActionsDialog(serving: Serving): Unit{
         if(context === null) return
 
         val servingActionsDialogView = LayoutInflater.from(context).inflate(R.layout.dialog_empty, null)
@@ -194,7 +192,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
         servingActionsDialog.show()
     }
 
-    private fun showChangeServingDialog(serving: ServingItem, servingActionsDialog: AlertDialog){
+    private fun showChangeServingDialog(serving: Serving, servingActionsDialog: AlertDialog){
         if(context === null) return
 
         val displayMetrics = context.resources.displayMetrics
@@ -278,7 +276,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
         changeServingDialog.window?.setLayout(width, height)
     }
 
-    private fun showDeleteServingDialog(serving: ServingItem, servingActionsDialog: AlertDialog): Unit{
+    private fun showDeleteServingDialog(serving: Serving, servingActionsDialog: AlertDialog): Unit{
         if(context === null) return
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_empty, null)
@@ -294,15 +292,17 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
             button.setOnClickListener {
                 lifecycleScope.launch {
                     with(Dispatchers.IO){
-                        if(serving.mealID != null){
-                            if(ServingRepository.getServings(serving.mealID).size == 1){
-                                MealRepository.deleteMeal(mealID = serving.mealID)
-                            }
-                            else{
-                                ServingRepository.deleteServing(serving)
-                            }
-                            Toast.makeText(context, "Порция успешно удалена!", Toast.LENGTH_LONG).show()
+                        val mealID = serving.mealID ?: -1
+                        val mealLocalID = serving.localMealID
+
+                        Log.d("APP_DEBUG", "MealAdapter: ${ServingRepository.getServings(mealID, mealLocalID)}")
+                        if(ServingRepository.getServings(mealID, mealLocalID).size == 1){
+                            MealRepository.deleteMeal(mealServerID = mealID, mealLocalID)
                         }
+                        else{
+                            ServingRepository.deleteServing(serving)
+                        }
+                        Toast.makeText(context, "Порция успешно удалена!", Toast.LENGTH_LONG).show()
 
                         dialog.dismiss()
                         servingActionsDialog.dismiss()

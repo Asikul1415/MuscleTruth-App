@@ -14,7 +14,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
 import com.example.muscletruth.data.repository.UserRepository.localDb
 import com.example.muscletruth.data.serviceClasses.CaloriesChartData
-import com.example.muscletruth.data.serviceClasses.WeightingsChartData
 import com.example.muscletruth.utils.Utils
 import java.time.DayOfWeek
 import java.time.OffsetDateTime
@@ -163,29 +162,26 @@ object MealRepository {
         }
     }
 
-    suspend fun deleteMeal(meal: Meal? = null, mealID: Int? = null){
+    suspend fun deleteMeal(mealServerID: Int? = null, mealLocalID: String? = null){
         try{
             if(checkForInternetConnection()){
-                if(meal !== null && meal.serverID !== -1){
-                    apiService.deleteMeal(meal.serverID)
-                }
-                else if(mealID !== null && mealID !== -1){
-                    apiService.deleteMeal(mealID)
+                if(mealServerID !== null && mealServerID != -1){
+                    apiService.deleteMeal(mealServerID)
                 }
                 else{
                     Log.e("APP_DEBUG", "DELETE MEAL: MEAL WASN'T DELETED")
                 }
             }
 
-            if(meal !== null){
-                val localMeal = localDb.mealDao().getLocalMeal(meal.localID)
+            if(mealServerID !== null && mealServerID != -1){
+                val localMeal = localDb.mealDao().getServerMeal(mealServerID)
                 localDb.mealDao().delete(localMeal!!)
-                Log.d("APP_DEBUG", "DELETE: MEAL $meal WAS DELETED")
+                Log.d("APP_DEBUG", "DELETE: MEAL $localMeal WAS DELETED")
             }
-            else if(mealID !== null && mealID !== -1){
-                val localMeal = localDb.mealDao().getServerMeal(mealID)
+            else if(mealLocalID !== null){
+                val localMeal = localDb.mealDao().getLocalMeal(mealLocalID)
                 localDb.mealDao().delete(localMeal!!)
-                Log.d("APP_DEBUG", "DELETE: MEAL $meal WAS DELETED")
+                Log.d("APP_DEBUG", "DELETE: MEAL $localMeal WAS DELETED")
             }
             else{
                 Log.e("APP_DEBUG", "DELETE MEAL: MEAL WASN'T DELETED")

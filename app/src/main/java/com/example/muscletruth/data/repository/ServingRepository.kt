@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Serving
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.example.muscletruth.data.repository.UserRepository.localDb
 import java.util.UUID
@@ -62,36 +61,22 @@ object ServingRepository {
         }
     }
 
-    suspend fun getServings(serverID: Int, localID: String? = null): MutableList<ServingItem> {
+    suspend fun getServings(mealServerID: Int, mealLocalID: String? = null): MutableList<Serving> {
         try{
             if(checkForInternetConnection()){
-                return apiService.getServings(serverID).map {serving ->
-                    ServingItem(
-                        id = serving.serverID,
-                        productID = serving.productID,
-                        mealID = serving.mealID,
-                        productAmount = serving.productAmount,
-                    )
-                }.toMutableList()
+                return apiService.getServings(mealServerID).map{ serving -> serving.copy(localID=UUID.randomUUID().toString())}.toMutableList()
             }
 
             var servings: List<Serving>
-            if(serverID !== -1){
-                servings = localDb.servingDao().getServerMealServings(serverID)
+            if(mealServerID !== -1){
+                servings = localDb.servingDao().getServerMealServings(mealServerID)
             }
             else{
-                servings = localDb.servingDao().getLocalMealServings(localID)
+                servings = localDb.servingDao().getLocalMealServings(mealLocalID)
             }
 
             Log.d("APP_DEBUG", "SERVINGS - $servings")
-            return servings.map {serving ->
-                ServingItem(
-                    id = serving.serverID,
-                    productID = serving.productID,
-                    mealID = serving.mealID,
-                    productAmount = serving.productAmount,
-                )
-            }.toMutableList()
+            return servings.toMutableList()
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "getServings() ERROR: ${e.toString()}")
@@ -99,14 +84,17 @@ object ServingRepository {
         }
     }
 
-    suspend fun deleteServing(serving: ServingItem){
+    suspend fun deleteServing(serving: Serving){
         try{
-            if(serving.id != null && serving.mealID != null){
+            if(serving.serverID !== null){
                 if(checkForInternetConnection()){
-                    apiService.deleteServing(serving.mealID, serving.id)
+                    val mealID = serving.mealID
+                    if(mealID !== null){
+                        apiService.deleteServing(mealID, serving.serverID)
+                    }
                 }
 
-                val localServing = localDb.servingDao().getServing(serving.id)
+                val localServing = localDb.servingDao().getServing(serving.serverID)
                 localDb.servingDao().delete(localServing)
                 Log.d("APP_DEBUG", "DELETE SERVING: SERVING $localServing WAS DELETED")
             }
