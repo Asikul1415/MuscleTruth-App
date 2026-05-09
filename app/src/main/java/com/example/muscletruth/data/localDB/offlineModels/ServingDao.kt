@@ -12,16 +12,16 @@ interface ServingDao {
     suspend fun insertAll(servings: List<Serving>)
 
     @Update
-    suspend fun update(servingEntity: Serving)
+    suspend fun update(serving: Serving)
 
     @Delete
-    suspend fun delete(servingEntity: Serving)
+    suspend fun delete(serving: Serving)
 
-    @Query("SELECT * from servings WHERE meal_id = :mealID")
-    suspend fun getServerMealServings(mealID: Int): MutableList<Serving>
+    @Query("SELECT * from servings WHERE meal_id = :mealServerID")
+    suspend fun getServerMealServings(mealServerID: Int): MutableList<Serving>
 
-    @Query("SELECT * from servings WHERE local_meal_id = :mealID")
-    suspend fun getLocalMealServings(mealID: String?): MutableList<Serving>
+    @Query("SELECT * from servings WHERE local_meal_id = :localMealID")
+    suspend fun getLocalMealServings(localMealID: String?): MutableList<Serving>
 
     @Query("SELECT * from servings")
     suspend fun getServings(): MutableList<Serving>

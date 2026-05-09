@@ -94,8 +94,14 @@ object ServingRepository {
                 }
             }
 
-            localDb.servingDao().update(serving)
-            Log.d("APP_DEBUG", "SERVING UPDATE: $serving WAS UPDATED LOCALLY")
+            if(serving.serverID != -1){
+                val localServing = localDb.servingDao().getServing(serving.serverID)
+                localServing.productAmount = serving.productAmount
+                localDb.servingDao().update(localServing)
+            }
+            else{
+                localDb.servingDao().update(serving)
+            }
         } catch(e: Exception) {
             Log.d("APP_DEBUG", "SERVING UPDATE ERROR: ${e.toString()}")
 
