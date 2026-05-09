@@ -3,13 +3,10 @@ package com.example.muscletruth.ui.Meals
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,10 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
-import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.serviceClasses.MealItem
-import com.example.muscletruth.data.serviceClasses.ServingItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ServingRepository
 import kotlinx.coroutines.Dispatchers
@@ -204,47 +199,11 @@ class MealsActivity : AppCompatActivity() {
 
     private fun setupList() {
         mealsList.layoutManager = LinearLayoutManager(this)
-        adapter = MealAdapter(lifecycleScope, this@MealsActivity, { serving ->
-            showDeleteServingDialog(serving = serving)
+        adapter = MealAdapter(lifecycleScope, this@MealsActivity, {
+            adapter.notifyDataSetChanged()
+            loadData()
         })
         adapter.items = mutableListOf<Any>()
         mealsList.adapter = adapter
-    }
-
-    private fun showDeleteServingDialog(serving: ServingItem): Unit{
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_empty, null)
-
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Вы хотите удалить эту порцию?")
-            .setView(dialogView)
-            .setPositiveButton("Да", null)
-            .setNegativeButton("Нет", null)
-            .create()
-
-        dialog.setOnShowListener {
-            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            button.setOnClickListener {
-                lifecycleScope.launch {
-                   with(Dispatchers.IO){
-                       if(serving.mealID != null){
-                           if(ServingRepository.getServings(serving.mealID).size == 1){
-                               MealRepository.deleteMeal(mealID = serving.mealID)
-                           }
-                           else{
-                               ServingRepository.deleteServing(serving)
-                           }
-                           Toast.makeText(this@MealsActivity, "Порция успешно удалена!", Toast.LENGTH_LONG)
-                       }
-
-                       dialog.dismiss()
-                       adapter.items.clear()
-                       adapter.notifyDataSetChanged()
-                       loadData()
-                   }
-                }
-            }
-        }
-
-        dialog.show()
     }
 }
