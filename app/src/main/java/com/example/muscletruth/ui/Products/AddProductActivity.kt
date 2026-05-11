@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Product
@@ -27,6 +29,7 @@ class AddProductActivity : AppCompatActivity() {
     private lateinit var proteinsField: EditText
     private lateinit var fatsField: EditText
     private lateinit var carbsField: EditText
+    private lateinit var caloriesField: TextView
     private lateinit var selectImageLauncher: ActivityResultLauncher<Intent>
     var imageURI: Uri? = null
 
@@ -43,8 +46,18 @@ class AddProductActivity : AppCompatActivity() {
 
         titleField = findViewById<EditText>(R.id.add_product_et_title)
         proteinsField = findViewById<EditText>(R.id.add_product_et_proteins)
+        proteinsField.addTextChangedListener {
+            calculateCalories()
+        }
         fatsField = findViewById<EditText>(R.id.add_product_et_fats)
+        fatsField.addTextChangedListener{
+            calculateCalories()
+        }
         carbsField = findViewById<EditText>(R.id.add_product_et_carbs)
+        carbsField.addTextChangedListener{
+            calculateCalories()
+        }
+        caloriesField = findViewById<TextView>(R.id.add_product_tv_calories_val)
         val image = findViewById<ImageView>(R.id.add_product_iv)
 
         val addImage = findViewById<Button>(R.id.add_product_btn_picture)
@@ -104,5 +117,14 @@ class AddProductActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    private fun calculateCalories(){
+        val proteins = proteinsField.text.toString().toIntOrNull() ?: 0
+        val carbs = carbsField.text.toString().toIntOrNull() ?: 0
+        val fats = fatsField.text.toString().toIntOrNull() ?: 0
+
+        val calories = proteins * 4 + carbs * 4 + fats * 9
+        caloriesField.text = calories.toString()
     }
 }
