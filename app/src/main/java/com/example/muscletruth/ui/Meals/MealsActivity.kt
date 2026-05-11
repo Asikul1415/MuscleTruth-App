@@ -53,10 +53,10 @@ class MealsActivity : AppCompatActivity() {
     override fun onResume () {
         super.onResume()
         val todayDate = LocalDate.now().toString()
-        loadData(startDate = todayDate, endDate = todayDate)
+        loadData()
     }
 
-    private fun loadData(startDate:String? = null, endDate: String? = null, mealTypeID: Int? = null){
+    private fun loadData(){
         adapter.items = mutableListOf<Any>()
 
         lifecycleScope.launch {
@@ -88,6 +88,24 @@ class MealsActivity : AppCompatActivity() {
 
                 withContext(Dispatchers.IO){
                     val breakfastTotal = MealRepository.getMealTypeTotal(1)
+                    val lunchTotal = MealRepository.getMealTypeTotal(2)
+                    val dinnerTotal = MealRepository.getMealTypeTotal(3)
+                    val snacksTotal = MealRepository.getMealTypeTotal(4)
+
+                    val totalProteins = breakfastTotal?.proteins!! + lunchTotal?.proteins!! + dinnerTotal?.proteins!! + snacksTotal?.proteins!!
+                    val totalFats = breakfastTotal?.fats!! + lunchTotal?.fats!! + dinnerTotal?.fats!! + snacksTotal?.fats!!
+                    val totalCarbs = breakfastTotal?.carbs!! + lunchTotal?.carbs!! + dinnerTotal?.carbs!! + snacksTotal?.carbs!!
+                    val totalCalories = totalProteins * 4 + totalFats * 9 + totalCarbs * 4
+
+                    adapter.items.add(MealType(
+                        id=999,
+                        title="Итого",
+                        proteins = totalProteins,
+                        fats = totalFats,
+                        carbs = totalCarbs,
+                        totalCalories = totalCalories,
+                    ))
+
                     adapter.items.add(MealType(
                         id=1,
                         title="Завтрак",
@@ -96,7 +114,6 @@ class MealsActivity : AppCompatActivity() {
                         carbs = breakfastTotal?.carbs,
                         totalCalories = breakfastTotal?.totalCalories))
 
-                    val lunchTotal = MealRepository.getMealTypeTotal(2)
                     adapter.items.add(MealType(
                         id=2,
                         title="Обед",
@@ -105,7 +122,6 @@ class MealsActivity : AppCompatActivity() {
                         carbs = lunchTotal?.carbs,
                         totalCalories = lunchTotal?.totalCalories))
 
-                    val dinnerTotal = MealRepository.getMealTypeTotal(3)
                     adapter.items.add(MealType(
                         id=3,
                         title="Ужин",
@@ -114,7 +130,6 @@ class MealsActivity : AppCompatActivity() {
                         carbs = dinnerTotal?.carbs,
                         totalCalories = dinnerTotal?.totalCalories))
 
-                    val snacksTotal = MealRepository.getMealTypeTotal(4)
                     adapter.items.add(MealType(
                         id=4,
                         title="Перекусы",
