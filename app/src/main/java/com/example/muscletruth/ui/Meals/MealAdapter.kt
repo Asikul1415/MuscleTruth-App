@@ -229,6 +229,21 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                 val fatsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_fats_val)
                 val caloriesField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_calories_val)
 
+                fun updateMacros() {
+                    val productAmount = amount.text.toString().toDouble()
+                    val proteinsAmount = product.proteins * (productAmount / 100)
+                    val carbsAmount = product.carbs * (productAmount / 100)
+                    val fatsAmount = product.fats * (productAmount / 100)
+                    val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
+
+                    proteinsField.text = "%.2f".format(proteinsAmount)
+                    carbsField.text = "%.2f".format(carbsAmount)
+                    fatsField.text = "%.2f".format(fatsAmount)
+                    caloriesField.text = "%.2f".format(caloriesAmount)
+                }
+
+                updateMacros()
+
                 amount.addTextChangedListener {
                     if (amount.length() > 4) {
                         amount.setText(amount.text.dropLast(1))
@@ -237,16 +252,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         amount.error = "Введите кол-во продукта!"
                     }
                     else{
-                        val productAmount = amount.text.toString().toDouble()
-                        val proteinsAmount = product.proteins * (productAmount / 100)
-                        val carbsAmount = product.carbs * (productAmount / 100)
-                        val fatsAmount = product.fats * (productAmount / 100)
-                        val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
-
-                        proteinsField.text = "%.2f".format(proteinsAmount)
-                        carbsField.text = "%.2f".format(carbsAmount)
-                        fatsField.text = "%.2f".format(fatsAmount)
-                        caloriesField.text = "%.2f".format(caloriesAmount)
+                        updateMacros()
                     }
                 }
                 saveButton.setOnClickListener {
