@@ -1,75 +1,124 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
     android:layout_marginBottom="12dp"
-    android:background="@color/surface_dark">
+    android:background="@color/surface_dark"
+    android:rowCount="2">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/item_meal_type_tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_row="0"
+        android:text="Тип приёма пищи"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"/>
 
-        <TextView
-            android:id="@+id/item_meal_type_tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Тип приёма пищи"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/accent"/>
-    </LinearLayout>
-
-    <LinearLayout
+    <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_row="1"
+        android:columnCount="8"
+        android:rowCount="1">
 
         <TextView
             android:id="@+id/item_meal_type_tv_proteins"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Б: "
+            android:layout_column="0"
+            android:layout_columnWeight="0"
+            android:text="Б:"
             android:textAlignment="center"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="@color/accent"/>
+            android:textColor="@color/secondary"/>
+
+        <TextView
+            android:id="@+id/item_meal_type_tv_proteins_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_columnWeight="1"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/item_meal_type_tv_fats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Ж: "
+            android:layout_column="2"
+            android:layout_columnWeight="0"
+            android:text="Ж:"
             android:textAlignment="center"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="@color/accent"/>
+            android:textColor="@color/secondary"/>
+
+        <TextView
+            android:id="@+id/item_meal_type_tv_fats_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_columnWeight="1"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/item_meal_type_tv_carbs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="У: "
+            android:layout_column="4"
+            android:layout_columnWeight="0"
+            android:text="У:"
             android:textAlignment="center"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="@color/accent"/>
+            android:textColor="@color/secondary"/>
+
+        <TextView
+            android:id="@+id/item_meal_type_tv_carbs_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="5"
+            android:layout_columnWeight="1"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:id="@+id/item_meal_type_tv_calories_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="6"
+            android:layout_columnWeight="1"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"/>
 
         <TextView
             android:id="@+id/item_meal_type_tv_calories"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
+            android:layout_column="7"
+            android:layout_columnWeight="0"
+            android:text="ккал"
             android:textAlignment="center"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="@color/accent"/>
-    </LinearLayout>
-</LinearLayout>
+            android:textColor="@color/secondary"/>
+    </GridLayout>
+</GridLayout>

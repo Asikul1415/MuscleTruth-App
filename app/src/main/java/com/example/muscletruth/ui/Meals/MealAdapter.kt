@@ -41,6 +41,10 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val mealTvDate: TextView? = view.findViewById(R.id.item_meal_tv_date)
+        val mealTvProteins: TextView? = view.findViewById(R.id.item_meal_tv_proteins_val)
+        val mealTvFats: TextView? = view.findViewById(R.id.item_meal_tv_fats_val)
+        val mealTvCarbs: TextView? = view.findViewById(R.id.item_meal_tv_carbs_val)
+        val mealTvCalories: TextView? = view.findViewById(R.id.item_meal_tv_calories_val)
 
         val servingTvTitle: TextView? = view.findViewById(R.id.item_serving_tv_title)
         val servingTvProteins: TextView? = view.findViewById(R.id.item_serving_tv_proteins_val)
@@ -51,10 +55,10 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
         val servingPicture: ImageView? = view.findViewById(R.id.item_serving_iv)
 
         val mealTypeTvTitle: TextView? = view.findViewById(R.id.item_meal_type_tv_title)
-        val mealTypeTvProteins: TextView? = view.findViewById(R.id.item_meal_type_tv_proteins)
-        val mealTypeTvFats: TextView? = view.findViewById(R.id.item_meal_type_tv_fats)
-        val mealTypeTvCarbs: TextView? = view.findViewById(R.id.item_meal_type_tv_carbs)
-        val mealTypeTvCalories: TextView? = view.findViewById(R.id.item_meal_type_tv_calories)
+        val mealTypeTvProteins: TextView? = view.findViewById(R.id.item_meal_type_tv_proteins_val)
+        val mealTypeTvFats: TextView? = view.findViewById(R.id.item_meal_type_tv_fats_val)
+        val mealTypeTvCarbs: TextView? = view.findViewById(R.id.item_meal_type_tv_carbs_val)
+        val mealTypeTvCalories: TextView? = view.findViewById(R.id.item_meal_type_tv_calories_val)
 
         init {
             itemView.setOnClickListener {
@@ -102,6 +106,29 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                 holder.mealTvDate?.text = ZonedDateTime.parse(item.creationDate).format(
                     DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm", russianLocale)
                 )
+
+                lifecycleScope.launch {
+                    var totalProteins = 0.00
+                    var totalFats = 0.00
+                    var totalCarbs = 0.00
+
+                    item.servings.forEach { serving ->
+                        val product = ProductRepository.getProduct(serving.productID, serving.localProductID)
+                        if(product !== null){
+                            totalProteins += product.proteins * (serving.productAmount / 100.00)
+                            totalFats += product.fats * (serving.productAmount / 100.00)
+                            totalCarbs += product.carbs * (serving.productAmount / 100.00)
+                        }
+                        Log.d("APP_DEBUG!", "$totalProteins $totalCarbs $totalFats")
+                        Log.d("APP_DEBUG!", "$product")
+                    }
+
+                    holder.mealTvProteins?.text = "%.2f".format(Locale.US, totalProteins)
+                    holder.mealTvFats?.text = "%.2f".format(Locale.US,totalFats)
+                    holder.mealTvCarbs?.text = "%.2f".format(Locale.US,totalCarbs)
+                    holder.mealTvCalories?.text = (totalProteins * 4 + totalCarbs * 4  + totalFats * 9).toString()
+                }
+
                 holder.itemView.setOnClickListener {
                     if(context != null){
                         val intent = Intent(context, MealActivity::class.java)
@@ -119,10 +146,10 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         val totalCalories = (product.proteins * 4 + product.fats * 9 + product.carbs * 4) / 100.00 * item.productAmount
 
                         holder.servingTvTitle?.text = product.title
-                        holder.servingTvProteins?.text = "${"%.2f".format(product.proteins / 100.00 * item.productAmount)}"
-                        holder.servingTvFats?.text = "${"%.2f".format(product.fats / 100.00 * item.productAmount)}"
-                        holder.servingTvCarbs?.text = "${"%.2f".format(product.carbs / 100.00 * item.productAmount)}"
-                        holder.servingTvCalories?.text = "${"%.2f".format(totalCalories)}"
+                        holder.servingTvProteins?.text = "${"%.2f".format(Locale.US,product.proteins / 100.00 * item.productAmount)}"
+                        holder.servingTvFats?.text = "${"%.2f".format(Locale.US,product.fats / 100.00 * item.productAmount)}"
+                        holder.servingTvCarbs?.text = "${"%.2f".format(Locale.US,product.carbs / 100.00 * item.productAmount)}"
+                        holder.servingTvCalories?.text = "${"%.2f".format(Locale.US,totalCalories)}"
                         holder.servingTvAmount?.text = "${item.productAmount}"
 
                         if(checkForInternetConnection() && product.serverPicture != null && holder.servingPicture != null && context != null){
@@ -147,16 +174,17 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
             }
             is MealType -> {
                 holder.mealTypeTvTitle?.text = item.title
+                holder.mealTypeTvProteins?.text = "${"%.2f".format(Locale.US,item.proteins)}"
+                holder.mealTypeTvFats?.text = "${"%.2f".format(Locale.US,item.fats)}"
+                holder.mealTypeTvCarbs?.text = "${"%.2f".format(Locale.US,item.carbs)}"
+                holder.mealTypeTvCalories?.text = "${"%.2f".format(Locale.US,item.totalCalories)}"
                 lifecycleScope.launch {
                     val response = withContext(Dispatchers.IO){
                         MealRepository.getMealTypeTotal(item.id)
                     }
                     Log.d("APP_DEBUG", "MEAL_TYPE_BASE: ${response}")
                     withContext(Dispatchers.Main){
-                        holder.mealTypeTvProteins?.text = "Б: ${"%.2f".format(response?.proteins)}"
-                        holder.mealTypeTvFats?.text = "Ж: ${"%.2f".format(response?.fats)}"
-                        holder.mealTypeTvCarbs?.text = "У: ${"%.2f".format(response?.carbs)}"
-                        holder.mealTypeTvCalories?.text = "${"%.2f".format(response?.totalCalories)} ккал"
+
                     }
                 }
             }
@@ -236,10 +264,10 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                     val fatsAmount = product.fats * (productAmount / 100)
                     val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
 
-                    proteinsField.text = "%.2f".format(proteinsAmount)
-                    carbsField.text = "%.2f".format(carbsAmount)
-                    fatsField.text = "%.2f".format(fatsAmount)
-                    caloriesField.text = "%.2f".format(caloriesAmount)
+                    proteinsField.text = "%.2f".format(Locale.US,proteinsAmount)
+                    carbsField.text = "%.2f".format(Locale.US,carbsAmount)
+                    fatsField.text = "%.2f".format(Locale.US,fatsAmount)
+                    caloriesField.text = "%.2f".format(Locale.US,caloriesAmount)
                 }
 
                 updateMacros()

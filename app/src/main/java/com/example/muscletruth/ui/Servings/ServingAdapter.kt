@@ -16,6 +16,7 @@ import com.example.muscletruth.utils.Utils
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class ServingAdapter(
     private val onItemClick: (Serving) -> Unit,
@@ -48,10 +49,10 @@ class ServingAdapter(
             with(Dispatchers.Main){
                 val totalCalories = (product.proteins * 4 + product.fats * 9 + product.carbs * 4) / 100.00 * item.productAmount
                 holder.tvTitle.text = product.title
-                holder.tvProteins.text = "${"%.2f".format(product.proteins / 100.00 * item.productAmount)}"
-                holder.tvFats.text = "${"%.2f".format(product.fats / 100.00 * item.productAmount)}"
-                holder.tvCarbs.text = "${"%.2f".format(product.carbs / 100.00 * item.productAmount)}"
-                holder.tvCalories.text = "${"%.2f".format(totalCalories)}"
+                holder.tvProteins.text = "${"%.2f".format(Locale.US,product.proteins / 100.00 * item.productAmount)}"
+                holder.tvFats.text = "${"%.2f".format(Locale.US,product.fats / 100.00 * item.productAmount)}"
+                holder.tvCarbs.text = "${"%.2f".format(Locale.US,product.carbs / 100.00 * item.productAmount)}"
+                holder.tvCalories.text = "${"%.2f".format(Locale.US,totalCalories)}"
                 holder.tvAmount.text = "${item.productAmount}"
                 if(checkForInternetConnection() && product.serverPicture !== null && context !== null){
                     val path = product.serverPicture

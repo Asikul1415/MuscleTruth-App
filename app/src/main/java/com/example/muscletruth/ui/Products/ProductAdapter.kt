@@ -26,7 +26,7 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
         val tvProteins: TextView = view.findViewById(R.id.item_product_tv_proteins_val)
         val tvFats: TextView = view.findViewById(R.id.item_product_tv_fats_val)
         val tvCarbs: TextView = view.findViewById(R.id.item_product_tv_carbs_val)
-        val tvCalories: TextView = view.findViewById(R.id.item_product_tv_calories)
+        val tvCalories: TextView = view.findViewById(R.id.item_product_tv_calories_val)
         val picture: ImageView = view.findViewById(R.id.item_product_iv)
     }
 
@@ -43,7 +43,7 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
         holder.tvProteins.text = item.proteins.toString()
         holder.tvFats.text = item.fats.toString()
         holder.tvCarbs.text = item.carbs.toString()
-        holder.tvCalories.text = "${totalCalories} ккал"
+        holder.tvCalories.text = "${totalCalories}"
         Log.d("APP_DEBUG", "PRODUCT: $item")
         if(checkForInternetConnection() === true){
             if(item.serverPicture != null && context != null){
