@@ -48,3 +48,31 @@ data class Product(
     @ColumnInfo("creation_date")
     var creationDate: String? = null
 ): Parcelable
+
+@Parcelize
+@Entity("favourite_products")
+data class FavouriteProduct(
+    @PrimaryKey
+    @ColumnInfo(name = "product_local_id")
+    var productLocalID: String,
+
+    @SerializedName("product_server_id")
+    @ColumnInfo(name = "product_server_id")
+    var productServerID: Int = -1,
+): Parcelable
+
+@Parcelize
+@Entity("products_history")
+data class ProductsHistory(
+    @PrimaryKey
+    @ColumnInfo(name = "product_local_id")
+    var productLocalID: String,
+
+    @SerializedName("product_server_id")
+    @ColumnInfo(name = "product_server_id")
+    var productServerID: Int = -1,
+
+    @SerializedName("use_date")
+    @ColumnInfo("use_date")
+    var useDate: String? = null
+): Parcelable

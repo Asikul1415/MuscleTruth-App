@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
+import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.models.ProductsHistory
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -27,7 +29,41 @@ object ProductRepository {
             return products.toMutableList()
         }
         catch(e: Exception){
-            Log.d("APP_DEBUG", "${e.toString()}")
+            Log.e("APP_DEBUG", "${e.toString()}")
+            return mutableListOf()
+        }
+    }
+
+    suspend fun getFavouriteProducts(): MutableList<FavouriteProduct> {
+        try{
+            if(checkForInternetConnection()){
+                val products = apiService.getFavouriteProducts()
+                Log.d("APP_DEBUG", "GET FAVOURITE PRODUCTS: $products")
+            }
+
+            val products = localDb.productDao().getFavouriteProducts()
+            Log.d("APP_DEBUG", "GET FAVOURITE PRODUCTS: LOCAL $products")
+            return products.toMutableList()
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "GET FAVOURITE PRODUCTS ERROR: ${e.toString()}")
+            return mutableListOf()
+        }
+    }
+
+    suspend fun getRecentProducts(): MutableList<ProductsHistory> {
+        try{
+            if(checkForInternetConnection()){
+                val products = apiService.getRecentProducts()
+                Log.d("APP_DEBUG", "GET RECENT PRODUCTS: $products")
+            }
+
+            val products = localDb.productDao().getRecentProducts()
+            Log.d("APP_DEBUG", "GET RECENT PRODUCTS: LOCAL $products")
+            return products.toMutableList()
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "GET RECENT PRODUCTS ERROR: ${e.toString()}")
             return mutableListOf()
         }
     }

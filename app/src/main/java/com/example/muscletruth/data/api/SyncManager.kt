@@ -3,9 +3,11 @@ package com.example.muscletruth.data.api
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.models.ProductsHistory
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.Weighting
 import com.example.muscletruth.data.repository.MealRepository
@@ -215,6 +217,8 @@ object SyncManager {
 
         //Insert new products from the server
         var productsToInsert: List<Product>
+        var favouriteProductsToInsert: List<FavouriteProduct>
+        var recentProductsToInsert: List<ProductsHistory>
 
         coroutineScope {
             with(Dispatchers.IO){
@@ -230,12 +234,24 @@ object SyncManager {
                         product.copy(localID = UUID.randomUUID().toString())
                     }
                 }.filter { product ->
-                    localProducts.find{local -> local.serverID === product.serverID} === null
+                    localProducts.find{local -> local.serverID == product.serverID} === null
+                }
+
+                val localFavouriteProducts = localDb.productDao().getFavouriteProducts()
+                favouriteProductsToInsert = ProductRepository.getFavouriteProducts().filter {product ->
+                    localFavouriteProducts.find{local-> local.productServerID == product.productServerID} === null
+                }
+
+                val localRecentProducts = localDb.productDao().getRecentProducts()
+                recentProductsToInsert = ProductRepository.getRecentProducts().filter {product ->
+                    localRecentProducts.find{local -> local.productServerID == product.productServerID} == null
                 }
             }
         }
 
         localDb.productDao().insertAll(productsToInsert)
+        localDb.productDao().insertAllFavourites(favouriteProductsToInsert)
+        localDb.productDao().insertAllRecent(recentProductsToInsert)
         Log.d("APP_DEBUG", "SYNC PRODUCTS: INSERTED $productsToInsert")
 
 

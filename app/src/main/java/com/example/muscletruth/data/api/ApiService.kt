@@ -1,7 +1,9 @@
 package com.example.muscletruth.data.api
 
+import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.models.ProductsHistory
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.Token
 import com.example.muscletruth.data.models.Weighting
@@ -72,6 +74,12 @@ interface ApiService {
     //========================================PRODUCTS========================================\\
     @GET("api/products")
     suspend fun getProducts(@Query("search_query") searchQuery: String?): MutableList<Product>
+
+    @GET("api/products/favourites")
+    suspend fun getFavouriteProducts(): MutableList<FavouriteProduct>
+
+    @GET("api/products/recent")
+    suspend fun getRecentProducts(): MutableList<ProductsHistory>
 
     @GET("api/products/{product_id}")
     suspend fun getProduct(@Path("product_id") product_id: Int): Product

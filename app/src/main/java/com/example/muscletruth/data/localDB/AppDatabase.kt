@@ -7,8 +7,10 @@ import com.example.muscletruth.data.localDB.offlineModels.ProductDao
 import com.example.muscletruth.data.localDB.offlineModels.ServingDao
 import com.example.muscletruth.data.localDB.offlineModels.UserDao
 import com.example.muscletruth.data.localDB.offlineModels.WeightingDao
+import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.models.ProductsHistory
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Weighting
@@ -19,6 +21,8 @@ import com.example.muscletruth.data.models.Weighting
     Meal::class,
     Weighting::class,
     Product::class,
+    FavouriteProduct::class,
+    ProductsHistory::class
     ],
     version = 1)
 abstract class AppDatabase : RoomDatabase() {

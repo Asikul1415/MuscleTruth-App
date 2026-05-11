@@ -1,7 +1,9 @@
 package com.example.muscletruth.data.localDB.offlineModels
 
 import androidx.room.*
+import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.models.ProductsHistory
 
 @Dao
 interface ProductDao {
@@ -10,6 +12,12 @@ interface ProductDao {
 
     @Insert(onConflict = OnConflictStrategy.NONE)
     suspend fun insertAll(products: List<Product>)
+
+    @Insert(onConflict = OnConflictStrategy.NONE)
+    suspend fun insertAllFavourites(products: List<FavouriteProduct>)
+
+    @Insert(onConflict = OnConflictStrategy.NONE)
+    suspend fun insertAllRecent(products: List<ProductsHistory>)
 
     @Update
     suspend fun update(product: Product)
@@ -28,4 +36,10 @@ interface ProductDao {
 
     @Query("SELECT * FROM products WHERE server_id = -1")
     suspend fun getProductsForSync(): List<Product>
+
+    @Query("SELECT * FROM favourite_products")
+    suspend fun getFavouriteProducts(): List<FavouriteProduct>
+
+    @Query("SELECT * FROM products_history ORDER BY use_date DESC LIMIT 50")
+    suspend fun getRecentProducts(): List<ProductsHistory>
 }
