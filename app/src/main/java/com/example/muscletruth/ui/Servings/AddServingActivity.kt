@@ -91,6 +91,12 @@ class AddServingActivity : AppCompatActivity() {
             val intent = Intent(this, AddProductActivity::class.java)
             addProductLauncher.launch(intent)
         }
+
+        val backButton = findViewById<Button>(R.id.add_serving_btn_back)
+        backButton.setOnClickListener {
+            setResult(RESULT_CANCELED)
+            finish()
+        }
     }
 
     override fun onResume() {

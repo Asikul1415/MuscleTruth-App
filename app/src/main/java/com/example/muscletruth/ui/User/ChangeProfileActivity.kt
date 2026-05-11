@@ -72,6 +72,11 @@ class ChangeProfileActivity : AppCompatActivity() {
             Utils.ImageUtils.openGallery(selectImageLauncher)
         }
 
+        val backButton = findViewById<Button>(R.id.change_profile_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
+
         val saveButton = findViewById<Button>(R.id.change_profile_btn_save)
         saveButton.setOnClickListener {
             if(userName.length() > 0 && userName.length() < 3){

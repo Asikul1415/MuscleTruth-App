@@ -48,6 +48,11 @@ class MealsActivity : AppCompatActivity() {
             startActivity(intent)
 
         }
+
+        val backButton = findViewById<Button>(R.id.meals_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
     }
 
     override fun onResume () {

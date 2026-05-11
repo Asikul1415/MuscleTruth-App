@@ -106,6 +106,11 @@ class WeightingActivity : AppCompatActivity() {
             }
         }
 
+        val backButton = findViewById<Button>(R.id.weighting_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
+
         val saveButton = findViewById<Button>(R.id.weighting_btn_save)
         saveButton.setOnClickListener {
             val weightingResult = etResult.text.toString().toDouble()

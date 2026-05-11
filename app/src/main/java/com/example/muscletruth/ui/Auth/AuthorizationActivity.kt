@@ -36,6 +36,11 @@ class AuthorizationActivity : AppCompatActivity() {
 
             authorizeUser(email, password)
         }
+
+        val backButton = findViewById<Button>(R.id.auth_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
     }
 
     private fun authorizeUser(emailField: TextView, passwordField: TextView) {

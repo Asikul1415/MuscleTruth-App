@@ -47,16 +47,33 @@
         android:id="@+id/weightings_btn_add"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="Добавить"
-        android:textSize="24dp"
         android:backgroundTint="@color/primary"
+        android:text="Добавить"
         android:textColor="@color/white"
+        android:textSize="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintHorizontal_bias="0.621"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.945" />
+
+    <Button
+        android:id="@+id/weightings_btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/primary"
+        android:minWidth="60dp"
+        android:minHeight="50dp"
+        android:padding="0px"
+        android:text="ᐊ"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.045"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.942" />
 
     <Button
         android:id="@+id/weightings_btn_week"

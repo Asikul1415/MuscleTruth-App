@@ -74,6 +74,11 @@ class AddMealActivity : AppCompatActivity() {
             startProductActivityForResult.launch(intent)
         }
 
+        val backButton = findViewById<Button>(R.id.add_meal_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
+
         spinner = findViewById<Spinner>(R.id.add_meal_sp)
         val adapter = ArrayAdapter.createFromResource(
             this,

@@ -51,6 +51,11 @@ class MyProfileActivity : AppCompatActivity() {
 
         updateUserData()
 
+        val backButton = findViewById<Button>(R.id.profile_btn_back)
+        backButton.setOnClickListener{
+            finish()
+        }
+
         val statisticButton = findViewById<Button>(R.id.profile_btn_statistics)
         statisticButton.setOnClickListener {
             val intent = Intent(this@MyProfileActivity, StatisticActivity::class.java)

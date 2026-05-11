@@ -77,6 +77,11 @@ class StatisticActivity : AppCompatActivity() {
 
         loadData()
 
+        val backButton = findViewById<Button>(R.id.statistics_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
+
         val weekButton = findViewById<Button>(R.id.statistics_btn_week)
         weekButton.setOnClickListener {
             rangePreference = Period.Week

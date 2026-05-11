@@ -102,6 +102,11 @@ class WeightingsActivity : AppCompatActivity() {
             rangePreference = Period.Year
             loadData()
         }
+
+        val backButton = findViewById<Button>(R.id.weightings_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
     }
 
     override fun onResume() {

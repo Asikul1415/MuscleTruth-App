@@ -13,13 +13,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Моя статистика"
-        android:textSize="36dp"
         android:textColor="@color/accent"
+        android:textSize="36dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.064" />
+        app:layout_constraintVertical_bias="0.116" />
+
+    <Button
+        android:id="@+id/statistics_btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/primary"
+        android:minWidth="60dp"
+        android:minHeight="50dp"
+        android:padding="0px"
+        android:text="ᐊ"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.045"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.019" />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/statistics_chart"

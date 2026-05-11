@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -72,6 +73,12 @@ class AddProductActivity : AppCompatActivity() {
                 image.setImageURI(selectedImageUri)
                 imageURI = selectedImageUri
             }
+        }
+
+        val backButton = findViewById<Button>(R.id.add_product_btn_back)
+        backButton.setOnClickListener {
+            setResult(RESULT_CANCELED)
+            finish()
         }
 
         val saveButton = findViewById<Button>(R.id.add_product_btn_save)

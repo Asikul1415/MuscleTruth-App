@@ -54,6 +54,12 @@ class AddWeightingActivity : AppCompatActivity() {
             openGallery()
         }
 
+        val backButton = findViewById<Button>(R.id.add_weighting_btn_back)
+        backButton.setOnClickListener {
+            setResult(RESULT_CANCELED)
+            finish()
+        }
+
         val weightingResultText = findViewById<EditText>(R.id.add_weighting_et_result)
         weightingResultText.addTextChangedListener {
             val text = it.toString()

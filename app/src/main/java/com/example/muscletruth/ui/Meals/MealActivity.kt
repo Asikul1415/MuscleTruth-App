@@ -183,6 +183,11 @@ class MealActivity : AppCompatActivity() {
 
         }
 
+        val backButton = findViewById<Button>(R.id.meal_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
+
         val saveButton = findViewById<Button>(R.id.meal_btn_save)
         saveButton.setOnClickListener {
             lifecycleScope.launch {

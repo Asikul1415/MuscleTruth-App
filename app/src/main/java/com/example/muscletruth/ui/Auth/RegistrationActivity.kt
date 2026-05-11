@@ -84,6 +84,11 @@ class RegistrationActivity : AppCompatActivity() {
         addPicture.setOnClickListener {
             Utils.ImageUtils.openGallery(selectImageLauncher)
         }
+
+        val backButton = findViewById<Button>(R.id.register_btn_back)
+        backButton.setOnClickListener {
+            finish()
+        }
     }
 
     private fun registerUser() {
