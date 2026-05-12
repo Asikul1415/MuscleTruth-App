@@ -240,11 +240,15 @@ object SyncManager {
                 val localFavouriteProducts = localDb.productDao().getFavouriteProducts()
                 favouriteProductsToInsert = ProductRepository.getFavouriteProducts().filter {product ->
                     localFavouriteProducts.find{local-> local.productServerID == product.productServerID} === null
+                }.map {it ->
+                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
                 }
 
                 val localRecentProducts = localDb.productDao().getRecentProducts()
                 recentProductsToInsert = ProductRepository.getRecentProducts().filter {product ->
                     localRecentProducts.find{local -> local.productServerID == product.productServerID} == null
+                }.map {it ->
+                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
                 }
             }
         }

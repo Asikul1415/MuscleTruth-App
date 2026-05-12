@@ -56,7 +56,7 @@ data class FavouriteProduct(
     @ColumnInfo(name = "product_local_id")
     var productLocalID: String,
 
-    @SerializedName("product_server_id")
+    @SerializedName("product_id")
     @ColumnInfo(name = "product_server_id")
     var productServerID: Int = -1,
 ): Parcelable
@@ -68,7 +68,7 @@ data class ProductsHistory(
     @ColumnInfo(name = "product_local_id")
     var productLocalID: String,
 
-    @SerializedName("product_server_id")
+    @SerializedName("product_id")
     @ColumnInfo(name = "product_server_id")
     var productServerID: Int = -1,
 

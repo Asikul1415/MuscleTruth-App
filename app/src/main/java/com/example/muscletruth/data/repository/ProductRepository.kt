@@ -39,6 +39,7 @@ object ProductRepository {
             if(checkForInternetConnection()){
                 val products = apiService.getFavouriteProducts()
                 Log.d("APP_DEBUG", "GET FAVOURITE PRODUCTS: $products")
+                return products
             }
 
             val products = localDb.productDao().getFavouriteProducts()
@@ -56,6 +57,7 @@ object ProductRepository {
             if(checkForInternetConnection()){
                 val products = apiService.getRecentProducts()
                 Log.d("APP_DEBUG", "GET RECENT PRODUCTS: $products")
+                return products
             }
 
             val products = localDb.productDao().getRecentProducts()
