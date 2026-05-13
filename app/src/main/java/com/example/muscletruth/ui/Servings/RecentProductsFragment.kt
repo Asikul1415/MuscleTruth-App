@@ -201,7 +201,7 @@ class RecentProductsFragment : Fragment() {
 
             dialog.show()
             dialog.window?.setLayout(width, height)
-        }, requireContext())
+        }, requireContext(), lifecycleScope)
         adapter.items = mutableListOf()
         productsList.adapter = adapter
     }

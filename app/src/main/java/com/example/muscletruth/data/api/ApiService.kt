@@ -78,6 +78,9 @@ interface ApiService {
     @GET("api/products/favourites")
     suspend fun getFavouriteProducts(): MutableList<FavouriteProduct>
 
+    @GET("api/products/favourites/{product_id}")
+    suspend fun getFavouriteProduct(@Path("product_id") productID: Int): FavouriteProduct
+
     @GET("api/products/recent")
     suspend fun getRecentProducts(): MutableList<ProductsHistory>
 
@@ -87,6 +90,13 @@ interface ApiService {
     @Multipart
     @POST("api/products")
     suspend fun addProduct(@Part("product") product: RequestBody, @Part image: MultipartBody.Part? = null): Response<Product>
+
+    @FormUrlEncoded
+    @POST("api/products/favourites")
+    suspend fun addFavouriteProduct(@Field("product_id") productID: Int): FavouriteProduct
+
+    @DELETE("api/products/recent/{product_id}")
+    suspend fun deleteRecentProduct(@Path("product_id") productID: Int): Boolean
 
 
 

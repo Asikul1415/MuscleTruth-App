@@ -5,19 +5,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Product
+import com.example.muscletruth.data.repository.ProductRepository
 import com.example.muscletruth.utils.Utils
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
+import kotlinx.coroutines.launch
 import java.util.Locale
 
-class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Context? = null) : RecyclerView.Adapter<ProductAdapter.ViewHolder>(), Filterable{
+class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Context? = null, val lifecycle: LifecycleCoroutineScope) : RecyclerView.Adapter<ProductAdapter.ViewHolder>(), Filterable{
     var items = mutableListOf<Product>()
     val filteredItems = mutableListOf<Product>()
 
@@ -28,6 +32,7 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
         val tvCarbs: TextView = view.findViewById(R.id.item_product_tv_carbs_val)
         val tvCalories: TextView = view.findViewById(R.id.item_product_tv_calories_val)
         val picture: ImageView = view.findViewById(R.id.item_product_iv)
+        val favouriteButton: Button = view.findViewById(R.id.item_product_btn_favourite)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -61,6 +66,31 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
                     .load(path)
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .into(holder.picture)
+            }
+        }
+
+        lifecycle.launch {
+            Log.d("APP_DEBUG!", "${ProductRepository.getFavouriteProducts().find{product -> product.productLocalID == item.localID}}")
+            if(ProductRepository.getFavouriteProduct(item.serverID, item.localID) !== null){
+                holder.favouriteButton.text = "♥"
+            }
+            else{
+                holder.favouriteButton.text = "♡"
+            }
+        }
+
+        holder.favouriteButton.setOnClickListener {
+            lifecycle.launch {
+                //If product not favourite
+                if(ProductRepository.getFavouriteProduct(item.serverID, item.localID) !== null){
+                    holder.favouriteButton.text = "♥"
+                    ProductRepository.addFavouriteProduct(item.serverID, item.localID)
+                }
+                //If product already favourite
+                else{
+                    holder.favouriteButton.text = "♡"
+                    ProductRepository.deleteFavouriteProduct(item.serverID, item.localID)
+                }
             }
         }
 

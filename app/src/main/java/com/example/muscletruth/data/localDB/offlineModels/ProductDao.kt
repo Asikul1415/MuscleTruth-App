@@ -10,6 +10,9 @@ interface ProductDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(product: Product)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addFavouriteProduct(favouriteProduct: FavouriteProduct)
+
     @Insert(onConflict = OnConflictStrategy.NONE)
     suspend fun insertAll(products: List<Product>)
 
@@ -25,6 +28,12 @@ interface ProductDao {
     @Delete
     suspend fun delete(product: Product)
 
+    @Delete
+    suspend fun deleteFavouriteProduct(favouriteProduct: FavouriteProduct)
+
+    @Delete
+    suspend fun deleteRecentProduct(productsHistory: ProductsHistory)
+
     @Query("SELECT * FROM products WHERE (:searchQuery IS NULL OR title LIKE '%' || :searchQuery || '%')")
     suspend fun getProducts(searchQuery: String? = null): MutableList<Product>
 
@@ -39,6 +48,9 @@ interface ProductDao {
 
     @Query("SELECT * FROM favourite_products")
     suspend fun getFavouriteProducts(): List<FavouriteProduct>
+
+    @Query("SELECT * FROM favourite_products WHERE product_server_id = :productID OR product_local_id = :localProductID")
+    suspend fun getFavouriteProduct(productID:Int, localProductID: String?): FavouriteProduct
 
     @Query("SELECT * FROM products_history ORDER BY use_date DESC LIMIT 50")
     suspend fun getRecentProducts(): List<ProductsHistory>
