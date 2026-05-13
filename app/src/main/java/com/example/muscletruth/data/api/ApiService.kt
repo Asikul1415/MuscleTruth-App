@@ -95,6 +95,9 @@ interface ApiService {
     @POST("api/products/favourites")
     suspend fun addFavouriteProduct(@Field("product_id") productID: Int): FavouriteProduct
 
+    @DELETE("api/products/favourites/{product_id}")
+    suspend fun deleteFavouriteProduct(@Path("product_id") productID: Int): Boolean
+
     @DELETE("api/products/recent/{product_id}")
     suspend fun deleteRecentProduct(@Path("product_id") productID: Int): Boolean
 
