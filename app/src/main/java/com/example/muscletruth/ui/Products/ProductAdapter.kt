@@ -83,13 +83,13 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
             lifecycle.launch {
                 //If product not favourite
                 if(ProductRepository.getFavouriteProduct(item.serverID, item.localID) !== null){
-                    holder.favouriteButton.text = "♥"
-                    ProductRepository.addFavouriteProduct(item.serverID, item.localID)
+                    holder.favouriteButton.text = "♡"
+                    ProductRepository.deleteFavouriteProduct(item.serverID, item.localID)
                 }
                 //If product already favourite
                 else{
-                    holder.favouriteButton.text = "♡"
-                    ProductRepository.deleteFavouriteProduct(item.serverID, item.localID)
+                    holder.favouriteButton.text = "♥"
+                    ProductRepository.addFavouriteProduct(item.serverID, item.localID)
                 }
             }
         }
