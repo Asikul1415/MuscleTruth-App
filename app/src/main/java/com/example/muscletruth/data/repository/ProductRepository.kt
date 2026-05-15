@@ -24,7 +24,13 @@ object ProductRepository {
         try{
             if(checkForInternetConnection()){
                 return apiService.getProducts(searchQuery).map{product ->
-                    product.copy(localID = localDb.productDao().getServerProduct(product.serverID)!!.localID)
+                    val localProduct = localDb.productDao().getServerProduct(product.serverID)
+                    if(localProduct !== null){
+                        product.copy(localID = localProduct.localID)
+                    }
+                    else{
+                        product
+                    }
                 }.toMutableList()
             }
             val products = localDb.productDao().getProducts(searchQuery)
@@ -32,7 +38,7 @@ object ProductRepository {
             return products.toMutableList()
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "${e.toString()}")
+            Log.e("APP_DEBUG", "getProducts() ${e.toString()}")
             return mutableListOf()
         }
     }
