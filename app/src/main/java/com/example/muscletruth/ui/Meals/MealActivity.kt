@@ -232,6 +232,7 @@ class MealActivity : AppCompatActivity() {
                                     productAmount = serving.productAmount
                                 )
                                 ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, servingBase)
+                                ProductRepository.addRecentProduct(serving.productID, serving.localProductID)
                             }
                             finish()
                         }

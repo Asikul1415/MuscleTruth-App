@@ -11,6 +11,9 @@ interface ProductDao {
     suspend fun insert(product: Product)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addRecentProduct(recentProduct: ProductsHistory)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addFavouriteProduct(favouriteProduct: FavouriteProduct)
 
     @Insert(onConflict = OnConflictStrategy.NONE)

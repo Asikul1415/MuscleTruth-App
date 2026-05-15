@@ -14,6 +14,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.example.muscletruth.data.repository.UserRepository.localDb
 import com.example.muscletruth.utils.Utils
+import java.time.ZonedDateTime
 import java.util.UUID
 
 object ProductRepository {
@@ -106,6 +107,7 @@ object ProductRepository {
                     productLocalID = localID!!,
                     productServerID = productID)
             }
+
             localDb.productDao().addFavouriteProduct(favouriteProduct)
             Log.d("APP_DEBUG", "ADDED FAVOURITE PRODUCT LOCAL: $favouriteProduct")
         }
@@ -156,6 +158,71 @@ object ProductRepository {
         catch(e: Exception){
             Log.e("APP_DEBUG", "GET RECENT PRODUCTS ERROR: ${e.toString()}")
             return mutableListOf()
+        }
+    }
+
+    suspend fun addRecentProduct(productID: Int, localProductID: String? = null) {
+        try{
+            var productHistory: ProductsHistory? = null
+            if(checkForInternetConnection()){
+                productHistory = apiService.addRecentProduct(productID)
+                Log.d("APP_DEBUG", "ADDED RECENT PRODUCT ON SERVER: $productHistory")
+            }
+
+            if(productHistory !== null){
+                val localProduct = localDb.productDao().getServerProduct(productHistory.productServerID)
+                if(localProduct !== null){
+                    productHistory.productLocalID = localProduct.localID
+                }
+
+            }
+            else{
+                var localID: String? = null
+                if(productID != -1){
+                    localID = localDb.productDao().getServerProduct(productID)!!.localID
+                }
+                else{
+                    localID = localProductID
+                }
+
+                productHistory = ProductsHistory(
+                    productLocalID = localID!!,
+                    productServerID = productID,
+                    useDate = ZonedDateTime.now().toOffsetDateTime().toString()
+                )
+            }
+            localDb.productDao().addRecentProduct(productHistory)
+            Log.d("APP_DEBUG", "ADDED RECENT PRODUCT LOCAL: $productHistory")
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "ADDED RECENT PRODUCT ERROR: ${e.toString()}")
+        }
+    }
+
+    suspend fun deleteRecentProduct(productID: Int, localProductID: String? = null){
+        try{
+            if(checkForInternetConnection()){
+                val isDeleteSuccessful = apiService.deleteRecentProduct(productID)
+                Log.d("APP_DEBUG", "DELETE RECENT PRODUCT ON SERVER: $isDeleteSuccessful")
+            }
+
+
+            var localID: String? = null
+            if(productID != -1){
+                localID = localDb.productDao().getServerProduct(productID)!!.localID
+            }
+            else{
+                localID = localProductID
+            }
+
+            val recentProduct = ProductsHistory(
+                productLocalID = localID!!,
+                productServerID = productID)
+            localDb.productDao().deleteRecentProduct(recentProduct)
+            Log.d("APP_DEBUG", "DELETE RECENT PRODUCT LOCAL: $recentProduct")
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "DELETE RECENT PRODUCT ERROR: ${e.toString()}")
         }
     }
 

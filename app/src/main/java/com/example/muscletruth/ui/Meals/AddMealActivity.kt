@@ -133,6 +133,7 @@ class AddMealActivity : AppCompatActivity() {
                         servings.forEach { serving ->
                             serving.mealID = meal.serverID
                             ServingRepository.addServing(meal, serving)
+                            ProductRepository.addRecentProduct(serving.productID, serving.localProductID)
                             finish()
                         }
                     }
