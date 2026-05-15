@@ -64,11 +64,15 @@ object ServingRepository {
     suspend fun getServings(mealServerID: Int, mealLocalID: String? = null): MutableList<Serving> {
         try{
             if(checkForInternetConnection()){
-                return apiService.getServings(mealServerID).map{ serving -> serving.copy(localID=UUID.randomUUID().toString())}.toMutableList()
+                return apiService.getServings(mealServerID).map{ serving -> serving.copy(
+                    localID=UUID.randomUUID().toString(),
+                    localMealID = localDb.mealDao().getServerMeal(serving.mealID!!)!!.localID,
+                    localProductID = localDb.productDao().getServerProduct(serving.productID)!!.localID,
+                )}.toMutableList()
             }
 
             var servings: List<Serving>
-            if(mealServerID !== -1){
+            if(mealServerID != -1){
                 servings = localDb.servingDao().getServerMealServings(mealServerID)
             }
             else{
@@ -95,7 +99,7 @@ object ServingRepository {
             }
 
             if(serving.serverID != -1){
-                val localServing = localDb.servingDao().getServing(serving.serverID)
+                val localServing = localDb.servingDao().getServerServing(serving.serverID)
                 localServing.productAmount = serving.productAmount
                 localDb.servingDao().update(localServing)
             }
@@ -110,21 +114,16 @@ object ServingRepository {
 
     suspend fun deleteServing(serving: Serving){
         try{
-            if(serving.serverID !== null){
-                if(checkForInternetConnection()){
-                    val mealID = serving.mealID
-                    if(mealID !== null){
-                        apiService.deleteServing(mealID, serving.serverID)
-                    }
+            if(checkForInternetConnection()){
+                val mealID = serving.mealID
+                if(mealID !== null){
+                    apiService.deleteServing(mealID, serving.serverID)
                 }
+            }
 
-                val localServing = localDb.servingDao().getServing(serving.serverID)
-                localDb.servingDao().delete(localServing)
-                Log.d("APP_DEBUG", "DELETE SERVING: SERVING $localServing WAS DELETED")
-            }
-            else{
-                Log.e("APP_DEBUG", "DELETE SERVING ERROR: serving $serving wasn't deleted")
-            }
+            val localServing = localDb.servingDao().getLocalServing(serving.localID)
+            localDb.servingDao().delete(localServing)
+            Log.d("APP_DEBUG", "DELETE SERVING: SERVING $localServing WAS DELETED")
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "DELETE SERVING ERROR: ${e.toString()}")
