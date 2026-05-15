@@ -10,7 +10,7 @@ import com.example.muscletruth.data.localDB.offlineModels.WeightingDao
 import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.models.ProductsHistory
+import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Weighting
@@ -22,7 +22,7 @@ import com.example.muscletruth.data.models.Weighting
     Weighting::class,
     Product::class,
     FavouriteProduct::class,
-    ProductsHistory::class
+    RecentServing::class
     ],
     version = 1)
 abstract class AppDatabase : RoomDatabase() {

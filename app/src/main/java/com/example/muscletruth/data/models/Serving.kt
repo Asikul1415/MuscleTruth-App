@@ -40,3 +40,19 @@ data class Serving(
     @ColumnInfo(name="product_amount")
     var productAmount: Int,
 ): Parcelable
+
+@Parcelize
+@Entity("recent_servings")
+data class RecentServing(
+    @PrimaryKey
+    @ColumnInfo(name = "serving_local_id")
+    var servingLocalID: String,
+
+    @SerializedName("serving_id")
+    @ColumnInfo(name = "serving_server_id")
+    var servingServerID: Int = -1,
+
+    @SerializedName("use_date")
+    @ColumnInfo("use_date")
+    var useDate: String? = null
+): Parcelable

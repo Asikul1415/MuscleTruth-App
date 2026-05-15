@@ -336,8 +336,8 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         val mealID = serving.mealID ?: -1
                         val mealLocalID = serving.localMealID
 
-                        Log.d("APP_DEBUG", "MealAdapter: ${ServingRepository.getServings(mealID, mealLocalID)}")
-                        if(ServingRepository.getServings(mealID, mealLocalID).size == 1){
+                        Log.d("APP_DEBUG", "MealAdapter: ${ServingRepository.getMealServings(mealID, mealLocalID)}")
+                        if(ServingRepository.getMealServings(mealID, mealLocalID).size == 1){
                             MealRepository.deleteMeal(mealServerID = mealID, mealLocalID)
                         }
                         else{

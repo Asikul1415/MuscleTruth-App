@@ -43,9 +43,11 @@ import java.util.UUID
 class MealActivity : AppCompatActivity() {
     private var servings = mutableListOf<Serving>()
     private var addedServings = mutableListOf<Serving>()
+    private var deletedServings = mutableListOf<Serving>()
     private lateinit var productsList: RecyclerView
     private lateinit var adapter: ServingAdapter
     private lateinit var spinner: Spinner
+    private lateinit var mealItem: MealItem
     private lateinit var selectImageLauncher: ActivityResultLauncher<Intent>
     private lateinit var picture: ImageView
     private lateinit var proteinsField: TextView
@@ -115,12 +117,10 @@ class MealActivity : AppCompatActivity() {
         carbsField = findViewById<TextView>(R.id.meal_tv_carbs_val)
         caloriesField = findViewById<TextView>(R.id.meal_tv_calories_val)
 
-
-        val mealItem = intent.getParcelableExtra<MealItem>("meal")
+        mealItem = intent.getParcelableExtra<MealItem>("meal")!!
        lifecycleScope.launch {
             with(Dispatchers.IO){
                 if(mealItem !== null){
-                    servings = ServingRepository.getServings(mealItem.id, mealItem.localID)
                     loadData()
 
                     val meal = MealRepository.getMeal(mealItem.id)
@@ -214,8 +214,8 @@ class MealActivity : AppCompatActivity() {
 
                         if(isMealUpdateSuccessful){
                             //Setting wasUpdated flag to sync changes later
-                            if(checkForInternetConnection() === false && mealItem.localID !== null){
-                                val updatedMeal = UserRepository.localDb.mealDao().getLocalMeal(mealItem.localID)
+                            if(checkForInternetConnection() == false && mealItem.localID !== null){
+                                val updatedMeal = UserRepository.localDb.mealDao().getLocalMeal(mealItem.localID!!)
                                 if(updatedMeal !== null){
                                     updatedMeal.wasUpdated = 1;
                                     UserRepository.localDb.mealDao().update(updatedMeal)
@@ -231,8 +231,20 @@ class MealActivity : AppCompatActivity() {
                                     localProductID = serving.localProductID,
                                     productAmount = serving.productAmount
                                 )
-                                ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, servingBase)
-                                ProductRepository.addRecentProduct(serving.productID, serving.localProductID)
+                                ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, servingBase).onSuccess {serverServing ->
+                                    ServingRepository.addRecentServing(serverServing.serverID, serving.localID)
+                                }
+                            }
+
+                            deletedServings.forEach {serving ->
+                                val servingBase = Serving(
+                                    mealID = mealItem.id,
+                                    localMealID = mealItem.localID,
+                                    productID = serving.productID,
+                                    localProductID = serving.localProductID,
+                                    productAmount = serving.productAmount
+                                )
+                                ServingRepository.deleteServing(servingBase)
                             }
                             finish()
                         }
@@ -283,6 +295,10 @@ class MealActivity : AppCompatActivity() {
     private fun loadData(){
         lifecycleScope.launch {
             try{
+                servings = ServingRepository.getMealServings(mealItem.id, mealItem.localID).filter{ serving ->
+                    deletedServings.map{ it->it.localID}.indexOf(serving.localID) == -1
+                }.toMutableList()
+                servings.addAll(addedServings)
                 adapter.items = servings
                 updateMacros()
 

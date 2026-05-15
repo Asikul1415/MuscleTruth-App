@@ -60,19 +60,3 @@ data class FavouriteProduct(
     @ColumnInfo(name = "product_server_id")
     var productServerID: Int = -1,
 ): Parcelable
-
-@Parcelize
-@Entity("products_history")
-data class ProductsHistory(
-    @PrimaryKey
-    @ColumnInfo(name = "product_local_id")
-    var productLocalID: String,
-
-    @SerializedName("product_id")
-    @ColumnInfo(name = "product_server_id")
-    var productServerID: Int = -1,
-
-    @SerializedName("use_date")
-    @ColumnInfo("use_date")
-    var useDate: String? = null
-): Parcelable

@@ -72,7 +72,7 @@ class MealsActivity : AppCompatActivity() {
                         MealItem(
                             id=meal.serverID!!,
                             localID = meal.localID,
-                            servings = ServingRepository.getServings(meal.serverID, meal.localID),
+                            servings = ServingRepository.getMealServings(meal.serverID, meal.localID),
                             mealTypeID = meal.mealTypeID,
                             creationDate = meal.creationDate)
                     }

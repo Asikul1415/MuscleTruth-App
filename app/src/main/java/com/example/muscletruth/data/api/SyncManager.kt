@@ -7,7 +7,7 @@ import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.models.ProductsHistory
+import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.Weighting
 import com.example.muscletruth.data.repository.MealRepository
@@ -170,7 +170,7 @@ object SyncManager {
             with(Dispatchers.IO){
                 val meals = MealRepository.getMeals()
                 meals.forEach { meal ->
-                    serverServings.addAll(ServingRepository.getServings(meal.serverID!!))
+                    serverServings.addAll(ServingRepository.getMealServings(meal.serverID!!))
                 }
             }
         }
@@ -211,6 +211,14 @@ object SyncManager {
             }
         }
         Log.d("APP_DEBUG", "SYNC SERVINGS: LOCALS WERE SENT $servingsForSync")
+
+        val localRecentServings = localDb.servingDao().getRecentServings()
+        val recentProductsToInsert = ServingRepository.getRecentServings().filter { serving ->
+            localRecentServings.find{ local -> local.servingServerID == serving.servingServerID} == null
+        }.map {it ->
+            it.copy(servingLocalID = localDb.servingDao().getServerServing(it.servingServerID)!!.localID)
+        }
+        localDb.productDao().insertAllRecent(recentProductsToInsert)
     }
 
     private suspend fun syncProducts(context: Context){
@@ -218,7 +226,6 @@ object SyncManager {
         //Insert new products from the server
         var productsToInsert: List<Product>
         var favouriteProductsToInsert: List<FavouriteProduct>
-        var recentProductsToInsert: List<ProductsHistory>
 
         coroutineScope {
             with(Dispatchers.IO){
@@ -243,19 +250,12 @@ object SyncManager {
                 }.map {it ->
                     it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
                 }
-
-                val localRecentProducts = localDb.productDao().getRecentProducts()
-                recentProductsToInsert = ProductRepository.getRecentProducts().filter {product ->
-                    localRecentProducts.find{local -> local.productServerID == product.productServerID} == null
-                }.map {it ->
-                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
-                }
             }
         }
 
         localDb.productDao().insertAll(productsToInsert)
         localDb.productDao().insertAllFavourites(favouriteProductsToInsert)
-        localDb.productDao().insertAllRecent(recentProductsToInsert)
+
         Log.d("APP_DEBUG", "SYNC PRODUCTS: INSERTED $productsToInsert")
 
 

@@ -1,6 +1,7 @@
 package com.example.muscletruth.data.localDB.offlineModels
 
 import androidx.room.*
+import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.data.models.Serving
 
 @Dao
@@ -17,6 +18,9 @@ interface ServingDao {
     @Delete
     suspend fun delete(serving: Serving)
 
+    @Delete
+    suspend fun delete(serving: RecentServing)
+
     @Query("SELECT * from servings WHERE meal_id = :mealServerID")
     suspend fun getServerMealServings(mealServerID: Int): MutableList<Serving>
 
@@ -27,8 +31,14 @@ interface ServingDao {
     suspend fun getServings(): MutableList<Serving>
 
     @Query("SELECT * from servings WHERE server_id = :servingID")
-    suspend fun getServing(servingID: Int): Serving
+    suspend fun getServerServing(servingID: Int): Serving
+
+    @Query("SELECT * from servings WHERE local_id = :servingLocalID")
+    suspend fun getLocalServing(servingLocalID: String): Serving
 
     @Query("SELECT * from servings WHERE server_id = -1")
     suspend fun getServingsForSync(): List<Serving>
+
+    @Query("SELECT * FROM recent_servings ORDER BY use_date DESC LIMIT 50")
+    suspend fun getRecentServings(): List<RecentServing>
 }

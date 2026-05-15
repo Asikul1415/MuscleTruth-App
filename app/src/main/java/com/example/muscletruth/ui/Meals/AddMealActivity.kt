@@ -132,8 +132,16 @@ class AddMealActivity : AppCompatActivity() {
                     mealResponse.onSuccess {meal ->
                         servings.forEach { serving ->
                             serving.mealID = meal.serverID
-                            ServingRepository.addServing(meal, serving)
-                            ProductRepository.addRecentProduct(serving.productID, serving.localProductID)
+                            ServingRepository.addServing(meal, serving).onSuccess {serverServing ->
+                                //If se
+                                if(serverServing.localID !== null){
+                                    ServingRepository.addRecentServing(serverServing.serverID, serverServing.localID)
+                                }
+                                else{
+                                    ServingRepository.addRecentServing(serverServing.serverID, serving.localID)
+                                }
+
+                            }
                             finish()
                         }
                     }

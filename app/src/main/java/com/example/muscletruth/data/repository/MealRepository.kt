@@ -176,12 +176,28 @@ object MealRepository {
             if(mealServerID !== null && mealServerID != -1){
                 val localMeal = localDb.mealDao().getServerMeal(mealServerID)
                 localDb.mealDao().delete(localMeal!!)
-                Log.d("APP_DEBUG", "DELETE: MEAL $localMeal WAS DELETED")
+                val servings = localDb.servingDao().getServerMealServings(mealServerID)
+                val recentServings = localDb.servingDao().getRecentServings()
+                servings.forEach {serving ->
+                    recentServings.filter {it->it.servingServerID == serving.serverID}.forEach { recentServing ->
+                        localDb.servingDao().delete(recentServing)
+                    }
+                    localDb.servingDao().delete(serving)
+                }
+                Log.d("APP_DEBUG", "DELETE MEAL: MEAL $localMeal WAS DELETED")
             }
             else if(mealLocalID !== null){
                 val localMeal = localDb.mealDao().getLocalMeal(mealLocalID)
                 localDb.mealDao().delete(localMeal!!)
-                Log.d("APP_DEBUG", "DELETE: MEAL $localMeal WAS DELETED")
+                val servings = localDb.servingDao().getLocalMealServings(localMeal.localID)
+                val recentServings = localDb.servingDao().getRecentServings()
+                servings.forEach {serving ->
+                    recentServings.filter {it->it.servingLocalID == serving.localID}.forEach { recentServing ->
+                        localDb.servingDao().delete(recentServing)
+                    }
+                    localDb.servingDao().delete(serving)
+                }
+                Log.d("APP_DEBUG", "DELETE MEAL: MEAL $localMeal WAS DELETED")
             }
             else{
                 Log.e("APP_DEBUG", "DELETE MEAL: MEAL WASN'T DELETED")

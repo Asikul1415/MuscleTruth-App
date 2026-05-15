@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
 class TabPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
-    private val fragments = listOf(ProductsListFragment(), FavouriteProductsFragment(), RecentProductsFragment())
+    private val fragments = listOf(ProductsListFragment(), FavouriteProductsFragment(), RecentServingsFragment())
     private val titles = listOf("Общий список", "Избранные", "Недавно использованные")
 
     override fun getItemCount(): Int = fragments.size
