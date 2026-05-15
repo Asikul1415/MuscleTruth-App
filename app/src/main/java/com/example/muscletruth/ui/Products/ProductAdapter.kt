@@ -21,7 +21,7 @@ import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnecti
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Context? = null, val lifecycle: LifecycleCoroutineScope) : RecyclerView.Adapter<ProductAdapter.ViewHolder>(), Filterable{
+class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Context? = null, val lifecycle: LifecycleCoroutineScope, val notifyItemChanged: () -> Unit) : RecyclerView.Adapter<ProductAdapter.ViewHolder>(), Filterable{
     var items = mutableListOf<Product>()
     val filteredItems = mutableListOf<Product>()
 
@@ -91,6 +91,7 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
                     holder.favouriteButton.text = "♥"
                     ProductRepository.addFavouriteProduct(item.serverID, item.localID)
                 }
+                notifyItemChanged()
             }
         }
 

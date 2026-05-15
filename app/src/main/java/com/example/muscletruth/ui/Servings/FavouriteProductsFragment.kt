@@ -202,7 +202,7 @@ class FavouriteProductsFragment : Fragment() {
 
             dialog.show()
             dialog.window?.setLayout(width, height)
-        }, requireContext(), lifecycleScope)
+        }, requireContext(), lifecycleScope, {loadData()})
         adapter.items = mutableListOf()
         productsList.adapter = adapter
     }
