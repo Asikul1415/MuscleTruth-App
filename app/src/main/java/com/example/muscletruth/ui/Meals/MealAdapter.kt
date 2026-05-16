@@ -126,7 +126,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                     holder.mealTvProteins?.text = "%.2f".format(Locale.US, totalProteins)
                     holder.mealTvFats?.text = "%.2f".format(Locale.US,totalFats)
                     holder.mealTvCarbs?.text = "%.2f".format(Locale.US,totalCarbs)
-                    holder.mealTvCalories?.text = (totalProteins * 4 + totalCarbs * 4  + totalFats * 9).toString()
+                    holder.mealTvCalories?.text = "%.2f".format(Locale.US,totalProteins * 4 + totalCarbs * 4  + totalFats * 9)
                 }
 
                 holder.itemView.setOnClickListener {
