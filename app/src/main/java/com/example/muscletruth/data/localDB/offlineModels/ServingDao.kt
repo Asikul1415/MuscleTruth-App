@@ -39,6 +39,9 @@ interface ServingDao {
     @Query("SELECT * from servings WHERE server_id = -1")
     suspend fun getServingsForSync(): List<Serving>
 
+    @Query("SELECT * FROM recent_servings WHERE serving_server_id = :servingServerID OR serving_local_id = :localServingID")
+    suspend fun getRecentServing(servingServerID: Int?, localServingID: String?): RecentServing?
+
     @Query("SELECT * FROM recent_servings ORDER BY use_date DESC LIMIT 50")
     suspend fun getRecentServings(): List<RecentServing>
 }

@@ -6,7 +6,7 @@ import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.models.ProductsHistory
+import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -146,89 +146,6 @@ object ProductRepository {
         }
         catch(e: Exception){
             Log.e("APP_DEBUG", "DELETE FAVOURITE PRODUCT ERROR: ${e.toString()}")
-        }
-    }
-
-    suspend fun getRecentProducts(): MutableList<ProductsHistory> {
-        try{
-            if(checkForInternetConnection()){
-                val products = apiService.getRecentProducts()
-                Log.d("APP_DEBUG", "GET RECENT PRODUCTS: $products")
-                return products
-            }
-
-            val products = localDb.productDao().getRecentProducts()
-            Log.d("APP_DEBUG", "GET RECENT PRODUCTS: LOCAL $products")
-            return products.toMutableList()
-        }
-        catch(e: Exception){
-            Log.e("APP_DEBUG", "GET RECENT PRODUCTS ERROR: ${e.toString()}")
-            return mutableListOf()
-        }
-    }
-
-    suspend fun addRecentProduct(productID: Int, localProductID: String? = null) {
-        try{
-            var productHistory: ProductsHistory? = null
-            if(checkForInternetConnection()){
-                productHistory = apiService.addRecentProduct(productID)
-                Log.d("APP_DEBUG", "ADDED RECENT PRODUCT ON SERVER: $productHistory")
-            }
-
-            if(productHistory !== null){
-                val localProduct = localDb.productDao().getServerProduct(productHistory.productServerID)
-                if(localProduct !== null){
-                    productHistory.productLocalID = localProduct.localID
-                }
-
-            }
-            else{
-                var localID: String? = null
-                if(productID != -1){
-                    localID = localDb.productDao().getServerProduct(productID)!!.localID
-                }
-                else{
-                    localID = localProductID
-                }
-
-                productHistory = ProductsHistory(
-                    productLocalID = localID!!,
-                    productServerID = productID,
-                    useDate = ZonedDateTime.now().toOffsetDateTime().toString()
-                )
-            }
-            localDb.productDao().addRecentProduct(productHistory)
-            Log.d("APP_DEBUG", "ADDED RECENT PRODUCT LOCAL: $productHistory")
-        }
-        catch(e: Exception){
-            Log.e("APP_DEBUG", "ADDED RECENT PRODUCT ERROR: ${e.toString()}")
-        }
-    }
-
-    suspend fun deleteRecentProduct(productID: Int, localProductID: String? = null){
-        try{
-            if(checkForInternetConnection()){
-                val isDeleteSuccessful = apiService.deleteRecentProduct(productID)
-                Log.d("APP_DEBUG", "DELETE RECENT PRODUCT ON SERVER: $isDeleteSuccessful")
-            }
-
-
-            var localID: String? = null
-            if(productID != -1){
-                localID = localDb.productDao().getServerProduct(productID)!!.localID
-            }
-            else{
-                localID = localProductID
-            }
-
-            val recentProduct = ProductsHistory(
-                productLocalID = localID!!,
-                productServerID = productID)
-            localDb.productDao().deleteRecentProduct(recentProduct)
-            Log.d("APP_DEBUG", "DELETE RECENT PRODUCT LOCAL: $recentProduct")
-        }
-        catch(e: Exception){
-            Log.e("APP_DEBUG", "DELETE RECENT PRODUCT ERROR: ${e.toString()}")
         }
     }
 

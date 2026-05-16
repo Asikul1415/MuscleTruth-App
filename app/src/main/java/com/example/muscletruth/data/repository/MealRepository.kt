@@ -6,6 +6,7 @@ import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.models.Meal
+import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -173,26 +174,22 @@ object MealRepository {
                 }
             }
 
-            if(mealServerID !== null && mealServerID != -1){
-                val localMeal = localDb.mealDao().getServerMeal(mealServerID)
-                localDb.mealDao().delete(localMeal!!)
-                val servings = localDb.servingDao().getServerMealServings(mealServerID)
-                val recentServings = localDb.servingDao().getRecentServings()
-                servings.forEach {serving ->
-                    recentServings.filter {it->it.servingServerID == serving.serverID}.forEach { recentServing ->
-                        localDb.servingDao().delete(recentServing)
-                    }
-                    localDb.servingDao().delete(serving)
+            if((mealServerID !== null && mealServerID != -1) || mealLocalID !== null){
+                var servings: MutableList<Serving>
+                var localMeal: Meal?
+                 if(mealServerID !== null && mealServerID != -1) {
+                    localMeal = localDb.mealDao().getServerMeal(mealServerID)
+                    servings = localDb.servingDao().getServerMealServings(mealServerID)
                 }
-                Log.d("APP_DEBUG", "DELETE MEAL: MEAL $localMeal WAS DELETED")
-            }
-            else if(mealLocalID !== null){
-                val localMeal = localDb.mealDao().getLocalMeal(mealLocalID)
+                else{
+                     localMeal = localDb.mealDao().getLocalMeal(mealLocalID!!)
+                     servings = localDb.servingDao().getLocalMealServings(mealLocalID)
+                }
+
                 localDb.mealDao().delete(localMeal!!)
-                val servings = localDb.servingDao().getLocalMealServings(localMeal.localID)
-                val recentServings = localDb.servingDao().getRecentServings()
                 servings.forEach {serving ->
-                    recentServings.filter {it->it.servingLocalID == serving.localID}.forEach { recentServing ->
+                    val recentServing = localDb.servingDao().getRecentServing(serving.serverID, serving.localID)
+                    if(recentServing !== null){
                         localDb.servingDao().delete(recentServing)
                     }
                     localDb.servingDao().delete(serving)
