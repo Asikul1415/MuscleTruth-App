@@ -40,7 +40,6 @@ class Utils {
     object NetworkUtils {
         public lateinit var connectivityManager: ConnectivityManager
         fun checkForInternetConnection(): Boolean{
-            Log.d("APP_DEBUG", "NETWORK: ${connectivityManager.activeNetwork !== null}")
             return connectivityManager.activeNetwork !== null
         }
     }

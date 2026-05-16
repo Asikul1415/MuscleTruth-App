@@ -183,9 +183,6 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                         MealRepository.getMealTypeTotal(item.id)
                     }
                     Log.d("APP_DEBUG", "MEAL_TYPE_BASE: ${response}")
-                    withContext(Dispatchers.Main){
-
-                    }
                 }
             }
         }

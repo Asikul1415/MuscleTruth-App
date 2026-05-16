@@ -4,8 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
@@ -13,9 +15,11 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -195,10 +199,159 @@ class AddMealActivity : AppCompatActivity() {
     private fun setupList() {
         productsList.layoutManager = LinearLayoutManager(this)
         adapter = ServingAdapter(lifecycleScope = lifecycleScope, onItemClick = { serving ->
-            //WIP to be filled
+            showServingActionsDialog(serving)
         }, context = this)
         adapter.items = emptyList()
         productsList.adapter = adapter
+    }
+
+    private fun showServingActionsDialog(serving: Serving): Unit{
+
+        val servingActionsDialogView = LayoutInflater.from(this@AddMealActivity).inflate(R.layout.dialog_empty, null)
+        val servingActionsDialog = AlertDialog.Builder(this@AddMealActivity)
+            .setTitle("Что вы желаете?")
+            .setView(servingActionsDialogView)
+            .setPositiveButton("Удалить", null)
+            .setNegativeButton("Изменить", null)
+            .create()
+
+        servingActionsDialog.setOnShowListener {
+            val deleteButton = servingActionsDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            deleteButton.setOnClickListener {
+                showDeleteServingDialog(serving, servingActionsDialog)
+            }
+
+            val changeButton = servingActionsDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            changeButton.setOnClickListener {
+                showChangeServingDialog(serving, servingActionsDialog)
+            }
+        }
+
+        servingActionsDialog.show()
+    }
+
+    private fun showChangeServingDialog(serving: Serving, servingActionsDialog: AlertDialog){
+        val displayMetrics = resources.displayMetrics
+        val width = (displayMetrics.widthPixels * 1).toInt()
+        val height = (displayMetrics.heightPixels * 0.55).toInt()
+
+        val changeServingDialogView = LayoutInflater.from(this@AddMealActivity).inflate(R.layout.dialog_product_amount, null)
+        val changeServingDialog = AlertDialog.Builder(this@AddMealActivity)
+            .setTitle("Введите количество продукта:")
+            .setView(changeServingDialogView)
+            .setPositiveButton("Сохранить", null)
+            .setNegativeButton("Отменить", null)
+            .create()
+
+
+        changeServingDialog.setOnShowListener {
+            lifecycleScope.launch {
+                val product = with(Dispatchers.IO) {
+                    ProductRepository.getProduct(serving.productID, serving.localProductID)
+                }
+
+                if(product === null) return@launch
+
+                val saveButton = changeServingDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                val cancelButton = changeServingDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                val productTitleField = changeServingDialog.findViewById<TextView>(R.id.dg_product_amount_tv_product_title)
+                productTitleField?.text = product.title
+
+                val amount = changeServingDialogView.findViewById<EditText>(R.id.dialog_product_amount_et_amount)
+                amount.setText(serving.productAmount.toString())
+
+                val proteinsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_proteins_val)
+                val carbsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_carbs_val)
+                val fatsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_fats_val)
+                val caloriesField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_calories_val)
+
+                fun updateMacros() {
+                    val productAmount = amount.text.toString().toDouble()
+                    val proteinsAmount = product.proteins * (productAmount / 100)
+                    val carbsAmount = product.carbs * (productAmount / 100)
+                    val fatsAmount = product.fats * (productAmount / 100)
+                    val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
+
+                    proteinsField.text = "%.2f".format(proteinsAmount)
+                    carbsField.text = "%.2f".format(carbsAmount)
+                    fatsField.text = "%.2f".format(fatsAmount)
+                    caloriesField.text = "%.2f".format(caloriesAmount)
+                }
+
+                updateMacros()
+
+                amount.addTextChangedListener {
+                    if (amount.length() > 4) {
+                        amount.setText(amount.text.dropLast(1))
+                        amount.setSelection(amount.text.length)
+                    } else if (amount.length() == 0) {
+                        amount.error = "Введите кол-во продукта!"
+                    }
+                    else{
+                        updateMacros()
+                    }
+                }
+                saveButton.setOnClickListener {
+                    //9999 max
+                    if (amount.length() > 0 && amount.length() <= 4) {
+                        val intAmount = amount.text.toString().toInt()
+                        if (intAmount <= 0) {
+                            amount.error = "Кол-во продукта должно быть больше 0!"
+                        } else if (intAmount > 9999) {
+                            amount.error = "Кол-во продукта должно быть меньше 9999!"
+                        } else {
+                            servingActionsDialog.dismiss()
+                            changeServingDialog.dismiss()
+
+                            val index = servings.indexOf(serving)
+                            if(index != -1){
+                                servings[index].productAmount = intAmount
+                            }
+                            loadData()
+
+                            Toast.makeText(this@AddMealActivity, "Порция была изменена успешно!", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        amount.error = "Введите корректное кол-во продукта!"
+                    }
+                }
+                cancelButton.setOnClickListener {
+                    changeServingDialog.dismiss()
+                }
+            }
+        }
+
+        changeServingDialog.show()
+        changeServingDialog.window?.setLayout(width, height)
+    }
+
+    private fun showDeleteServingDialog(serving: Serving, servingActionsDialog: AlertDialog): Unit{
+
+        val dialogView = LayoutInflater.from(this@AddMealActivity).inflate(R.layout.dialog_empty, null)
+        val dialog = AlertDialog.Builder(this@AddMealActivity)
+            .setTitle("Вы хотите удалить эту порцию?")
+            .setView(dialogView)
+            .setPositiveButton("Да", null)
+            .setNegativeButton("Нет", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            button.setOnClickListener {
+                lifecycleScope.launch {
+                    with(Dispatchers.IO){
+                        servings.remove(serving)
+                        loadData()
+                        Toast.makeText(this@AddMealActivity, "Порция успешно удалена!", Toast.LENGTH_LONG).show()
+
+                        dialog.dismiss()
+                        servingActionsDialog.dismiss()
+                    }
+                }
+            }
+        }
+
+        dialog.show()
     }
 }
 
