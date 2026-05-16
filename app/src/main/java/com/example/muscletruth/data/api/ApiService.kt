@@ -106,31 +106,6 @@ interface ApiService {
     @PUT("api/meals/{meal_id}")
     suspend fun updateMeal(@Path("meal_id") mealID: Int, @Part("meal") meal: RequestBody, @Part image: MultipartBody.Part? = null): Boolean
 
-    @POST("/api/servings")
-    suspend fun addServing(@Query("meal_id") mealID: Int, @Body serving: Serving): Response<Serving>
-
-    @FormUrlEncoded
-    @POST("api/servings/recent")
-    suspend fun addRecentServing(@Field("serving_id") servingID: Int): RecentServing
-
-    @GET("/api/servings")
-    suspend fun getMealServings(@Query("meal_id") mealID: Int): MutableList<Serving>
-
-    @GET("/api/servings/{serving_id}")
-    suspend fun getServing(@Path("serving_id") servingID: Int): Serving
-
-    @GET("/api/servings/recent")
-    suspend fun getRecentServings(): MutableList<RecentServing>
-
-    @DELETE("/api/servings/{serving_id}")
-    suspend fun deleteServing(@Path("serving_id") servingID: Int)
-
-    @DELETE("/api/servings/recent/{serving_id}")
-    suspend fun deleteRecentProduct(@Path("serving_id") servingID: Int): Boolean
-
-    @PUT("/api/servings/{serving_id}")
-    suspend fun updateServing(@Path("serving_id") servingID: Int, @Body serving: Serving)
-
     @GET("/api/meals")
     suspend fun getMeals(@Query("start_date") startDate: String?, @Query("end_date") endDate: String?): List<Meal>
 
@@ -154,4 +129,34 @@ interface ApiService {
 
     @GET("api/meals/chart/week")
     suspend fun getAverageCaloriesWeekChartData(): List<CaloriesChartData.ChartDataByDay>
+
+    //======================================SERVINGS========================================\\
+
+    @POST("/api/servings")
+    suspend fun addServing(@Query("meal_id") mealID: Int, @Body serving: Serving): Response<Serving>
+
+    @FormUrlEncoded
+    @POST("api/servings/recent")
+    suspend fun addRecentServing(@Field("serving_id") servingID: Int): RecentServing
+
+    @GET("/api/servings")
+    suspend fun getServings(): MutableList<Serving>
+
+    @GET("/api/servings")
+    suspend fun getMealServings(@Query("meal_id") mealID: Int): MutableList<Serving>
+
+    @GET("/api/servings/{serving_id}")
+    suspend fun getServing(@Path("serving_id") servingID: Int): Serving
+
+    @GET("/api/servings/recent")
+    suspend fun getRecentServings(): MutableList<RecentServing>
+
+    @DELETE("/api/servings/{serving_id}")
+    suspend fun deleteServing(@Path("serving_id") servingID: Int)
+
+    @DELETE("/api/servings/recent/{serving_id}")
+    suspend fun deleteRecentServing(@Path("serving_id") servingID: Int): Boolean
+
+    @PUT("/api/servings/{serving_id}")
+    suspend fun updateServing(@Path("serving_id") servingID: Int, @Body serving: Serving)
 }

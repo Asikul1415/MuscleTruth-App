@@ -63,6 +63,29 @@ object ServingRepository {
         }
     }
 
+    suspend fun getServings(): MutableList<Serving> {
+        try{
+            if(checkForInternetConnection()){
+                val servings = apiService.getServings()
+                return servings.map{ serving -> serving.copy(
+                    localID=UUID.randomUUID().toString(),
+                    localMealID = localDb.mealDao().getServerMeal(serving.mealID!!)!!.localID,
+                    localProductID = localDb.productDao().getServerProduct(serving.productID)!!.localID,
+                )}.toMutableList()
+            }
+
+            val servings = localDb.servingDao().getServings()
+
+            Log.d("APP_DEBUG", "SERVINGS - $servings")
+            return servings.toMutableList()
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "getMealServings() ERROR: ${e.toString()}")
+            throw e
+            return mutableListOf()
+        }
+    }
+
     suspend fun getMealServings(mealServerID: Int, mealLocalID: String? = null): MutableList<Serving> {
         try{
             if(checkForInternetConnection()){
@@ -223,7 +246,7 @@ object ServingRepository {
     suspend fun deleteRecentServing(servingServerID: Int, servingLocalID: String? = null){
         try{
             if(checkForInternetConnection()){
-                val isDeleteSuccessful = apiService.deleteRecentProduct(servingServerID)
+                val isDeleteSuccessful = apiService.deleteRecentServing(servingServerID)
                 Log.d("APP_DEBUG", "DELETE RECENT SERVING ON SERVER: $isDeleteSuccessful")
             }
 

@@ -168,10 +168,7 @@ object SyncManager {
 
         coroutineScope {
             with(Dispatchers.IO){
-                val meals = MealRepository.getMeals()
-                meals.forEach { meal ->
-                    serverServings.addAll(ServingRepository.getMealServings(meal.serverID!!))
-                }
+                serverServings.addAll(ServingRepository.getServings().toMutableList())
             }
         }
 
