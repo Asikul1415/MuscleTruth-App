@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -62,6 +64,8 @@ class MealActivity : AppCompatActivity() {
             val data = result.data
             val serving = data?.getParcelableExtra<Serving>("serving")
             if(serving != null){
+                serving.mealID = mealItem.id
+                serving.localMealID = mealItem.localID
                 servings.add(serving)
                 addedServings.add(serving)
                 loadData()
@@ -118,7 +122,7 @@ class MealActivity : AppCompatActivity() {
         caloriesField = findViewById<TextView>(R.id.meal_tv_calories_val)
 
         mealItem = intent.getParcelableExtra<MealItem>("meal")!!
-       lifecycleScope.launch {
+        lifecycleScope.launch {
             with(Dispatchers.IO){
                 if(mealItem !== null){
                     loadData()
@@ -224,27 +228,17 @@ class MealActivity : AppCompatActivity() {
 
 
                             addedServings.forEach { serving ->
-                                val servingBase = Serving(
-                                    mealID = mealItem.id,
-                                    localMealID = mealItem.localID,
-                                    productID = serving.productID,
-                                    localProductID = serving.localProductID,
-                                    productAmount = serving.productAmount
-                                )
-                                ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, servingBase).onSuccess {serverServing ->
-                                    ServingRepository.addRecentServing(serverServing.serverID, serving.localID)
+                                ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, serving).onSuccess {serverServing ->
+                                    ServingRepository.addRecentServing(serverServing.serverID, serverServing.localID)
                                 }
                             }
 
                             deletedServings.forEach {serving ->
-                                val servingBase = Serving(
-                                    mealID = mealItem.id,
-                                    localMealID = mealItem.localID,
-                                    productID = serving.productID,
-                                    localProductID = serving.localProductID,
-                                    productAmount = serving.productAmount
-                                )
-                                ServingRepository.deleteServing(servingBase)
+                                ServingRepository.deleteServing(serving)
+                            }
+
+                            if(ServingRepository.getMealServings(mealItem.id, mealItem.localID).count() == 0){
+                                MealRepository.deleteMeal(mealItem.id, mealItem.localID)
                             }
                             finish()
                         }
@@ -295,7 +289,9 @@ class MealActivity : AppCompatActivity() {
     private fun loadData(){
         lifecycleScope.launch {
             try{
+                Log.d("APP_DEBUG!", "${deletedServings}")
                 servings = ServingRepository.getMealServings(mealItem.id, mealItem.localID).filter{ serving ->
+                    Log.d("APP_DEBUG!", "${serving}")
                     deletedServings.map{ it->it.localID}.indexOf(serving.localID) == -1
                 }.toMutableList()
                 servings.addAll(addedServings)
@@ -313,9 +309,172 @@ class MealActivity : AppCompatActivity() {
     private fun setupList() {
         productsList.layoutManager = LinearLayoutManager(this)
         adapter = ServingAdapter(lifecycleScope = lifecycleScope, onItemClick = { serving ->
-            //WIP to be filled
+            showServingActionsDialog(serving)
         }, context = this)
         adapter.items = emptyList()
         productsList.adapter = adapter
+    }
+
+    private fun showServingActionsDialog(serving: Serving): Unit{
+
+        val servingActionsDialogView = LayoutInflater.from(this@MealActivity).inflate(R.layout.dialog_empty, null)
+        val servingActionsDialog = AlertDialog.Builder(this@MealActivity)
+            .setTitle("Что вы желаете?")
+            .setView(servingActionsDialogView)
+            .setPositiveButton("Удалить", null)
+            .setNegativeButton("Изменить", null)
+            .create()
+
+        servingActionsDialog.setOnShowListener {
+            val deleteButton = servingActionsDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            deleteButton.setOnClickListener {
+                showDeleteServingDialog(serving, servingActionsDialog)
+            }
+
+            val changeButton = servingActionsDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            changeButton.setOnClickListener {
+                showChangeServingDialog(serving, servingActionsDialog)
+            }
+        }
+
+        servingActionsDialog.show()
+    }
+
+    private fun showChangeServingDialog(serving: Serving, servingActionsDialog: AlertDialog){
+        val displayMetrics = resources.displayMetrics
+        val width = (displayMetrics.widthPixels * 1).toInt()
+        val height = (displayMetrics.heightPixels * 0.55).toInt()
+
+        val changeServingDialogView = LayoutInflater.from(this@MealActivity).inflate(R.layout.dialog_product_amount, null)
+        val changeServingDialog = AlertDialog.Builder(this@MealActivity)
+            .setTitle("Введите количество продукта:")
+            .setView(changeServingDialogView)
+            .setPositiveButton("Сохранить", null)
+            .setNegativeButton("Отменить", null)
+            .create()
+
+
+        changeServingDialog.setOnShowListener {
+            lifecycleScope.launch {
+                val product = with(Dispatchers.IO) {
+                    ProductRepository.getProduct(serving.productID, serving.localProductID)
+                }
+
+                if(product === null) return@launch
+
+                val saveButton = changeServingDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                val cancelButton = changeServingDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                val productTitleField = changeServingDialog.findViewById<TextView>(R.id.dg_product_amount_tv_product_title)
+                productTitleField?.text = product.title
+
+                val amount = changeServingDialogView.findViewById<EditText>(R.id.dialog_product_amount_et_amount)
+                amount.setText(serving.productAmount.toString())
+
+                val proteinsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_proteins_val)
+                val carbsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_carbs_val)
+                val fatsField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_fats_val)
+                val caloriesField = changeServingDialogView.findViewById<TextView>(R.id.dg_product_amount_tv_calories_val)
+
+                fun updateMacros() {
+                    val productAmount = amount.text.toString().toDouble()
+                    val proteinsAmount = product.proteins * (productAmount / 100)
+                    val carbsAmount = product.carbs * (productAmount / 100)
+                    val fatsAmount = product.fats * (productAmount / 100)
+                    val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
+
+                    proteinsField.text = "%.2f".format(proteinsAmount)
+                    carbsField.text = "%.2f".format(carbsAmount)
+                    fatsField.text = "%.2f".format(fatsAmount)
+                    caloriesField.text = "%.2f".format(caloriesAmount)
+                }
+
+                updateMacros()
+
+                amount.addTextChangedListener {
+                    if (amount.length() > 4) {
+                        amount.setText(amount.text.dropLast(1))
+                        amount.setSelection(amount.text.length)
+                    } else if (amount.length() == 0) {
+                        amount.error = "Введите кол-во продукта!"
+                    }
+                    else{
+                        updateMacros()
+                    }
+                }
+                saveButton.setOnClickListener {
+                    //9999 max
+                    if (amount.length() > 0 && amount.length() <= 4) {
+                        val intAmount = amount.text.toString().toInt()
+                        if (intAmount <= 0) {
+                            amount.error = "Кол-во продукта должно быть больше 0!"
+                        } else if (intAmount > 9999) {
+                            amount.error = "Кол-во продукта должно быть меньше 9999!"
+                        } else {
+                            servingActionsDialog.dismiss()
+                            changeServingDialog.dismiss()
+
+                            lifecycleScope.launch {
+                                //If serving was there before
+                                if(addedServings.map{it->it.localID}.indexOf(serving.localID) == -1){
+                                    serving.productAmount = intAmount
+                                    ServingRepository.updateServing(serving)
+                                    loadData()
+                                }
+                                //If serving was added now
+                                else{
+                                    val index = addedServings.indexOf(serving)
+                                    addedServings[index].productAmount = intAmount
+                                    loadData()
+                                }
+                            }
+
+                            Toast.makeText(this@MealActivity, "Порция была изменена успешно!", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        amount.error = "Введите корректное кол-во продукта!"
+                    }
+                }
+                cancelButton.setOnClickListener {
+                    changeServingDialog.dismiss()
+                }
+            }
+        }
+
+        changeServingDialog.show()
+        changeServingDialog.window?.setLayout(width, height)
+    }
+
+    private fun showDeleteServingDialog(serving: Serving, servingActionsDialog: AlertDialog): Unit{
+
+        val dialogView = LayoutInflater.from(this@MealActivity).inflate(R.layout.dialog_empty, null)
+        val dialog = AlertDialog.Builder(this@MealActivity)
+            .setTitle("Вы хотите удалить эту порцию?")
+            .setView(dialogView)
+            .setPositiveButton("Да", null)
+            .setNegativeButton("Нет", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            button.setOnClickListener {
+                lifecycleScope.launch {
+                    with(Dispatchers.IO){
+
+                        //If serving was there before
+                        if(addedServings.map{it->it.localID}.indexOf(serving.localID) == -1){
+                            addedServings.remove(serving)
+                            deletedServings.add(serving)
+                            loadData()
+                        }
+                        Toast.makeText(this@MealActivity, "Порция успешно удалена!", Toast.LENGTH_LONG).show()
+
+                        dialog.dismiss()
+                        servingActionsDialog.dismiss()
+                    }
+                }
+            }
+        }
+
+        dialog.show()
     }
 }

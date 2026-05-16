@@ -90,11 +90,13 @@ object ServingRepository {
         try{
             if(checkForInternetConnection()){
                 val servings = apiService.getMealServings(mealServerID)
-                return servings.map{ serving -> serving.copy(
-                    localID=UUID.randomUUID().toString(),
-                    localMealID = localDb.mealDao().getServerMeal(serving.mealID!!)!!.localID,
-                    localProductID = localDb.productDao().getServerProduct(serving.productID)!!.localID,
-                )}.toMutableList()
+                return servings.map{ serving ->
+                    val localServing = localDb.servingDao().getServerServing(serving.serverID)
+                    serving.copy(
+                        localID= localServing.localID,
+                        localMealID = localDb.mealDao().getServerMeal(serving.mealID!!)!!.localID,
+                        localProductID = localDb.productDao().getServerProduct(serving.productID)!!.localID,
+                    )}.toMutableList()
             }
 
             var servings: List<Serving>
