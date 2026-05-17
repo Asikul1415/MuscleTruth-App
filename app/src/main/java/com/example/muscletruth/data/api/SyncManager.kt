@@ -213,9 +213,16 @@ object SyncManager {
         val recentProductsToInsert = ServingRepository.getRecentServings().filter { serving ->
             localRecentServings.find{ local -> local.servingServerID == serving.servingServerID} == null
         }.map {it ->
-            it.copy(servingLocalID = localDb.servingDao().getServerServing(it.servingServerID)!!.localID)
+            val localServing = localDb.servingDao().getServerServing(it.servingServerID)
+            if(localServing !== null){
+                it.copy(servingLocalID = localServing.localID)
+            }
+            else{
+                it
+            }
         }
-        localDb.productDao().insertAllRecent(recentProductsToInsert)
+        localDb.servingDao().insertAllRecent(recentProductsToInsert)
+
     }
 
     private suspend fun syncProducts(context: Context){
@@ -240,19 +247,18 @@ object SyncManager {
                 }.filter { product ->
                     localProducts.find{local -> local.serverID == product.serverID} === null
                 }
+                localDb.productDao().insertAll(productsToInsert)
 
-                val localFavouriteProducts = localDb.productDao().getFavouriteProducts()
-                favouriteProductsToInsert = ProductRepository.getFavouriteProducts().filter {product ->
-                    localFavouriteProducts.find{local-> local.productServerID == product.productServerID} === null
-                }.map {it ->
-                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
-                }
+//                val localFavouriteProducts = localDb.productDao().getFavouriteProducts()
+//                favouriteProductsToInsert = ProductRepository.getFavouriteProducts().filter {product ->
+//                    localFavouriteProducts.find{local-> local.productServerID == product.productServerID} === null
+//                }.map {it ->
+//                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
+//                }
+//
+//                localDb.productDao().insertAllFavourites(favouriteProductsToInsert)
             }
         }
-
-        localDb.productDao().insertAll(productsToInsert)
-        localDb.productDao().insertAllFavourites(favouriteProductsToInsert)
-
         Log.d("APP_DEBUG", "SYNC PRODUCTS: INSERTED $productsToInsert")
 
 

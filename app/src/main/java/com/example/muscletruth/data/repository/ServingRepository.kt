@@ -192,9 +192,19 @@ object ServingRepository {
     suspend fun getRecentServings(): MutableList<RecentServing> {
         try{
             if(checkForInternetConnection()){
-                val recentServings = apiService.getRecentServings()
+                val recentServings = apiService.getRecentServings().map{recentServing ->
+                    val localServing = localDb.servingDao().getServerServing(recentServing.servingServerID)
+                    if(localServing !== null){
+                        recentServing.copy(
+                            servingLocalID = localServing.localID
+                        )
+                    }
+                    else{
+                        recentServing
+                    }
+                }
                 Log.d("APP_DEBUG", "GET RECENT SERVINGS: $recentServings")
-                return recentServings
+                return recentServings.toMutableList()
             }
 
             val localRecentServings = localDb.servingDao().getRecentServings()

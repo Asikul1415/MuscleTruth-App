@@ -12,6 +12,9 @@ interface ServingDao {
     @Insert(onConflict = OnConflictStrategy.NONE)
     suspend fun insertAll(servings: List<Serving>)
 
+    @Insert(onConflict = OnConflictStrategy.NONE)
+    suspend fun insertAllRecent(products: List<RecentServing>)
+
     @Update
     suspend fun update(serving: Serving)
 

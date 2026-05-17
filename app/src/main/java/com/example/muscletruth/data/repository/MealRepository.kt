@@ -146,10 +146,16 @@ object MealRepository {
     suspend fun getMeal(mealID: Int, localMealID: String? = null): Meal?{
         try{
             if(checkForInternetConnection()){
-                return apiService.getMeal(mealID)
+                val meal = apiService.getMeal(mealID)
+                val localMeal = localDb.mealDao().getServerMeal(mealID)
+                if(localMeal !== null){
+                    meal.localID = localMeal.localID
+                    meal.localPicture = localMeal.localPicture
+                }
+                return meal
             }
             else{
-                if(localMealID !== null && mealID === -1){
+                if(localMealID !== null && mealID == -1){
                     return localDb.mealDao().getLocalMeal(localMealID)
                 }
                 else{

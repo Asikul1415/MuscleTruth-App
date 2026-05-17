@@ -47,9 +47,16 @@ object ProductRepository {
         try{
             if(checkForInternetConnection()){
                 val products = apiService.getFavouriteProducts().map{product ->
-                    product.copy(
-                        productLocalID = localDb.productDao().getServerProduct(product.productServerID)!!.localID
-                    )
+                    val localProduct = localDb.productDao().getServerProduct(product.productServerID)
+                    if(localProduct !== null){
+                        product.copy(
+                            productLocalID = localProduct.localID
+                        )
+                    }
+                    else{
+                        product
+                    }
+
                 }.toMutableList()
                 Log.d("APP_DEBUG", "GET FAVOURITE PRODUCTS: $products")
                 return products
