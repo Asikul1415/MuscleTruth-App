@@ -22,7 +22,8 @@ import com.example.muscletruth.data.models.Weighting
     Weighting::class,
     Product::class,
     FavouriteProduct::class,
-    RecentServing::class
+    RecentServing::class,
+    SavedMeal::class,
     ],
     version = 1)
 abstract class AppDatabase : RoomDatabase() {

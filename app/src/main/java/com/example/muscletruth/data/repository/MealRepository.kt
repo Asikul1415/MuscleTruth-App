@@ -6,6 +6,7 @@ import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.models.Meal
+import com.example.muscletruth.data.models.SavedMeal
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.google.gson.Gson
@@ -437,6 +438,46 @@ object MealRepository {
         catch(e: Exception){
             Log.e("APP_DEBUG", "CALORIES CHART WEEK DATA ERROR: ${e.toString()}")
             return emptyList()
+        }
+    }
+
+    suspend fun getSavedMeals(): List<SavedMeal>{
+        try{
+            if(checkForInternetConnection()){
+                val meals = apiService.getSavedMeals()
+
+                return meals.map{meal ->
+                    val localMeal = localDb.mealDao().getServerMeal(meal.mealServerID)
+                    if(localMeal !== null){
+                        meal.copy(mealLocalID = localMeal.localID)
+                    }
+                    else meal
+                }
+            }
+
+            val meals = localDb.mealDao().getSavedMeals()
+            return meals
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "getSavedMeals() ERROR: ${e.toString()}")
+            return emptyList()
+        }
+    }
+
+    suspend fun getSavedMeals(mealServerID: Int, mealLocalID: String?): SavedMeal?{
+        try{
+            if(checkForInternetConnection()){
+                val meal = apiService.getSavedMeal(mealServerID)
+
+                return meal
+            }
+
+            val meal = localDb.mealDao().getSavedMeal(mealServerID, mealLocalID)
+            return meal
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "getSavedMeal() ERROR: ${e.toString()}")
+            return null
         }
     }
 }

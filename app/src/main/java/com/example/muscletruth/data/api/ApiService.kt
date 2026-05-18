@@ -130,6 +130,12 @@ interface ApiService {
     @GET("api/meals/chart/week")
     suspend fun getAverageCaloriesWeekChartData(): List<CaloriesChartData.ChartDataByDay>
 
+    @GET("/api/meals/saved")
+    suspend fun getSavedMeals(): List<SavedMeal>
+
+    @GET("/api/meals/saved/{meal_id}")
+    suspend fun getSavedMeal(@Path("meal_id") mealID: Int): SavedMeal?
+
     //======================================SERVINGS========================================\\
 
     @POST("/api/servings")

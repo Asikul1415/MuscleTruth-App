@@ -165,13 +165,13 @@ class MealActivity : AppCompatActivity() {
                 val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
                 positiveButton.setOnClickListener {
-                    Log.d("APP_DEBUG", "SERVING DELETE")
                     lifecycleScope.launch {
                         withContext(Dispatchers.IO){
-                            Log.d("APP_DEBUG", "SERVING DELETE: mealItem from intent $mealItem")
                             if(mealItem !== null && mealItem.localID !== null){
                                 MealRepository.deleteMeal(mealItem.id, mealItem.localID)
-                                Log.d("APP_DEBUG", "SERVING DELETE: serving was deleted")
+                                servings.forEach {serving ->
+                                    ServingRepository.deleteServing(serving)
+                                }
                                 finish()
                             }
                         }

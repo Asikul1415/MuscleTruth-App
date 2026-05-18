@@ -2,6 +2,7 @@ package com.example.muscletruth.data.localDB.offlineModels
 
 import androidx.room.*
 import com.example.muscletruth.data.models.Meal
+import com.example.muscletruth.data.models.SavedMeal
 
 @Dao
 interface MealDao {
@@ -37,4 +38,10 @@ interface MealDao {
 
     @Query("SELECT * FROM meals WHERE was_updated = 1")
     suspend fun getMealsForUpdate(): List<Meal>
+
+    @Query("SELECT * FROM saved_meals")
+    suspend fun getSavedMeals(): List<SavedMeal>
+
+    @Query("SELECT * FROM saved_meals WHERE meal_server_id = :mealServerID OR meal_local_id = :mealLocalID")
+    suspend fun getSavedMeal(mealServerID: Int?, mealLocalID: String?): SavedMeal
 }

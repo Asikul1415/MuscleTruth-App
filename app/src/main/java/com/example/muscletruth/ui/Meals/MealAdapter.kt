@@ -186,7 +186,6 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                 }
             }
         }
-
     }
 
     override fun getItemCount() = items.size

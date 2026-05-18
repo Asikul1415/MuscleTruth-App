@@ -23,6 +23,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Serving
@@ -36,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
+import java.io.File
 
 class AddMealActivity : AppCompatActivity() {
     private var servings = mutableListOf<Serving>()
@@ -46,20 +48,52 @@ class AddMealActivity : AppCompatActivity() {
     private lateinit var fatsField: TextView
     private lateinit var carbsField: TextView
     private lateinit var caloriesField: TextView
+    private lateinit var picture: ImageView
     private lateinit var selectImageLauncher: ActivityResultLauncher<Intent>
     var imageURI: Uri? = null
 
     private val startProductActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-        { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                val serving = data?.getParcelableExtra<Serving>("serving")
-                if(serving != null){
-                    servings.add(serving)
+    { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val serving = data?.getParcelableExtra<Serving>("serving")
+            if(serving != null){
+                servings.add(serving)
+                loadData()
+            }
+        }
+    }
+
+    private val startSavedMealsActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val meal = data?.getParcelableExtra<Meal>("meal")
+            if(meal !== null){
+                Log.d("APP_DEBUG!", "meal get $meal")
+                lifecycleScope.launch {
+                    servings = ServingRepository.getMealServings(meal.serverID, meal.localID)
+                    if(meal.localPicture !== null){
+                        Glide.with(this@AddMealActivity)
+                            .load(meal.localPicture)
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .into(picture)
+                        imageURI = Uri.fromFile(File(meal.localPicture))
+                    }
+                    else if(meal.serverPicture !== null){
+                        val path = Utils.ImageUtils.getImagePath(meal.serverPicture!!)
+                        val localPicture = Utils.ImageUtils.saveImageFromServer(this@AddMealActivity, path)
+                        Glide.with(this@AddMealActivity)
+                            .load(localPicture)
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .into(picture)
+                        imageURI = Uri.fromFile(File(localPicture))
+                    }
+                    setupList()
                     loadData()
                 }
             }
         }
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,6 +117,12 @@ class AddMealActivity : AppCompatActivity() {
             finish()
         }
 
+        val savedMealsButton = findViewById<Button>(R.id.add_meal_btn_saved_meals)
+        savedMealsButton.setOnClickListener {
+            val intent = Intent(this, SavedMealsActivity::class.java)
+            startSavedMealsActivityForResult.launch(intent)
+        }
+
         spinner = findViewById<Spinner>(R.id.add_meal_sp)
         val adapter = ArrayAdapter.createFromResource(
             this,
@@ -98,13 +138,13 @@ class AddMealActivity : AppCompatActivity() {
             Utils.ImageUtils.openGallery(selectImageLauncher)
         }
 
-        val image = findViewById<ImageView>(R.id.add_meal_iv)
+        picture = findViewById<ImageView>(R.id.add_meal_iv)
         selectImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
                 result ->
             if(result.resultCode == RESULT_OK){
                 val selectedImageUri: Uri? = result.data?.data
 
-                image.setImageURI(selectedImageUri)
+                picture.setImageURI(selectedImageUri)
                 imageURI = selectedImageUri
             }
         }

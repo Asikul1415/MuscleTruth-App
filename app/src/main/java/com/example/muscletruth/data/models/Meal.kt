@@ -39,3 +39,31 @@ data class Meal(
     @ColumnInfo("was_updated")
     var wasUpdated: Int = 0,
 ): Parcelable
+
+@Parcelize
+@Entity("saved_meals")
+data class SavedMeal(
+
+    @SerializedName("title")
+    @ColumnInfo(name = "title")
+    var title: String,
+
+    @SerializedName("meal_id")
+    @ColumnInfo(name = "meal_server_id")
+    var mealServerID: Int = -1,
+
+    @PrimaryKey
+    @ColumnInfo(name = "meal_local_id")
+    var mealLocalID: String,
+
+    @SerializedName("user_id")
+    @ColumnInfo("user_id")
+    var userID: Int? = null,
+
+    var totalProteins: Double = 0.00,
+    var totalFats: Double = 0.00,
+    var totalCarbs: Double = 0.00,
+    var totalCalories: Double = 0.00,
+    var localImage: String?,
+    var serverImage: String?
+): Parcelable
