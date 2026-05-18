@@ -464,15 +464,70 @@ object MealRepository {
         }
     }
 
-    suspend fun getSavedMeals(mealServerID: Int, mealLocalID: String?): SavedMeal?{
+    suspend fun addSavedMeal(title: String, mealServerID: Int, mealLocalID: String? = null): SavedMeal? {
         try{
-            if(checkForInternetConnection()){
-                val meal = apiService.getSavedMeal(mealServerID)
+            var serverSavedMeal: SavedMeal? = null
+            if(checkForInternetConnection() && mealServerID != -1){
+                Log.d("APP_DEBUG", "addSavedMeal(): $title $mealServerID $mealLocalID")
+                serverSavedMeal = apiService.addSavedMeal(title, mealServerID)
+                Log.d("APP_DEBUG", "addSavedMeal(): MEAL WAS ADDED ON SERVER $serverSavedMeal")
+            }
 
+            val localSavedMeal = localDb.mealDao().getSavedMeal(mealServerID, mealLocalID)
+            if(localSavedMeal !== null && serverSavedMeal !== null){
+                localSavedMeal.mealServerID = serverSavedMeal.mealServerID
+                return localSavedMeal
+            }
+            else{
+                val localSavedMeal = SavedMeal(
+                    title = title,
+                    mealServerID = mealServerID,
+                    mealLocalID = mealLocalID ?: UUID.randomUUID().toString()
+                )
+                localDb.mealDao().insertSavedMeal(localSavedMeal)
+                return localSavedMeal
+            }
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "addSavedMeal(): ERROR ${e.toString()}")
+            return null
+        }
+    }
+
+    suspend fun deleteSavedMeal(mealServerID: Int, mealLocalID: String? = null){
+        try{
+            if(checkForInternetConnection() && mealServerID != -1){
+                apiService.deleteSavedMeal(mealServerID)
+                Log.d("APP_DEBUG", "deleteSavedMeal: SERVER DELETE SUCCESSFUL")
+            }
+
+            val localSavedMeal = localDb.mealDao().getSavedMeal(mealServerID, mealLocalID)
+            if(localSavedMeal !== null){
+                localDb.mealDao().deleteSavedMeal(localSavedMeal)
+                Log.d("APP_DEBUG", "deleteSavedMeal: LOCAL DELETE SUCCESSFUL")
+            }
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "deleteSavedMeal: ERROR ${e.toString()}")
+        }
+    }
+
+    suspend fun getSavedMeal(mealServerID: Int, mealLocalID: String?): SavedMeal?{
+        try{
+
+            if(checkForInternetConnection()){
+                val meal = apiService.getSavedMeal(mealServerID).body()
+                Log.d("APP_DEBUG", "getSavedMeal(): GET FROM SERVER $meal")
                 return meal
             }
 
-            val meal = localDb.mealDao().getSavedMeal(mealServerID, mealLocalID)
+            val meal = if(mealServerID != -1){
+                localDb.mealDao().getSavedMeal(mealServerID, mealLocalID)
+            }
+            else{
+                localDb.mealDao().getSavedMeal(null, mealLocalID = mealLocalID)
+            }
+            Log.d("APP_DEBUG", "getSavedMeal(): GET LOCALLY $meal")
             return meal
         }
         catch(e: Exception){

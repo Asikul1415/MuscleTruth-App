@@ -11,6 +11,7 @@ import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
 import com.example.muscletruth.data.models.RecentServing
+import com.example.muscletruth.data.models.SavedMeal
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Weighting

@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
 import java.io.File
+import java.util.UUID
 
 class AddMealActivity : AppCompatActivity() {
     private var servings = mutableListOf<Serving>()
@@ -176,6 +177,8 @@ class AddMealActivity : AppCompatActivity() {
                     mealResponse.onSuccess {meal ->
                         servings.forEach { serving ->
                             serving.mealID = meal.serverID
+                            //Regenerate localID to prevent serving just being replaced. With it it would be inserted, not replaced in offline
+                            serving.localID = UUID.randomUUID().toString()
                             ServingRepository.addServing(meal, serving).onSuccess {serverServing ->
                                 //If se
                                 if(serverServing.localID !== null){

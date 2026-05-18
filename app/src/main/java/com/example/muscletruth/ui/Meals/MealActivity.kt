@@ -192,6 +192,103 @@ class MealActivity : AppCompatActivity() {
             finish()
         }
 
+        val saveMealButton = findViewById<Button>(R.id.meal_btn_save_meal)
+        var isMealSaved: Boolean = false
+        lifecycleScope.launch {
+            isMealSaved = MealRepository.getSavedMeal(mealItem.id, mealItem.localID) !== null
+            if(isMealSaved){
+                saveMealButton.text = "♥"
+            }
+
+            saveMealButton.setOnClickListener {
+                if(isMealSaved){
+                    val confirmSavedMealDeleteDialogView =
+                        LayoutInflater.from(this@MealActivity)
+                            .inflate(R.layout.dialog_empty, null)
+                    val confirmSavedMealDeleteDialog =
+                        AlertDialog.Builder(this@MealActivity)
+                            .setTitle("Вы точно хотите удалить из сохранённого приём пищи?")
+                            .setView(confirmSavedMealDeleteDialogView)
+                            .setPositiveButton("Да", null)
+                            .setNegativeButton("Нет", null)
+                            .create()
+
+                    confirmSavedMealDeleteDialog.setOnShowListener {
+                        val positiveButton =
+                            confirmSavedMealDeleteDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        positiveButton.setOnClickListener {
+                            lifecycleScope.launch {
+                                MealRepository.deleteSavedMeal(
+                                    mealItem.id,
+                                    mealItem.localID
+                                )
+                                confirmSavedMealDeleteDialog.dismiss()
+                                saveMealButton.text = "♡"
+                            }
+                        }
+
+                        val negativeButton =
+                            confirmSavedMealDeleteDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                        negativeButton.setOnClickListener {
+                            confirmSavedMealDeleteDialog.dismiss()
+                        }
+                    }
+
+                    confirmSavedMealDeleteDialog.show()
+                }
+                else{
+                    val saveMealDialogView = LayoutInflater.from(this@MealActivity).inflate(R.layout.dialog_save_meal, null)
+                    val saveMealDialog = AlertDialog.Builder(this@MealActivity)
+                        .setTitle("Что вы желаете?")
+                        .setView(saveMealDialogView)
+                        .setPositiveButton("Сохранить", null)
+                        .setNegativeButton("Отменить", null)
+                        .create()
+
+                    saveMealDialog.setOnShowListener {
+                        val saveButton = saveMealDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        saveButton.setOnClickListener {
+                            lifecycleScope.launch {
+                                try {
+                                    val titleField = saveMealDialog.findViewById<EditText>(R.id.dialog_save_meal_et_title)
+                                    val title = titleField?.text.toString()
+                                    if (title.length > 3 && title.length < 256) {
+                                        val savedMeal = MealRepository.addSavedMeal(
+                                            title,
+                                            mealItem.id,
+                                            mealItem.localID
+                                        )
+                                        if (savedMeal !== null) {
+                                            saveMealButton.text = "♥"
+                                            saveMealDialog.dismiss()
+                                        }
+                                    } else if (title.length < 3) {
+                                        titleField?.error =
+                                            "Название должно состоять хотя бы из 3 символов!"
+                                    } else if (title.length > 255) {
+                                        titleField?.error =
+                                            "Название должно состоять не более чем из 255 символов!"
+                                    }
+
+                                }
+                                catch (e: Exception){
+                                    Log.e("APP_DEBUG", "ERRORRRR!!!!!!!! ${e.toString()}")
+
+                                }
+                            }
+                        }
+
+                        val backButton = saveMealDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                        backButton.setOnClickListener {
+                            saveMealDialog.dismiss()
+                        }
+                    }
+
+                    saveMealDialog.show()
+                }
+            }
+        }
+
         val saveButton = findViewById<Button>(R.id.meal_btn_save)
         saveButton.setOnClickListener {
             lifecycleScope.launch {

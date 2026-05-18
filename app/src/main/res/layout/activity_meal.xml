@@ -8,6 +8,23 @@
     tools:context=".ui.Meals.AddMealActivity"
     android:background="@color/background">
 
+    <Button
+        android:id="@+id/meal_btn_save_meal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/primary"
+        android:maxWidth="0dp"
+        android:maxHeight="0dp"
+        android:padding="0dp"
+        android:text="♡"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.95"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.328" />
+
     <TextView
         android:id="@+id/meal_tv_calories_val"
         android:layout_width="80dp"
@@ -158,10 +175,10 @@
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.069"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.326" />
+        app:layout_constraintVertical_bias="0.329" />
 
     <Spinner
         android:id="@+id/meal_sp"

@@ -249,14 +249,14 @@ object SyncManager {
                 }
                 localDb.productDao().insertAll(productsToInsert)
 
-//                val localFavouriteProducts = localDb.productDao().getFavouriteProducts()
-//                favouriteProductsToInsert = ProductRepository.getFavouriteProducts().filter {product ->
-//                    localFavouriteProducts.find{local-> local.productServerID == product.productServerID} === null
-//                }.map {it ->
-//                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
-//                }
-//
-//                localDb.productDao().insertAllFavourites(favouriteProductsToInsert)
+                val localFavouriteProducts = localDb.productDao().getFavouriteProducts()
+                favouriteProductsToInsert = ProductRepository.getFavouriteProducts().filter {product ->
+                    localFavouriteProducts.find{local-> local.productServerID == product.productServerID} === null
+                }.map {it ->
+                    it.copy(productLocalID = localDb.productDao().getServerProduct(it.productServerID)!!.localID)
+                }
+
+                localDb.productDao().insertAllFavourites(favouriteProductsToInsert)
             }
         }
         Log.d("APP_DEBUG", "SYNC PRODUCTS: INSERTED $productsToInsert")

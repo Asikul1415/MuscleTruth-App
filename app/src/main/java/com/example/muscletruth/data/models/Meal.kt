@@ -43,7 +43,6 @@ data class Meal(
 @Parcelize
 @Entity("saved_meals")
 data class SavedMeal(
-
     @SerializedName("title")
     @ColumnInfo(name = "title")
     var title: String,
@@ -64,6 +63,6 @@ data class SavedMeal(
     var totalFats: Double = 0.00,
     var totalCarbs: Double = 0.00,
     var totalCalories: Double = 0.00,
-    var localImage: String?,
-    var serverImage: String?
+    var localImage: String? = null,
+    var serverImage: String? = null
 ): Parcelable

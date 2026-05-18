@@ -71,6 +71,10 @@ class SavedMealsActivity : AppCompatActivity() {
                     finish()
                 }
             }
+        }, {item ->
+            lifecycleScope.launch {
+                MealRepository.deleteSavedMeal(item.mealServerID, item.mealLocalID)
+            }
         })
         adapter.items = mutableListOf<SavedMeal>()
         mealsList.adapter = adapter

@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -14,10 +15,9 @@ import com.example.muscletruth.R
 import com.example.muscletruth.data.models.SavedMeal
 import com.example.muscletruth.utils.Utils
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
-import java.io.File
 import java.util.Locale
 
-class SavedMealAdapter(val context: Context, val onItemClick: (item: SavedMeal) -> Unit): RecyclerView.Adapter<SavedMealAdapter.ViewHolder>() {
+class SavedMealAdapter(val context: Context, val onItemClick: (item: SavedMeal) -> Unit, val deleteSavedMeal: (item: SavedMeal) -> Unit): RecyclerView.Adapter<SavedMealAdapter.ViewHolder>() {
     var items = mutableListOf<SavedMeal>()
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -27,6 +27,7 @@ class SavedMealAdapter(val context: Context, val onItemClick: (item: SavedMeal) 
         val tvCarbs: TextView? = view.findViewById(R.id.item_saved_meal_tv_carbs_val)
         val tvCalories: TextView? = view.findViewById(R.id.item_saved_meal_tv_calories_val)
         val picture: ImageView? = view.findViewById(R.id.item_saved_meal_iv)
+        val deleteButton: Button? = view.findViewById(R.id.item_saved_meal_btn_delete)
 
 
         init {
@@ -69,6 +70,10 @@ class SavedMealAdapter(val context: Context, val onItemClick: (item: SavedMeal) 
 
         holder.itemView.setOnClickListener {
             onItemClick(item)
+        }
+
+        holder.deleteButton?.setOnClickListener {
+            deleteSavedMeal(item)
         }
     }
 

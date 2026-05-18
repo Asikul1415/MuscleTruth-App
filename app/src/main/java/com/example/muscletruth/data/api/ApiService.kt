@@ -4,6 +4,7 @@ import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
 import com.example.muscletruth.data.models.RecentServing
+import com.example.muscletruth.data.models.SavedMeal
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.Token
 import com.example.muscletruth.data.models.Weighting
@@ -134,7 +135,14 @@ interface ApiService {
     suspend fun getSavedMeals(): List<SavedMeal>
 
     @GET("/api/meals/saved/{meal_id}")
-    suspend fun getSavedMeal(@Path("meal_id") mealID: Int): SavedMeal?
+    suspend fun getSavedMeal(@Path("meal_id") mealID: Int): Response<SavedMeal?>
+
+    @FormUrlEncoded
+    @POST("api/meals/saved")
+    suspend fun addSavedMeal(@Field("title") title: String, @Field("meal_id") mealID: Int): SavedMeal
+
+    @DELETE("/api/meals/saved/{meal_id}")
+    suspend fun deleteSavedMeal(@Path("meal_id") mealID: Int)
 
     //======================================SERVINGS========================================\\
 
@@ -156,6 +164,9 @@ interface ApiService {
 
     @GET("/api/servings/recent")
     suspend fun getRecentServings(): MutableList<RecentServing>
+
+    @GET("/api/servings/recent/{serving_id}")
+    suspend fun getRecentServing(@Path("serving_id") servingID: Int): RecentServing?
 
     @DELETE("/api/servings/{serving_id}")
     suspend fun deleteServing(@Path("serving_id") servingID: Int)

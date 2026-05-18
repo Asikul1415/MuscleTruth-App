@@ -12,11 +12,17 @@ interface MealDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(meals: List<Meal>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSavedMeal(meal: SavedMeal)
+
     @Update
     suspend fun update(meal: Meal)
 
     @Delete
     suspend fun delete(meal: Meal)
+
+    @Delete
+    suspend fun deleteSavedMeal(savedMeal: SavedMeal)
 
     @Query("SELECT * FROM meals WHERE substr(creation_date, 1, 10) = :today")
     suspend fun getTodayMeals(today: String): List<Meal>
@@ -42,6 +48,6 @@ interface MealDao {
     @Query("SELECT * FROM saved_meals")
     suspend fun getSavedMeals(): List<SavedMeal>
 
-    @Query("SELECT * FROM saved_meals WHERE meal_server_id = :mealServerID OR meal_local_id = :mealLocalID")
-    suspend fun getSavedMeal(mealServerID: Int?, mealLocalID: String?): SavedMeal
+    @Query("SELECT * FROM saved_meals WHERE meal_local_id = :mealLocalID OR meal_server_id = :mealServerID")
+    suspend fun getSavedMeal(mealServerID: Int?, mealLocalID: String?): SavedMeal?
 }

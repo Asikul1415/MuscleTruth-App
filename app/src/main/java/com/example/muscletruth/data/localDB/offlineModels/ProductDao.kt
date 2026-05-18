@@ -50,6 +50,6 @@ interface ProductDao {
     @Query("SELECT * FROM favourite_products")
     suspend fun getFavouriteProducts(): List<FavouriteProduct>
 
-    @Query("SELECT * FROM favourite_products WHERE product_server_id = :productID OR product_local_id = :localProductID")
+    @Query("SELECT * FROM favourite_products WHERE product_local_id = :localProductID OR product_server_id = :productID")
     suspend fun getFavouriteProduct(productID:Int, localProductID: String?): FavouriteProduct
 }

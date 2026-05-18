@@ -27,6 +27,17 @@
                 android:layout_width="75dp"
                 android:layout_height="75dp"/>
 
+            <Button
+                android:id="@+id/item_saved_meal_btn_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="0dp"
+                android:maxWidth="0dp"
+                android:padding="0dp"
+                android:text="♥"
+                android:textSize="28sp"
+                android:backgroundTint="@color/primary"/>
+
         </LinearLayout>
 
         <LinearLayout
