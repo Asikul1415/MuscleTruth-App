@@ -80,7 +80,7 @@ object ServingRepository {
             return servings.toMutableList()
         }
         catch(e: Exception){
-            Log.e("APP_DEBUG", "getMealServings() ERROR: ${e.toString()}")
+            Log.e("APP_DEBUG", "getServings() ERROR: ${e.toString()}")
             throw e
             return mutableListOf()
         }

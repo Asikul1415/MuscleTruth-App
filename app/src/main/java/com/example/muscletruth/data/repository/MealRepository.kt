@@ -121,10 +121,10 @@ object MealRepository {
         }
     }
 
-    suspend fun getMeals(): List<Meal>{
+    suspend fun getMeals(date: String? = null): List<Meal>{
         try{
             if(checkForInternetConnection()){
-                val meals = apiService.getMeals(null, null)
+                val meals = apiService.getMeals(date, date)
 
                 return meals.map{meal ->
                     val localMeal = localDb.mealDao().getServerMeal(meal.serverID)
@@ -135,7 +135,7 @@ object MealRepository {
                 }
             }
 
-            val meals = localDb.mealDao().getMeals()
+            val meals = localDb.mealDao().getMeals(date)
             return meals
         }
         catch(e: Exception){
@@ -212,14 +212,15 @@ object MealRepository {
         }
     }
 
-    suspend fun getMealTypeTotal(mealTypeID: Int): MealType? {
+    suspend fun getMealTypeTotal(mealTypeID: Int, date: String? = null): MealType? {
         try{
-            val todayDate = LocalDate.now().toString()
+            val mealDate = date ?: LocalDate.now().toString()
+
             if(checkForInternetConnection()){
-                val response = apiService.getMealTypeTotal(mealTypeID,todayDate, todayDate)
+                val response = apiService.getMealTypeTotal(mealTypeID,mealDate, mealDate)
                 return response
             }
-            val meals = localDb.mealDao().getMealTypeMeals(mealTypeID, todayDate)
+            val meals = localDb.mealDao().getMealTypeMeals(mealTypeID, mealDate)
             var totalProteins = 0.00f;
             var totalFats = 0.00f;
             var totalCarbs = 0.00f;
