@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class RecentServingsFragment : Fragment() {
     private var servings = mutableListOf<Serving>()
@@ -148,11 +149,26 @@ class RecentServingsFragment : Fragment() {
                     productTitleField?.text = product?.title
 
                     val amount = dialogView.findViewById<EditText>(R.id.dialog_product_amount_et_amount)
+                    amount.setText(serving.productAmount.toString())
                     val proteinsField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_proteins_val)
                     val carbsField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_carbs_val)
                     val fatsField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_fats_val)
                     val caloriesField = dialogView.findViewById<TextView>(R.id.dg_product_amount_tv_calories_val)
 
+                    fun updateMacros() {
+                        val productAmount = amount.text.toString().toDouble()
+                        val proteinsAmount = product.proteins * (productAmount / 100)
+                        val carbsAmount = product.carbs * (productAmount / 100)
+                        val fatsAmount = product.fats * (productAmount / 100)
+                        val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
+
+                        proteinsField.text = "%.2f".format(Locale.US,proteinsAmount)
+                        carbsField.text = "%.2f".format(Locale.US, carbsAmount)
+                        fatsField.text = "%.2f".format(Locale.US, fatsAmount)
+                        caloriesField.text = "%.2f".format(Locale.US, caloriesAmount)
+                    }
+
+                    updateMacros()
                     amount.addTextChangedListener {
                         if (amount.length() > 4) {
                             amount.setText(amount.text.dropLast(1))
@@ -161,16 +177,7 @@ class RecentServingsFragment : Fragment() {
                             amount.error = "Введите кол-во продукта!"
                         }
                         else{
-                            val productAmount = amount.text.toString().toDouble()
-                            val proteinsAmount = product.proteins * (productAmount / 100)
-                            val carbsAmount = product.carbs * (productAmount / 100)
-                            val fatsAmount = product.fats * (productAmount / 100)
-                            val caloriesAmount = proteinsAmount * 4 + carbsAmount * 4 + fatsAmount * 9
-
-                            proteinsField.text = "%.2f".format(proteinsAmount)
-                            carbsField.text = "%.2f".format(carbsAmount)
-                            fatsField.text = "%.2f".format(fatsAmount)
-                            caloriesField.text = "%.2f".format(caloriesAmount)
+                            updateMacros()
                         }
                     }
                     button.setOnClickListener {
