@@ -80,17 +80,27 @@ object MealRepository {
                 val mealJson = Gson().toJson(meal)
                 val mealBody = mealJson.toRequestBody("application/json".toMediaTypeOrNull())
 
-                Log.d("APP_DEBUG", "MEAL UPDATE: SUCCESS")
-                return apiService.updateMeal(meal.serverID,mealBody, image)
+                Log.d("APP_DEBUG", "MEAL SERVER UPDATE: SUCCESS")
+                apiService.updateMeal(meal.serverID,mealBody, image)
             }
-            else{
-                if(localImage !== null){
-                    meal.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localImage)
+
+            if(localImage !== null){
+                meal.localPicture = Utils.ImageUtils.copyImageToLocalStorage(context, localImage)
+            }
+            localDb.mealDao().update(meal)
+
+            //Clearing meals created from this one origin_meal_id field
+            val childrenMeals = localDb.mealDao().getSavedMealChildren(meal.serverID, meal.localID)
+            childrenMeals.forEach{ meal ->
+                if(meal !== null){
+                    meal?.localOriginMealID = null
+                    meal?.serverOriginMealID = null
+                    localDb.mealDao().update(meal)
                 }
-                localDb.mealDao().update(meal)
-                Log.d("APP_DEBUG", "MEAL UPDATE: SUCCESS")
-                return true
             }
+
+            Log.d("APP_DEBUG", "MEAL LOCAL UPDATE: SUCCESS")
+            return true
         } catch (e: Exception) {
             Log.e("APP_DEBUG", "updateMeal() ERROR: ${e.toString()}")
             return false
