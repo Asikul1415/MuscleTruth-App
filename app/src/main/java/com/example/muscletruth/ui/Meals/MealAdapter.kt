@@ -170,7 +170,7 @@ class MealAdapter(
                                 .into(holder.servingPicture)
                         }
                         holder.itemView.setOnClickListener {
-                            if(date !== null){
+                            if(date === null){
                                 showServingActionsDialog(item)
                             }
                         }
