@@ -2,6 +2,7 @@ package com.example.muscletruth.ui.Meals
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -20,6 +21,10 @@ import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.serviceClasses.MealItem
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ServingRepository
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,6 +36,7 @@ class MealsActivity : AppCompatActivity() {
     private var meals: List<MealItem> = emptyList()
 
     private lateinit var mealsList: RecyclerView
+    private lateinit var pieChart: PieChart
     private lateinit var tvDate: TextView
     private lateinit var adapter: MealAdapter
     private var mealsDate: String? = null
@@ -47,6 +53,8 @@ class MealsActivity : AppCompatActivity() {
 
         mealsList = findViewById<RecyclerView>(R.id.meals_rv)
         setupList()
+
+        pieChart = findViewById<PieChart>(R.id.meals_pie_chart)
 
         val addButton = findViewById<Button>(R.id.meals_btn_add)
         addButton.setOnClickListener {
@@ -77,6 +85,7 @@ class MealsActivity : AppCompatActivity() {
         adapter.items.clear()
         meals = mutableListOf()
         setupList(date)
+
         try{
             if(date === null){
                 loadTodayMeals()
@@ -99,6 +108,40 @@ class MealsActivity : AppCompatActivity() {
         }, mealsDate)
         adapter.items.clear()
         mealsList.adapter = adapter
+    }
+
+    private fun setupPieChart() {
+        val entries = mutableListOf<PieEntry>()
+        var totalCalories = 0.00f
+        adapter.items.forEach {mealType ->
+            //Filtering total for all day header
+            if(mealType is MealType && mealType.id !== 999 && mealType.totalCalories !== null && mealType.totalCalories > 0){
+                entries.add(PieEntry(mealType.totalCalories, mealType.title))
+            }
+            else if(mealType is MealType && mealType.id == 999){
+                totalCalories = mealType.totalCalories ?: 0.00f
+            }
+        }
+
+        // Создаём датасет и задаём цвета
+        val dataSet = PieDataSet(entries, "Рацион")
+        dataSet.colors = listOf(Color.rgb(230, 156, 46), Color.GRAY, Color.MAGENTA, Color.LTGRAY)
+        dataSet.valueTextSize = 24f
+        dataSet.valueTextColor = Color.YELLOW
+
+    // Формируем данные для отображения
+        pieChart.data = PieData(dataSet)
+        pieChart.setEntryLabelColor(Color.BLACK)
+        pieChart.setEntryLabelTextSize(14f)
+        pieChart.legend.isEnabled = false
+        pieChart.holeRadius = 40f
+        pieChart.centerText = totalCalories.toString() + " ккал"
+        pieChart.setCenterTextSize(24f)
+        pieChart.setCenterTextColor(Color.BLACK)
+        pieChart.description.isEnabled = false
+
+    // Обновляем диаграмму
+        pieChart.invalidate()
     }
 
     private fun showDatePickerDialog() {
@@ -286,6 +329,7 @@ class MealsActivity : AppCompatActivity() {
             }
 
             adapter.notifyDataSetChanged()
+            setupPieChart()
         }
     }
 
@@ -429,6 +473,7 @@ class MealsActivity : AppCompatActivity() {
                 }
             }
             adapter.notifyDataSetChanged()
+            setupPieChart()
         }
     }
 }
