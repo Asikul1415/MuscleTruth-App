@@ -32,7 +32,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 
-class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private val context: Context? = null, private val onItemsUpdate: () -> Unit) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
+class MealAdapter(
+    private val lifecycleScope: LifecycleCoroutineScope,
+    private val context: Context? = null,
+    private val onItemsUpdate: () -> Unit,
+    private val date: String? = null) : RecyclerView.Adapter<MealAdapter.ViewHolder>(){
     var items = mutableListOf<Any>()
 
     private val TYPE_MEAL = 0;
@@ -119,8 +123,6 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                             totalFats += product.fats * (serving.productAmount / 100.00)
                             totalCarbs += product.carbs * (serving.productAmount / 100.00)
                         }
-                        Log.d("APP_DEBUG!", "$totalProteins $totalCarbs $totalFats")
-                        Log.d("APP_DEBUG!", "$product")
                     }
 
                     holder.mealTvProteins?.text = "%.2f".format(Locale.US, totalProteins)
@@ -133,6 +135,7 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                     if(context != null){
                         val intent = Intent(context, MealActivity::class.java)
                         intent.putExtra("meal", item)
+                        intent.putExtra("date", date)
                         context.startActivity(intent)
                     }
                 }
@@ -167,7 +170,9 @@ class MealAdapter(private val lifecycleScope: LifecycleCoroutineScope, private v
                                 .into(holder.servingPicture)
                         }
                         holder.itemView.setOnClickListener {
-                            showServingActionsDialog(item)
+                            if(date !== null){
+                                showServingActionsDialog(item)
+                            }
                         }
                     }
                 }

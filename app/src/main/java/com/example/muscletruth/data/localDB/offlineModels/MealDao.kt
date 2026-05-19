@@ -33,7 +33,7 @@ interface MealDao {
     @Query("SELECT * from meals WHERE local_id = :mealID")
     suspend fun getLocalMeal(mealID: String): Meal?
 
-    @Query("SELECT * from meals WHERE meal_type_id = :mealTypeID AND substr(creation_date, 1, 10) = Fяsubstr(:date, 1, 10)")
+    @Query("SELECT * from meals WHERE meal_type_id = :mealTypeID AND substr(creation_date, 1, 10) = substr(:date, 1, 10)")
     suspend fun getMealTypeMeals(mealTypeID: Int, date: String): MutableList<Meal>
 
     @Query("SELECT * FROM meals WHERE creation_date LIKE '%' || substr(:date, 1, 10) || '%'")

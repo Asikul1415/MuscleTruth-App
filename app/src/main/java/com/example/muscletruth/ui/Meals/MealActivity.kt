@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -57,6 +58,7 @@ class MealActivity : AppCompatActivity() {
     private lateinit var carbsField: TextView
     private lateinit var caloriesField: TextView
     var imageURI: Uri? = null
+    private var date: String? = null
 
     private val startProductActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
     { result ->
@@ -84,12 +86,6 @@ class MealActivity : AppCompatActivity() {
             insets
         }
 
-        val addProduct = findViewById<Button>(R.id.meal_btn_product_add)
-        addProduct.setOnClickListener {
-            val intent = Intent(this, AddServingActivity::class.java)
-            startProductActivityForResult.launch(intent)
-        }
-
         spinner = findViewById<Spinner>(R.id.meal_sp)
         val adapter = ArrayAdapter.createFromResource(
             this,
@@ -99,11 +95,6 @@ class MealActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(R.layout.item_spinner_meal_type)
         spinner.adapter = adapter
         spinner.setSelection(0)
-
-        val addImage = findViewById<Button>(R.id.meal_btn_picture)
-        addImage.setOnClickListener {
-            Utils.ImageUtils.openGallery(selectImageLauncher)
-        }
 
         picture = findViewById<ImageView>(R.id.meal_iv)
         selectImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
@@ -122,6 +113,8 @@ class MealActivity : AppCompatActivity() {
         caloriesField = findViewById<TextView>(R.id.meal_tv_calories_val)
 
         mealItem = intent.getParcelableExtra<MealItem>("meal")!!
+        date = intent.getStringExtra("date")
+        Log.d("APP_DEBUG!", "GET DATE $date")
         lifecycleScope.launch {
             with(Dispatchers.IO){
                 if(mealItem !== null){
@@ -151,40 +144,65 @@ class MealActivity : AppCompatActivity() {
             }
        }
 
-        val deleteButton = findViewById<Button>(R.id.meal_btn_delete)
-        deleteButton.setOnClickListener {
-            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_empty, null)
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("Вы точно хотите удалить приём пищи?")
-                .setView(dialogView)
-                .setPositiveButton("Да", null)
-                .setNegativeButton("Нет", null)
-                .create()
-            dialog.setOnShowListener {
-                val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val addImage = findViewById<Button>(R.id.meal_btn_picture)
+        if(date !== null){
+            addImage.visibility = View.GONE
+        }
+        else{
+            addImage.setOnClickListener {
+                Utils.ImageUtils.openGallery(selectImageLauncher)
+            }
 
-                positiveButton.setOnClickListener {
-                    lifecycleScope.launch {
-                        withContext(Dispatchers.IO){
-                            if(mealItem !== null && mealItem.localID !== null){
-                                MealRepository.deleteMeal(mealItem.id, mealItem.localID)
-                                servings.forEach {serving ->
-                                    ServingRepository.deleteServing(serving)
+        }
+
+        val addProduct = findViewById<Button>(R.id.meal_btn_product_add)
+        if(date !== null){
+            addProduct.visibility = View.GONE
+        }
+        else{
+            addProduct.setOnClickListener {
+                val intent = Intent(this, AddServingActivity::class.java)
+                startProductActivityForResult.launch(intent)
+            }
+        }
+
+        val deleteButton = findViewById<Button>(R.id.meal_btn_delete)
+        if(date !== null){
+            deleteButton.visibility = View.GONE
+        }
+        else{
+            deleteButton.setOnClickListener {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_empty, null)
+                val dialog = AlertDialog.Builder(this)
+                    .setTitle("Вы точно хотите удалить приём пищи?")
+                    .setView(dialogView)
+                    .setPositiveButton("Да", null)
+                    .setNegativeButton("Нет", null)
+                    .create()
+                dialog.setOnShowListener {
+                    val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+                    positiveButton.setOnClickListener {
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO){
+                                if(mealItem !== null && mealItem.localID !== null){
+                                    MealRepository.deleteMeal(mealItem.id, mealItem.localID)
+                                    servings.forEach {serving ->
+                                        ServingRepository.deleteServing(serving)
+                                    }
+                                    finish()
                                 }
-                                finish()
                             }
                         }
                     }
-                }
 
-                negativeButton.setOnClickListener {
-                    dialog.cancel()
+                    negativeButton.setOnClickListener {
+                        dialog.cancel()
+                    }
                 }
+                dialog.show()
             }
-
-            dialog.show()
-
         }
 
         val backButton = findViewById<Button>(R.id.meal_btn_back)
@@ -289,68 +307,73 @@ class MealActivity : AppCompatActivity() {
             }
         }
 
+
         val saveButton = findViewById<Button>(R.id.meal_btn_save)
-        saveButton.setOnClickListener {
-            lifecycleScope.launch {
-                withContext(Dispatchers.IO){
-                    var imagePart: MultipartBody.Part? = null
-                    if(imageURI != null){
-                        imagePart = imageURI?.let { uri ->
-                            Utils.ImageUtils.createImagePart(this@MealActivity, uri)
+        if(date !== null){
+            saveButton.visibility = View.GONE
+        }
+        else{
+            saveButton.setOnClickListener {
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO){
+                        var imagePart: MultipartBody.Part? = null
+                        if(imageURI != null){
+                            imagePart = imageURI?.let { uri ->
+                                Utils.ImageUtils.createImagePart(this@MealActivity, uri)
+                            }
                         }
-                    }
 
-                    val mealTypeID = spinner.selectedItemPosition + 1;
+                        val mealTypeID = spinner.selectedItemPosition + 1;
 
-                    if(mealItem !== null){
-                        val isMealUpdateSuccessful = MealRepository.updateMeal(
-                            meal = Meal(
-                                localID = mealItem.localID ?: UUID.randomUUID().toString(),
-                                serverID = mealItem.id ?: -1,
-                                mealTypeID=mealTypeID,
-                                creationDate = mealItem.creationDate),
-                            localImage = imageURI,
-                            image = imagePart,
-                            context = this@MealActivity)
+                        if(mealItem !== null){
+                            val isMealUpdateSuccessful = MealRepository.updateMeal(
+                                meal = Meal(
+                                    localID = mealItem.localID ?: UUID.randomUUID().toString(),
+                                    serverID = mealItem.id ?: -1,
+                                    mealTypeID=mealTypeID,
+                                    creationDate = mealItem.creationDate),
+                                localImage = imageURI,
+                                image = imagePart,
+                                context = this@MealActivity)
 
-                        if(isMealUpdateSuccessful){
-                            //Setting wasUpdated flag to sync changes later
-                            if(checkForInternetConnection() == false && mealItem.localID !== null){
-                                val updatedMeal = UserRepository.localDb.mealDao().getLocalMeal(mealItem.localID!!)
-                                if(updatedMeal !== null){
-                                    updatedMeal.wasUpdated = 1;
-                                    UserRepository.localDb.mealDao().update(updatedMeal)
+                            if(isMealUpdateSuccessful){
+                                //Setting wasUpdated flag to sync changes later
+                                if(checkForInternetConnection() == false && mealItem.localID !== null){
+                                    val updatedMeal = UserRepository.localDb.mealDao().getLocalMeal(mealItem.localID!!)
+                                    if(updatedMeal !== null){
+                                        updatedMeal.wasUpdated = 1;
+                                        UserRepository.localDb.mealDao().update(updatedMeal)
+                                    }
                                 }
-                            }
 
 
-                            addedServings.forEach { serving ->
-                                ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, serving).onSuccess {serverServing ->
-                                    ServingRepository.addRecentServing(serverServing.serverID, serverServing.localID)
+                                addedServings.forEach { serving ->
+                                    ServingRepository.addServing(MealRepository.getMeal(mealItem.id, mealItem.localID!!)!!, serving).onSuccess {serverServing ->
+                                        ServingRepository.addRecentServing(serverServing.serverID, serverServing.localID)
+                                    }
                                 }
-                            }
 
-                            deletedServings.forEach {serving ->
-                                ServingRepository.deleteServing(serving)
-                            }
+                                deletedServings.forEach {serving ->
+                                    ServingRepository.deleteServing(serving)
+                                }
 
-                            if(ServingRepository.getMealServings(mealItem.id, mealItem.localID).count() == 0){
-                                MealRepository.deleteMeal(mealItem.id, mealItem.localID)
+                                if(ServingRepository.getMealServings(mealItem.id, mealItem.localID).count() == 0){
+                                    MealRepository.deleteMeal(mealItem.id, mealItem.localID)
+                                }
+                                finish()
                             }
+                        }
+                        else{
+                            Toast.makeText(this@MealActivity, "Ошибка!",
+                                Toast.LENGTH_LONG).show()
+                            Log.e("APP_DEBUG", "MEAL ACTIVITY ERROR: MEAL ITEM IS NULL")
                             finish()
                         }
-                    }
-                    else{
-                        Toast.makeText(this@MealActivity, "Ошибка!",
-                            Toast.LENGTH_LONG).show()
-                        Log.e("APP_DEBUG", "MEAL ACTIVITY ERROR: MEAL ITEM IS NULL")
-                        finish()
-                    }
 
+                    }
                 }
             }
         }
-
 
 
         productsList = findViewById<RecyclerView>(R.id.meal_rv)
@@ -386,9 +409,7 @@ class MealActivity : AppCompatActivity() {
     private fun loadData(){
         lifecycleScope.launch {
             try{
-                Log.d("APP_DEBUG!", "${deletedServings}")
                 servings = ServingRepository.getMealServings(mealItem.id, mealItem.localID).filter{ serving ->
-                    Log.d("APP_DEBUG!", "${serving}")
                     deletedServings.map{ it->it.localID}.indexOf(serving.localID) == -1
                 }.toMutableList()
                 servings.addAll(addedServings)
@@ -398,7 +419,7 @@ class MealActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
             }
             catch(e: Exception){
-                Log.e("APP_DEBUG", "${e.toString()}")
+                Log.e("APP_DEBUG", "MealActivity: ERROR ${e.toString()}")
             }
         }
     }

@@ -76,6 +76,7 @@ class MealsActivity : AppCompatActivity() {
     private fun loadData(date: String? = null){
         adapter.items.clear()
         meals = mutableListOf()
+        setupList(date)
         try{
             if(date === null){
                 loadTodayMeals()
@@ -90,12 +91,12 @@ class MealsActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupList() {
+    private fun setupList(date: String? = null) {
         mealsList.layoutManager = LinearLayoutManager(this)
         adapter = MealAdapter(lifecycleScope, this@MealsActivity, {
-            loadData()
+            loadData(date)
             adapter.notifyDataSetChanged()
-        })
+        }, mealsDate)
         adapter.items.clear()
         mealsList.adapter = adapter
     }
@@ -109,18 +110,25 @@ class MealsActivity : AppCompatActivity() {
         val datePickerDialog = DatePickerDialog(
             this,
             { _, selectedYear, selectedMonth, selectedDay ->
-                val formattedDate = "${selectedYear}-${selectedMonth + 1}-$selectedDay"
-                tvDate.text = formattedDate
-
-
-                val selectedCalendar = Calendar.getInstance().apply {
-                    set(selectedYear, selectedMonth, selectedDay, 0, 0, 0)
-                    set(Calendar.MILLISECOND, 0)
+                val formattedDate = String.format("%d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                val today = LocalDate.now().toString()
+                Log.d("APP_DEBUG!", "DATE $formattedDate $today")
+                if(formattedDate == today){
+                    tvDate.text = "Сегодня"
+                    mealsDate = null
+                    loadData()
                 }
-                val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
-                formatter.timeZone = selectedCalendar.timeZone
-                mealsDate = formatter.format(selectedCalendar.time)
-                loadData(mealsDate)
+                else{
+                    tvDate.text = formattedDate
+                    val selectedCalendar = Calendar.getInstance().apply {
+                        set(selectedYear, selectedMonth, selectedDay, 0, 0, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
+                    formatter.timeZone = selectedCalendar.timeZone
+                    mealsDate = formatter.format(selectedCalendar.time)
+                    loadData(mealsDate)
+                }
             },
             year, month, day
         )
