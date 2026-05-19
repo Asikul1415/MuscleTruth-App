@@ -203,10 +203,12 @@ class MealsActivity : AppCompatActivity() {
             val noMealsText = findViewById<TextView>(R.id.meals_tv_no_meals)
             if(meals.size == 0){
                 mealsList.visibility = View.GONE
+                pieChart.visibility = View.GONE
                 noMealsText.visibility = View.VISIBLE
                 return@launch
             } else{
                 mealsList.visibility = View.VISIBLE
+                pieChart.visibility = View.VISIBLE
                 noMealsText.visibility = View.GONE
             }
 
@@ -353,9 +355,11 @@ class MealsActivity : AppCompatActivity() {
             if(meals.size == 0){
                 mealsList.visibility = View.GONE
                 noMealsText.visibility = View.VISIBLE
+                pieChart.visibility = View.GONE
                 return@launch
             } else{
                 mealsList.visibility = View.VISIBLE
+                pieChart.visibility = View.VISIBLE
                 noMealsText.visibility = View.GONE
             }
 
