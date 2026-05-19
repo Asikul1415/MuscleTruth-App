@@ -32,9 +32,6 @@ interface WeightingDao {
     @Query("SELECT * from weightings WHERE server_id = -1")
     suspend fun getWeightingsForSync(): List<Weighting>
 
-    @Query("SELECT * from weightings WHERE local_id = :id")
-    suspend fun getWeighting(id: String): Weighting
-
-    @Query("SELECT * from weightings WHERE server_id = :id")
-    suspend fun getServerWeighting(id: Int): Weighting
+    @Query("SELECT * from weightings WHERE local_id = :localWeightingID OR server_id = :serverWeightingID")
+    suspend fun getWeighting(serverWeightingID: Int, localWeightingID: String? = null): Weighting
 }

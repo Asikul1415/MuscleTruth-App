@@ -26,7 +26,7 @@ object WeightingRepository {
             //SERVER
             if(checkForInternetConnection()){
                 val response = apiService.getUserWeightings(startDate = startDate, endDate = endDate).map { weighting ->
-                    var localWeighting = localDb.weightingDao().getServerWeighting(weighting.serverID)
+                    var localWeighting = localDb.weightingDao().getWeighting(weighting.serverID)
                     val localID = localWeighting?.localID ?: UUID.randomUUID().toString()
                     weighting.copy(localID = localID)
                 }
@@ -193,6 +193,24 @@ object WeightingRepository {
         } catch (e: Exception) {
             Log.e("APP_DEBUG", "${e.toString()}")
             return false;
+        }
+    }
+
+    suspend fun deleteWeighting (weightingServerID: Int, weightingLocalID: String? = null) {
+
+        try {
+            if (checkForInternetConnection()) {
+                apiService.deleteWeighting(weightingServerID)
+                Log.d("APP_DEBUG", "deleteWeighting(): WEIGHTING DELETED ON SERVER")
+            }
+
+            val localWeighting =
+                localDb.weightingDao().getWeighting(weightingServerID, weightingLocalID)
+            localDb.weightingDao().delete(localWeighting)
+            Log.d("APP_DEBUG", "deleteWeighting(): WEIGHTING DELETED LOCALLY")
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "deleteWeighting(): ERROR ${e.toString()}")
         }
     }
 }

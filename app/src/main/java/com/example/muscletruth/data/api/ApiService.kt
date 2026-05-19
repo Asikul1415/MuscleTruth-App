@@ -64,6 +64,9 @@ interface ApiService {
         @Part("weighting") weighting: RequestBody,
         @Part image: MultipartBody.Part? = null): Boolean
 
+    @DELETE("api/weightings/{weighting_id}")
+    suspend fun deleteWeighting(@Path("weighting_id") weightingServerID: Int)
+
     @GET("api/weightings/chart/year")
     suspend fun getWeightingsYearChartData(): List<WeightingsChartData.YearChartData>
 

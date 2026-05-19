@@ -7,7 +7,6 @@ import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.models.Weighting
 import com.example.muscletruth.data.repository.MealRepository
@@ -49,7 +48,7 @@ object SyncManager {
 
                 //Find all weightings from server that missing in localDB
                 weightingsToInsert = WeightingRepository.getWeightings().map { weighting ->
-                    var localWeighting = UserRepository.localDb.weightingDao().getServerWeighting(weighting.serverID)
+                    var localWeighting = UserRepository.localDb.weightingDao().getWeighting(weighting.serverID)
 
                     var localPicture: String? = null
                     if(checkForInternetConnection() && weighting.serverPicture?.isNullOrEmpty() === false){

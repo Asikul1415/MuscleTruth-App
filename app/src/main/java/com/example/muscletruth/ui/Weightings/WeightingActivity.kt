@@ -3,14 +3,17 @@ package com.example.muscletruth.ui.Weightings
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Weighting
+import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.UserRepository
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.example.muscletruth.data.repository.WeightingRepository
@@ -151,6 +155,42 @@ class WeightingActivity : AppCompatActivity() {
             }
             else{
                 Toast.makeText(this@WeightingActivity, "Ошибка! Взвешивания не существует!", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        val deleteButton = findViewById<ImageButton>(R.id.weighting_btn_delete)
+        deleteButton.setOnClickListener {
+            if(weighting !== null){
+                lifecycleScope.launch {
+                    val confirmWeightingDeleteDialogView = LayoutInflater.from(this@WeightingActivity)
+                        .inflate(R.layout.dialog_empty, null)
+                    val confirmWeightingDeleteDialog =
+                        AlertDialog.Builder(this@WeightingActivity)
+                            .setTitle("Вы точно хотите удалить взвешивание?")
+                            .setView(confirmWeightingDeleteDialogView)
+                            .setPositiveButton("Да", null)
+                            .setNegativeButton("Нет", null)
+                            .create()
+
+                    confirmWeightingDeleteDialog.setOnShowListener {
+                        val positiveButton = confirmWeightingDeleteDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        positiveButton.setOnClickListener {
+                            lifecycleScope.launch {
+                                WeightingRepository.deleteWeighting(weighting.serverID, weighting.localID)
+                                finish()
+                            }
+                        }
+
+                        val negativeButton = confirmWeightingDeleteDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                        negativeButton.setOnClickListener {
+                            confirmWeightingDeleteDialog.dismiss()
+                        }
+                    }
+
+                    confirmWeightingDeleteDialog.show()
+
+
+                }
             }
         }
     }
