@@ -52,6 +52,8 @@ class AddMealActivity : AppCompatActivity() {
     private lateinit var picture: ImageView
     private lateinit var selectImageLauncher: ActivityResultLauncher<Intent>
     var imageURI: Uri? = null
+    var serverOriginMealID: Int? = null
+    var localOriginMealID: String? = null
 
     private val startProductActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
     { result ->
@@ -71,6 +73,10 @@ class AddMealActivity : AppCompatActivity() {
             val meal = data?.getParcelableExtra<Meal>("meal")
             if(meal !== null){
                 Log.d("APP_DEBUG!", "meal get $meal")
+                serverOriginMealID = meal.serverID
+                localOriginMealID = meal.localID
+                Log.d("APP_DEBUG!!!", "server $serverOriginMealID local $localOriginMealID")
+
                 lifecycleScope.launch {
                     servings = ServingRepository.getMealServings(meal.serverID, meal.localID)
                     if(meal.localPicture !== null){
@@ -172,7 +178,12 @@ class AddMealActivity : AppCompatActivity() {
                     }
 
                     val mealTypeID = spinner.selectedItemPosition + 1;
-                    val mealResponse = MealRepository.addMeal(Meal(mealTypeID=mealTypeID), imagePart, localImage = imageURI, context = this@AddMealActivity)
+                    Log.d("APP_DEBUG!!!", "server $serverOriginMealID local $localOriginMealID")
+                    val mealResponse = MealRepository.addMeal(
+                        Meal(mealTypeID=mealTypeID, serverOriginMealID = serverOriginMealID, localOriginMealID = localOriginMealID),
+                        imagePart,
+                        localImage = imageURI,
+                        context = this@AddMealActivity)
 
                     mealResponse.onSuccess {meal ->
                         servings.forEach { serving ->

@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Meal
+import com.example.muscletruth.data.models.SavedMeal
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.repository.MealRepository
 import com.example.muscletruth.data.repository.ProductRepository
@@ -217,6 +218,14 @@ class MealActivity : AppCompatActivity() {
             if(isMealSaved){
                 saveMealButton.text = "♥"
             }
+            else{
+                if(mealItem.serverOriginMealID !== null){
+                    isMealSaved = MealRepository.getSavedMeal(mealItem.serverOriginMealID!!, mealItem.localOriginMealID) !== null
+                    if(isMealSaved){
+                        saveMealButton.text = "♥"
+                    }
+                }
+            }
 
             saveMealButton.setOnClickListener {
                 if(isMealSaved){
@@ -236,12 +245,18 @@ class MealActivity : AppCompatActivity() {
                             confirmSavedMealDeleteDialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         positiveButton.setOnClickListener {
                             lifecycleScope.launch {
-                                MealRepository.deleteSavedMeal(
-                                    mealItem.id,
-                                    mealItem.localID
-                                )
+                                if(mealItem.serverOriginMealID === null && mealItem.localOriginMealID === null){
+                                    MealRepository.deleteSavedMeal(
+                                        mealItem.id,
+                                        mealItem.localID
+                                    )
+                                }
+                                else{
+                                    MealRepository.deleteSavedMeal(mealItem.serverOriginMealID!!, mealItem.localOriginMealID)
+                                }
                                 confirmSavedMealDeleteDialog.dismiss()
                                 saveMealButton.text = "♡"
+                                isMealSaved = false
                             }
                         }
 
@@ -257,7 +272,7 @@ class MealActivity : AppCompatActivity() {
                 else{
                     val saveMealDialogView = LayoutInflater.from(this@MealActivity).inflate(R.layout.dialog_save_meal, null)
                     val saveMealDialog = AlertDialog.Builder(this@MealActivity)
-                        .setTitle("Что вы желаете?")
+                        .setTitle("Сохранить приём пищи как?")
                         .setView(saveMealDialogView)
                         .setPositiveButton("Сохранить", null)
                         .setNegativeButton("Отменить", null)
@@ -271,13 +286,25 @@ class MealActivity : AppCompatActivity() {
                                     val titleField = saveMealDialog.findViewById<EditText>(R.id.dialog_save_meal_et_title)
                                     val title = titleField?.text.toString()
                                     if (title.length > 3 && title.length < 256) {
-                                        val savedMeal = MealRepository.addSavedMeal(
-                                            title,
-                                            mealItem.id,
-                                            mealItem.localID
-                                        )
+                                        var savedMeal: SavedMeal? = null
+                                        if(mealItem.serverOriginMealID === null && mealItem.localOriginMealID === null){
+                                            savedMeal = MealRepository.addSavedMeal(
+                                                title,
+                                                mealItem.id,
+                                                mealItem.localID
+                                            )
+                                        }
+                                        else{
+                                            savedMeal = MealRepository.addSavedMeal(
+                                                title,
+                                                mealItem.serverOriginMealID!!,
+                                                mealItem.localOriginMealID
+                                            )
+                                        }
+
                                         if (savedMeal !== null) {
                                             saveMealButton.text = "♥"
+                                            isMealSaved = true
                                             saveMealDialog.dismiss()
                                         }
                                     } else if (title.length < 3) {

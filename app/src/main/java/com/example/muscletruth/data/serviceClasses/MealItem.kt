@@ -27,4 +27,7 @@ data class MealItem(
 
     @SerializedName("creationDate")
     val creationDate: String? = null,
+
+    val serverOriginMealID: Int? = null,
+    val localOriginMealID: String? = null,
 ): Parcelable

@@ -148,7 +148,9 @@ class MealsActivity : AppCompatActivity() {
                         localID = meal.localID,
                         servings = ServingRepository.getMealServings(meal.serverID, meal.localID),
                         mealTypeID = meal.mealTypeID,
-                        creationDate = meal.creationDate)
+                        creationDate = meal.creationDate,
+                        serverOriginMealID = meal.serverOriginMealID,
+                        localOriginMealID = meal.localOriginMealID)
                 }
             }
             meals.forEach {meal ->
@@ -297,7 +299,9 @@ class MealsActivity : AppCompatActivity() {
                         localID = meal.localID,
                         servings = ServingRepository.getMealServings(meal.serverID, meal.localID),
                         mealTypeID = meal.mealTypeID,
-                        creationDate = meal.creationDate)
+                        creationDate = meal.creationDate,
+                        serverOriginMealID = meal.serverOriginMealID,
+                        localOriginMealID = meal.localOriginMealID)
                 }
             }
 

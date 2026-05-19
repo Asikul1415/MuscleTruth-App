@@ -36,6 +36,13 @@ data class Meal(
     @ColumnInfo("creation_date")
     var creationDate: String? = null,
 
+    @SerializedName("origin_meal_id")
+    @ColumnInfo("server_origin_meal_id")
+    var serverOriginMealID: Int? = null,
+
+    @ColumnInfo("local_origin_meal_id")
+    var localOriginMealID: String? = null,
+
     @ColumnInfo("was_updated")
     var wasUpdated: Int = 0,
 ): Parcelable

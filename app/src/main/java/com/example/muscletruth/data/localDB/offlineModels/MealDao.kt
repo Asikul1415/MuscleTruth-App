@@ -50,4 +50,7 @@ interface MealDao {
 
     @Query("SELECT * FROM saved_meals WHERE meal_local_id = :mealLocalID OR meal_server_id = :mealServerID")
     suspend fun getSavedMeal(mealServerID: Int?, mealLocalID: String?): SavedMeal?
+
+    @Query("SELECT * FROM meals WHERE local_origin_meal_id = :mealLocalID OR server_origin_meal_id = :mealServerID")
+    suspend fun getSavedMealChildren(mealServerID: Int?, mealLocalID: String?): List<Meal?>
 }

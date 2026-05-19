@@ -504,6 +504,15 @@ object MealRepository {
 
             val localSavedMeal = localDb.mealDao().getSavedMeal(mealServerID, mealLocalID)
             if(localSavedMeal !== null){
+                //Clearing meals created from this one origin_meal_id field
+                val childrenMeals = localDb.mealDao().getSavedMealChildren(mealServerID, mealLocalID)
+                childrenMeals.forEach{ meal ->
+                    if(meal !== null){
+                        meal?.localOriginMealID = null
+                        meal?.serverOriginMealID = null
+                        localDb.mealDao().update(meal)
+                    }
+                }
                 localDb.mealDao().deleteSavedMeal(localSavedMeal)
                 Log.d("APP_DEBUG", "deleteSavedMeal: LOCAL DELETE SUCCESSFUL")
             }

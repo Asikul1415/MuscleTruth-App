@@ -18,7 +18,7 @@ object ServingRepository {
         return try {
             //SERVER
             //ONLY IF SERVING DOESN'T EXIST ON THE SERVER ALREADY
-            if(checkForInternetConnection() && serving.serverID == -1){
+            if(checkForInternetConnection()){
                 //In case serving product was added offline
                 if(serving.productID == -1 && serving.localProductID !== null){
                     val productLocalID = serving.localProductID!!
