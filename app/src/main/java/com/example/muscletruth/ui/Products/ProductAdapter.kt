@@ -50,23 +50,24 @@ class ProductAdapter(private val onItemClick: (Product) -> Unit, val context: Co
         holder.tvCarbs.text = item.carbs.toString()
         holder.tvCalories.text = "${totalCalories}"
         Log.d("APP_DEBUG", "PRODUCT: $item")
-        if(checkForInternetConnection() === true){
-            if(item.serverPicture != null && context != null){
-                val path = item.serverPicture
-                Glide.with(context)
-                    .load(Utils.ImageUtils.getImagePath(path!!))
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .into(holder.picture)
-            }
+        if(checkForInternetConnection() === true && item.serverPicture !== null && context != null){
+            val path = item.serverPicture
+            Glide.with(context)
+                .load(Utils.ImageUtils.getImagePath(path!!))
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(holder.picture)
         }
-        else{
-            if(item.localPicture !== null && context !== null){
-                val path = item.localPicture
-                Glide.with(context)
-                    .load(path)
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .into(holder.picture)
-            }
+        else if(item.localPicture !== null && context !== null){
+            val path = item.localPicture
+            Glide.with(context)
+                .load(path)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(holder.picture)
+        }
+        else if(context !== null){
+            Glide.with(context)
+                .load(R.drawable.ic_launcher_foreground)
+                .into(holder.picture)
         }
 
         lifecycle.launch {
