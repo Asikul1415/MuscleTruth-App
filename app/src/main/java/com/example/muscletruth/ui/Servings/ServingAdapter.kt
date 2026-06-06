@@ -68,6 +68,11 @@ class ServingAdapter(
                         .placeholder(R.drawable.ic_launcher_foreground)
                         .into(holder.picture)
                 }
+                else if(context !== null){
+                    Glide.with(context)
+                        .load(R.drawable.ic_launcher_foreground)
+                        .into(holder.picture)
+                }
             }
 
                 holder.itemView.setOnClickListener {
