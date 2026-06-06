@@ -12,8 +12,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Weighting
-import com.example.muscletruth.data.repository.MealRepository
-import com.example.muscletruth.data.repository.WeightingRepository
+import com.example.muscletruth.data.repositories.MealRepository
+import com.example.muscletruth.data.repositories.WeightingRepository
 import com.example.muscletruth.data.serviceClasses.CaloriesChartData
 import com.example.muscletruth.utils.Period
 import com.example.muscletruth.utils.Utils.DateUtils

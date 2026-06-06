@@ -2,7 +2,6 @@ package com.example.muscletruth.ui.Meals
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -16,11 +15,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.SavedMeal
-import com.example.muscletruth.data.models.Serving
-import com.example.muscletruth.data.repository.MealRepository
-import com.example.muscletruth.data.repository.ProductRepository
-import com.example.muscletruth.data.repository.ServingRepository
-import com.example.muscletruth.data.serviceClasses.MealItem
+import com.example.muscletruth.data.repositories.MealRepository
+import com.example.muscletruth.data.repositories.ProductRepository
+import com.example.muscletruth.data.repositories.ServingRepository
 import kotlinx.coroutines.launch
 
 class SavedMealsActivity : AppCompatActivity() {

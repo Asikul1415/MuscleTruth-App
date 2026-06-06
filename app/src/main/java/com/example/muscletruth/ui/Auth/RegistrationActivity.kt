@@ -19,7 +19,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.User
-import com.example.muscletruth.data.repository.UserRepository
+import com.example.muscletruth.data.repositories.UserRepository
 import com.example.muscletruth.ui.MainMenuActivity
 import com.example.muscletruth.utils.PreferencesManager
 import com.example.muscletruth.utils.Utils

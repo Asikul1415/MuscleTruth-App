@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -18,7 +17,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.repository.ProductRepository
+import com.example.muscletruth.data.repositories.ProductRepository
 import com.example.muscletruth.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

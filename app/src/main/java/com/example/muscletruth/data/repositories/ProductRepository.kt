@@ -1,4 +1,4 @@
-package com.example.muscletruth.data.repository
+package com.example.muscletruth.data.repositories
 
 import android.content.Context
 import android.net.Uri
@@ -6,15 +6,13 @@ import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
 import com.example.muscletruth.data.models.FavouriteProduct
 import com.example.muscletruth.data.models.Product
-import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import com.example.muscletruth.data.repository.UserRepository.localDb
+import com.example.muscletruth.data.repositories.UserRepository.localDb
 import com.example.muscletruth.utils.Utils
-import java.time.ZonedDateTime
 import java.util.UUID
 
 object ProductRepository {

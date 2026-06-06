@@ -12,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.muscletruth.R
 import com.example.muscletruth.data.api.SyncManager
-import com.example.muscletruth.data.repository.UserRepository
+import com.example.muscletruth.data.repositories.UserRepository
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import com.example.muscletruth.ui.Meals.MealsActivity
 import com.example.muscletruth.ui.User.MyProfileActivity

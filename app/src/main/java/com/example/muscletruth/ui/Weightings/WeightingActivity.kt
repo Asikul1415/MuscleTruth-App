@@ -22,10 +22,8 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Weighting
-import com.example.muscletruth.data.repository.MealRepository
-import com.example.muscletruth.data.repository.UserRepository
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
-import com.example.muscletruth.data.repository.WeightingRepository
+import com.example.muscletruth.data.repositories.WeightingRepository
 import com.example.muscletruth.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

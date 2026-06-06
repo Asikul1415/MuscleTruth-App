@@ -15,8 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.User
-import com.example.muscletruth.data.repository.UserRepository
-import com.example.muscletruth.data.repository.WeightingRepository
+import com.example.muscletruth.data.repositories.UserRepository
+import com.example.muscletruth.data.repositories.WeightingRepository
 import com.example.muscletruth.ui.EnterActivity
 import com.example.muscletruth.ui.StatisticActivity
 import com.example.muscletruth.utils.PreferencesManager

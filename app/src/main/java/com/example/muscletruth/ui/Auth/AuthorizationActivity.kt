@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.muscletruth.R
-import com.example.muscletruth.data.repository.UserRepository
+import com.example.muscletruth.data.repositories.UserRepository
 import com.example.muscletruth.ui.MainMenuActivity
 import com.example.muscletruth.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope

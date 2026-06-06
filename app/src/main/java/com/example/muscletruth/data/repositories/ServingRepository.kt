@@ -1,4 +1,4 @@
-package com.example.muscletruth.data.repository
+package com.example.muscletruth.data.repositories
 
 import android.util.Log
 import com.example.muscletruth.data.api.ApiClient
@@ -6,7 +6,7 @@ import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.RecentServing
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
-import com.example.muscletruth.data.repository.UserRepository.localDb
+import com.example.muscletruth.data.repositories.UserRepository.localDb
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -222,6 +222,24 @@ object ServingRepository {
         catch(e: Exception){
             Log.e("APP_DEBUG", "GET RECENT SERVINGS ERROR: ${e.toString()}")
             return mutableListOf()
+        }
+    }
+
+    suspend fun getRecentServing(servingServerID: Int? = null, servingLocalID: String? = null): RecentServing? {
+        try{
+            if(checkForInternetConnection() && servingServerID !== null && servingServerID != -1){
+                val recentServing = apiService.getRecentServing(servingServerID)
+                Log.d("APP_DEBUG", "GET RECENT SERVING: $recentServing")
+                return recentServing
+            }
+
+            val localRecentServing = localDb.servingDao().getRecentServing(servingServerID, servingLocalID)
+            Log.d("APP_DEBUG", "GET RECENT SERVING: LOCAL $localRecentServing")
+            return localRecentServing
+        }
+        catch(e: Exception){
+            Log.e("APP_DEBUG", "GET RECENT SERVING ERROR: ${e.toString()}")
+            return null
         }
     }
 

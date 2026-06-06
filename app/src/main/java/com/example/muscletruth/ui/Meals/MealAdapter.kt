@@ -19,9 +19,9 @@ import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Serving
 import com.example.muscletruth.data.serviceClasses.MealType
 import com.example.muscletruth.data.serviceClasses.MealItem
-import com.example.muscletruth.data.repository.MealRepository
-import com.example.muscletruth.data.repository.ProductRepository
-import com.example.muscletruth.data.repository.ServingRepository
+import com.example.muscletruth.data.repositories.MealRepository
+import com.example.muscletruth.data.repositories.ProductRepository
+import com.example.muscletruth.data.repositories.ServingRepository
 import com.example.muscletruth.utils.Utils
 import com.example.muscletruth.utils.Utils.NetworkUtils.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers

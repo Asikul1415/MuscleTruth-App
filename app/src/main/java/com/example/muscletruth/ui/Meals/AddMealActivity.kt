@@ -27,9 +27,9 @@ import com.bumptech.glide.Glide
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Meal
 import com.example.muscletruth.data.models.Serving
-import com.example.muscletruth.data.repository.MealRepository
-import com.example.muscletruth.data.repository.ProductRepository
-import com.example.muscletruth.data.repository.ServingRepository
+import com.example.muscletruth.data.repositories.MealRepository
+import com.example.muscletruth.data.repositories.ProductRepository
+import com.example.muscletruth.data.repositories.ServingRepository
 import com.example.muscletruth.ui.Servings.AddServingActivity
 import com.example.muscletruth.ui.Servings.ServingAdapter
 import com.example.muscletruth.utils.Utils

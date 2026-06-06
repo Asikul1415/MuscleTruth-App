@@ -15,7 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import com.example.muscletruth.R
 import com.example.muscletruth.data.models.Weighting
-import com.example.muscletruth.data.repository.WeightingRepository
+import com.example.muscletruth.data.repositories.WeightingRepository
 import com.example.muscletruth.utils.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

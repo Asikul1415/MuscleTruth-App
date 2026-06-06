@@ -1,4 +1,4 @@
-package com.example.muscletruth.data.repository
+package com.example.muscletruth.data.repositories
 
 import android.content.Context
 import android.net.Uri
@@ -14,7 +14,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
-import com.example.muscletruth.data.repository.UserRepository.localDb
+import com.example.muscletruth.data.repositories.UserRepository.localDb
 import com.example.muscletruth.data.serviceClasses.CaloriesChartData
 import com.example.muscletruth.utils.Utils
 import java.time.DayOfWeek

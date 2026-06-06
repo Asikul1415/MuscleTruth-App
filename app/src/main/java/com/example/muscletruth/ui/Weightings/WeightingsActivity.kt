@@ -15,9 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.muscletruth.R
-import com.example.muscletruth.data.localDB.offlineModels.WeightingDao
 import com.example.muscletruth.data.models.Weighting
-import com.example.muscletruth.data.repository.WeightingRepository
+import com.example.muscletruth.data.repositories.WeightingRepository
 import com.example.muscletruth.utils.Period
 import com.example.muscletruth.utils.Utils.DateUtils
 import com.github.mikephil.charting.charts.LineChart

@@ -20,9 +20,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.muscletruth.R
-import com.example.muscletruth.data.models.User
 import com.example.muscletruth.data.models.UserUpdate
-import com.example.muscletruth.data.repository.UserRepository
+import com.example.muscletruth.data.repositories.UserRepository
 import com.example.muscletruth.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

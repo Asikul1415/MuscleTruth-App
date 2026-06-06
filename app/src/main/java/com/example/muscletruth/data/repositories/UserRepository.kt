@@ -1,4 +1,4 @@
-package com.example.muscletruth.data.repository
+package com.example.muscletruth.data.repositories
 import android.content.Context
 import android.net.ConnectivityManager
 import com.example.muscletruth.data.api.ApiClient
